@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>لوحة التحكم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script>tailwind.config={darkMode:'class'}</script>
 <style>
@@ -13,18 +15,11 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,sans-serif;background:#f1f
 html.dark body{background:#0b1120;color:#e2e8f0}
 .sb{transition:width .25s,transform .25s}
 .hide-t .lbl{display:none}
-#loader{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:22px;padding:24px;text-align:center;color:#e2e8f0;
-  background:radial-gradient(60% 50% at 50% 35%,rgba(99,102,241,.28),transparent 70%),linear-gradient(160deg,#020617,#0f1235 60%,#1e1b4b);opacity:0;transition:opacity .35s}
-#loader.hidden{display:none}
-#loader.show{opacity:1}
-#loader .ring{width:84px;height:84px;border-radius:50%;border:4px solid rgba(255,255,255,.1);border-top-color:#818cf8;border-right-color:#c084fc;animation:spin 1s linear infinite;box-shadow:0 0 40px rgba(129,140,248,.45)}
-#loader .brand{font-size:26px;font-weight:800;letter-spacing:.5px;background:linear-gradient(90deg,#a5b4fc,#f0abfc);-webkit-background-clip:text;background-clip:text;color:transparent}
-#loader .track{width:min(320px,80vw);height:8px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
-#loader .bar{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#6366f1,#a855f7,#ec4899);box-shadow:0 0 14px rgba(168,85,247,.8)}
-#loader .dots::after{content:"";animation:dots 1.2s steps(4,end) infinite}
+.spin{width:26px;height:26px;border-radius:50%;border:3px solid rgba(99,102,241,.2);border-top-color:#6366f1;border-right-color:#a855f7;animation:spin .8s linear infinite}
+.brandtxt{font-family:"Poppins","Segoe UI",system-ui,sans-serif;font-weight:600;font-size:20px;letter-spacing:.6px;background:linear-gradient(90deg,#6366f1,#d946ef);-webkit-background-clip:text;background-clip:text;color:transparent}
+.busy{opacity:.55;pointer-events:none;transition:opacity .2s}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
-@media (prefers-reduced-motion:reduce){#loader .ring{animation-duration:3s}}
+@media (prefers-reduced-motion:reduce){.spin{animation-duration:2.4s}}
 </style>
 </head>
 <body class="min-h-screen">
@@ -32,6 +27,10 @@ html.dark body{background:#0b1120;color:#e2e8f0}
 <!-- ========== AUTH ========== -->
 <section id="auth" class="min-h-screen grid place-items-center p-4 bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900">
   <div class="w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl shadow-2xl p-7">
+    <div id="cardLoader" class="hidden mb-5" role="status" aria-live="polite">
+      <div class="flex items-center justify-center gap-3"><span class="spin"></span><span class="brandtxt">layal folw</span></div>
+    </div>
+    <div id="authBody">
     <div class="flex items-center justify-between mb-5">
       <div class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">◆ لوحتي</div>
       <button class="themeBtn rounded-full w-9 h-9 grid place-items-center bg-slate-100 dark:bg-slate-800" aria-label="تبديل الوضع">🌓</button>
@@ -59,6 +58,7 @@ html.dark body{background:#0b1120;color:#e2e8f0}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>
         Facebook</button>
     </div>
+    </div><!-- /authBody -->
   </div>
 </section>
 
@@ -111,15 +111,6 @@ html.dark body{background:#0b1120;color:#e2e8f0}
       </div>
     </main>
   </div>
-</div>
-
-<!-- ========== LOADING SCREEN ========== -->
-<div id="loader" class="hidden" role="status" aria-live="polite">
-  <div class="ring"></div>
-  <div class="brand">◆ لوحتي</div>
-  <div class="text-xl font-semibold"><span id="ldText">جاري الدخول</span></div>
-  <div class="track"><div class="bar" id="ldBar"></div></div>
-  <div class="text-sm text-slate-400" id="ldPct" dir="ltr">0%</div>
 </div>
 
 <script>
@@ -248,32 +239,18 @@ const allBtns = () => [$("#authBtn"), $("#gBtn"), $("#fbBtn")];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const info = m => { const e = $("#err"); e.className = "text-sm text-emerald-500 min-h-[20px]"; e.textContent = m; };
 let busy = false;   // يمنع onAuthStateChanged من فتح اللوحة قبل انتهاء المهلة
-let ldTimer=null;
-function showLoader(label){
-  const L=$("#loader"),bar=$("#ldBar");
-  $("#ldText").textContent=label.replace(/\.+$/,"");
-  $("#ldText").className="dots";
-  $("#auth").classList.add("hidden");               // إخفاء نموذج الدخول
-  L.classList.remove("hidden"); void L.offsetWidth; L.classList.add("show");
-  bar.style.transition="none"; bar.style.width="0"; void bar.offsetWidth;
-  bar.style.transition="width 5s linear"; bar.style.width="100%";
-  const t0=Date.now(); clearInterval(ldTimer);
-  ldTimer=setInterval(()=>{$("#ldPct").textContent=Math.min(100,Math.round((Date.now()-t0)/50))+"%"},100);
-}
-function hideLoader(){
-  clearInterval(ldTimer);
-  const L=$("#loader"); L.classList.remove("show");
-  setTimeout(()=>L.classList.add("hidden"),350);
-}
+const cardLoader=on=>{
+  $("#cardLoader").classList.toggle("hidden",!on);
+  $("#authBody").classList.toggle("busy",on);
+};
 async function flow(label, doAuth) {
   busy = true;
-  const btn = $("#authBtn"), old = btn.textContent;
   try {
     const user = await doAuth();         // نجاح التحقق من Firebase
-    showLoader(label);
+    cardLoader(true);                    // الدائرة + الاسم أعلى البطاقة
     await sleep(5000);                   // 5 ثوانٍ كاملة
     showUser(user);                      // فتح اللوحة
-  } finally { busy = false; btn.textContent = old; hideLoader(); }
+  } finally { busy = false; cardLoader(false); }
 }
 
 /* 3) Google */
