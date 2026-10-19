@@ -180,7 +180,7 @@ ${v.map((n,i)=>`<circle cx="${x(i)}" cy="${y(n)}" r="4.5" fill="#6366f1"/><text 
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { initializeAuth, inMemoryPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider,
+import { initializeAuth, browserSessionPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider,
   signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
@@ -195,9 +195,9 @@ const firebaseConfig = {
   measurementId: "G-KVN372FDCR"
 };
 const app  = initializeApp(firebaseConfig);
-/* لا تُحفظ الجلسة في المتصفح: عند فتح الصفحة أو تحديثها يُطلب الدخول من جديد */
+/* الجلسة تُحفظ لتبويب المتصفح فقط (تنتقل بين index و dashboard وتُمحى عند إغلاق التبويب) */
 const auth = initializeAuth(app, {
-  persistence: inMemoryPersistence,
+  persistence: browserSessionPersistence,
   popupRedirectResolver: browserPopupRedirectResolver
 });
 auth.languageCode = "ar";
@@ -249,7 +249,7 @@ async function flow(label, doAuth) {
     const user = await doAuth();         // نجاح التحقق من Firebase
     cardLoader(true);                    // الدائرة + الاسم أعلى البطاقة
     await sleep(5000);                   // 5 ثوانٍ كاملة
-    showUser(user);                      // فتح اللوحة
+    location.href = "dashboard.html";    // الانتقال للوحة
   } finally { busy = false; cardLoader(false); }
 }
 
@@ -310,7 +310,7 @@ function showUser(user, forcedName) {
 /* يتابع حالة الدخول (الجلسة في الذاكرة فقط، فلا تُستعاد بعد التحديث) */
 onAuthStateChanged(auth, user => {
   if (busy) return;
-  if (user) showUser(user);
+  if (user) location.replace("dashboard.html");
   else { $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); }
 });
 
