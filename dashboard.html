@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>layal folw – Dashboard</title>
+<script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <style>
 body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;background:#eef3fb;color:#0f1f3d;-webkit-tap-highlight-color:transparent}
@@ -103,12 +104,18 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
       <h2 class="text-lg font-extrabold mb-4 text-blue-800">Add funds</h2>
 
       <div class="text-sm font-semibold mb-2">Payment method</div>
-      <div id="methods" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5" role="radiogroup">
+      <div id="methods" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5" role="radiogroup">
         <button type="button" data-m="card" role="radio" class="mth text-left rounded-xl border-2 p-3.5 transition">
           <div class="flex items-center gap-2 font-bold text-sm"><span id="icCard"></span>Credit / Debit Card</div>
           <div class="flex items-center gap-1.5 mt-2.5">
             <svg width="40" height="26" viewBox="0 0 40 26" aria-label="Visa"><rect width="40" height="26" rx="4" fill="#1a1f71"/><text x="20" y="18" text-anchor="middle" font-family="Arial" font-style="italic" font-weight="800" font-size="12" fill="#fff">VISA</text></svg>
             <svg width="40" height="26" viewBox="0 0 40 26" aria-label="Mastercard"><rect width="40" height="26" rx="4" fill="#fff" stroke="#e2e8f0"/><circle cx="16" cy="13" r="7" fill="#eb001b"/><circle cx="24" cy="13" r="7" fill="#f79e1b" fill-opacity=".9"/></svg>
+          </div>
+        </button>
+        <button type="button" data-m="gpay" role="radio" class="mth text-left rounded-xl border-2 p-3.5 transition">
+          <div class="flex items-center gap-2 font-bold text-sm"><span id="icWallet"></span>Google Pay</div>
+          <div class="flex items-center gap-1.5 mt-2.5">
+            <svg width="52" height="26" viewBox="0 0 52 26" aria-label="Google Pay"><rect width="52" height="26" rx="4" fill="#fff" stroke="#e2e8f0"/><text x="26" y="17.5" text-anchor="middle" font-family="Arial" font-weight="700" font-size="11" fill="#3c4043"><tspan fill="#4285f4">G</tspan> Pay</text></svg>
           </div>
         </button>
         <button type="button" data-m="crypto" role="radio" class="mth text-left rounded-xl border-2 p-3.5 transition">
@@ -323,9 +330,10 @@ function drawOrders(){
 }
 /* ---- Add funds: Card (Stripe Checkout) / Crypto ---- */
 /* ضع هنا رابط الخادم الذي ينشئ جلسة الدفع. يستقبل {amount, method} ويرجع {url} */
-const PAY_API = "";                       // مثال: "https://your-domain.com/api/create-checkout"
+const stripe = typeof Stripe!=="undefined" ? Stripe('pk_live_51SiumcEhUQAuIFHKiDW0umETBNa4rgWlbwg6hzt5OpGx3FXXKgXRfVhzUWg1X4b8UKsgM64j7BXMZ9iN5kwNYN6Q00YVDICxKg') : null;
+const PAY_API = "/api/create-checkout-session";   // دالة Vercel (الملف api/create-checkout-session.js)
 let method="card";
-$("#icCard").innerHTML=ic("card",20);$("#icCoin").innerHTML=ic("coins",20);$("#icLock").innerHTML=ic("lock",16);
+$("#icCard").innerHTML=ic("card",20);$("#icCoin").innerHTML=ic("coins",20);$("#icWallet").innerHTML=ic("wallet",20);$("#icLock").innerHTML=ic("lock",16);
 function drawMethods(){
   document.querySelectorAll(".mth").forEach(b=>{
     const on=b.dataset.m===method;
@@ -341,14 +349,14 @@ $("#payBtn").onclick=async()=>{
   const m=$("#payMsg"),btn=$("#payBtn"),amount=+$("#fund").value;
   m.textContent="";
   if(!(amount>=1&&amount<=500))return m.textContent="أدخل مبلغاً بين $1 و $500.";
-  if(!PAY_API)return m.textContent="بوابة الدفع غير مربوطة بعد: ضع رابط الخادم في PAY_API.";
+  if(method==="crypto")return m.textContent="الدفع بالعملات الرقمية سيتوفر قريباً. استخدم البطاقة أو Google Pay.";
   btn.disabled=true;btn.textContent="Redirecting…";
   try{
     const token=await window.__getToken();           // رمز Firebase للتحقق من المستخدم في الخادم
-    const r=await fetch(PAY_API,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({amount,method})});
+    const r=await fetch(PAY_API,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify({amount,method:"card"})});
     const j=await r.json();
     if(!r.ok||!j.url)throw new Error(j.error||"payment_failed");
-    location.href=j.url;                             // صفحة Stripe Checkout / بوابة الدفع الآمنة
+    location.href=j.url;                             // Stripe Checkout (بطاقات + Google Pay)
   }catch(err){
     m.textContent="تعذّر بدء الدفع. حاول مرة أخرى.";
     btn.disabled=false;btn.textContent="Continue to payment";
