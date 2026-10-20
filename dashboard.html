@@ -227,7 +227,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
           <span class="text-sm text-slate-500">Charge</span>
           <span class="text-xl font-extrabold text-blue-700" dir="ltr">$<span id="charge">0.00</span></span>
         </div>
-        <p id="msg" class="min-h-[20px] text-sm text-red-500"></p>
+        <p id="msg" dir="auto" class="min-h-[20px] text-sm text-red-500 break-words" role="alert"></p>
         <button id="sendBtn" type="submit" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">Submit order</button>
       </form>
     </section>
@@ -567,7 +567,7 @@ $("#sbCam").onclick=()=>{openSb(false);showSec(7)};
 $("#cpBtn").onclick=()=>{const v=$("#cpDom").value.trim();toast(/^[\w.-]+\.\w{2,}$/.test(v)?"✓ Request sent (demo)":"Enter a valid domain")};
 
 /* ---- اتصال آمن بالخادم: الخدمات والطلبات ---- */
-const ORDER_ERR={insufficient_balance:"رصيدك غير كافٍ. اشحن رصيدك أولاً.",invalid_link:"أدخل رابطاً صحيحاً يبدأ بـ https://",invalid_quantity:"الكمية غير صحيحة.",unknown_service:"الخدمة غير متاحة.",unauthorized:"انتهت الجلسة. أعد تسجيل الدخول.",provider_error:"تعذّر تنفيذ الطلب لدى المزوّد. أُعيد رصيدك.",services_unavailable:"الخدمات غير متاحة حالياً. حاول لاحقاً."};
+const ORDER_ERR={user_not_found:"حسابك غير موجود في قاعدة البيانات.",server_error:"خطأ في الخادم.",init_failed:"فشل تهيئة الخادم.",insufficient_balance:"رصيدك غير كافٍ. اشحن رصيدك أولاً.",invalid_link:"أدخل رابطاً صحيحاً يبدأ بـ https://",invalid_quantity:"الكمية غير صحيحة.",unknown_service:"الخدمة غير متاحة.",unauthorized:"انتهت الجلسة. أعد تسجيل الدخول.",provider_error:"تعذّر تنفيذ الطلب لدى المزوّد. أُعيد رصيدك.",services_unavailable:"الخدمات غير متاحة حالياً. حاول لاحقاً."};
 const platOf=s=>{const t=(s.category+" "+s.name).toLowerCase();return /telegram/.test(t)?"telegram":/instagram/.test(t)?"instagram":/facebook/.test(t)?"facebook":/tiktok/.test(t)?"tiktok":/youtube/.test(t)?"youtube":/twitter|\bx\b/.test(t)?"x":"other"};
 async function loadServices(){
   try{
@@ -579,13 +579,24 @@ async function loadServices(){
   }catch(e){toast("تعذّر تحميل الخدمات")}
 }
 async function placeOrder(service,link,quantity){
+  let status=0;
   try{
     const tk=await window.__getToken();
     const r=await fetch("/api/create-order",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+tk},body:JSON.stringify({service,link,quantity})});
-    const d=await r.json().catch(()=>({}));
-    if(!r.ok)return{ok:false,msg:ORDER_ERR[d.error]||"تعذّر إنشاء الطلب. حاول مرة أخرى."};
+    status=r.status;
+    const txt=await r.text();
+    let d;try{d=JSON.parse(txt)}catch(_){d={error:"http_"+r.status,detail:txt.replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim().slice(0,200)}}
+    if(!r.ok){
+      console.error("create-order failed",r.status,d);
+      const base=ORDER_ERR[d.error]||"تعذّر إنشاء الطلب.";
+      return{ok:false,msg:`${base} [${r.status}${d.error?" · "+d.error:""}]${d.detail?" — "+d.detail:""}`};
+    }
+    if(d.detail)console.warn("create-order note:",d.detail);
     return{ok:true,data:d};
-  }catch(e){return{ok:false,msg:"تعذّر الاتصال بالخادم."}}
+  }catch(e){
+    console.error("create-order exception",e);
+    return{ok:false,msg:`تعذّر الاتصال بالخادم. [${status||"network"}] — ${(e&&e.message)||e}`};
+  }
 }
 function setSpent(n){spent=n;refresh()}
 function setOrders(a){ORDERS=a;drawOrders()}   // يُستدعى من Firestore (onSnapshot)
