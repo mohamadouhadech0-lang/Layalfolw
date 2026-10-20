@@ -1,8 +1,7 @@
 import { db, auth } from './firebaseConfig.js'; // تأكد من مسار ملف Firebase الخاص بك
 import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://justanotherpanel.com/api/v2");
 
-// رابط API المزود
-const API_URL = "https://justanotherpanel.com/api/v2";
 
 // ضع مفتاح الـ API الخاص بك هنا من حسابك في JAP
 const API_KEY = "feaa69096d501c6ccfc39634a59e2cc8"; 
