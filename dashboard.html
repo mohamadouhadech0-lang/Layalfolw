@@ -49,7 +49,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 .safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style>
 </head>
-<body class="min-h-screen" style="visibility:hidden">
+<body class="min-h-screen">
 
 <div id="scrim" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-30 lg:hidden"></div>
 
@@ -107,4 +107,5 @@ html.dark body{background:#0b1220;color:#e5ebf5}
           <div class="min-w-0"><div id="pmName" class="text-sm font-bold truncate" dir="auto">Guest</div>
           <div id="pmMail" class="text-xs text-slate-500 truncate" dir="ltr"></div></div>
         </div>
-        <button id="pmProfile" role="menuitem" class="w-full flex items-center gap-3 h-1
+        <button id="pmProfile" role="menuitem" class="w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-blue-50 active:scale-95 transition"><span id="pmUser"></span>الملف الشخصي</button>
+        <button id="logout" role="menuitem" class="w-full flex items-
