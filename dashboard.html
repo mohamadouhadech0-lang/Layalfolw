@@ -838,5 +838,80 @@ document.getElementById("logout").onclick = out;
 document.getElementById("logout2").onclick = out;
 document.getElementById("logout3").onclick = out;
 </script>
+      document.getElementById("logout3").onclick = out;
+  </script>
+  
+  <!-- ضع الكود الجديد هنا -->
+  <script type="module">
+    import { getJapServices, processUserOrder } from './japService.js';
+
+    let allServices = [];
+
+    async function initOrderPage() {
+      allServices = await getJapServices();
+      
+      const categorySelect = document.getElementById('categorySelect');
+      const serviceSelect = document.getElementById('serviceSelect');
+      
+      if (!allServices || allServices.length === 0) return;
+
+      const categories = [...new Set(allServices.map(s => s.category))];
+      
+      categorySelect.innerHTML = '<option value="">اختر الفئة...</option>';
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+      });
+
+      categorySelect.addEventListener('change', (e) => {
+        const selectedCategory = e.target.value;
+        const filteredServices = allServices.filter(s => s.category === selectedCategory);
+        
+        serviceSelect.innerHTML = '<option value="">اختر الخدمة...</option>';
+        filteredServices.forEach(service => {
+          const option = document.createElement('option');
+          option.value = service.service;
+          option.dataset.rate = service.rate;
+          option.dataset.min = service.min;
+          option.dataset.max = service.max;
+          option.textContent = `${service.name} - ($${service.rate} / 1000)`;
+          serviceSelect.appendChild(option);
+        });
+      });
+    }
+
+    const orderForm = document.getElementById('orderForm');
+    if (orderForm) {
+      orderForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const serviceSelect = document.getElementById('serviceSelect');
+        const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+        
+        const serviceId = serviceSelect.value;
+        const serviceRate = selectedOption ? selectedOption.dataset.rate : 0;
+        const link = document.getElementById('linkInput').value;
+        const quantity = document.getElementById('quantityInput').value;
+
+        if (!serviceId || !link || !quantity) {
+          alert('الرجاء ملء جميع الحقول المطلوبة!');
+          return;
+        }
+
+        const result = await processUserOrder(serviceId, serviceRate, link, quantity);
+
+        if (result.success) {
+          alert(`تم إرسال الطلب بنجاح! رقم الطلب: ${result.orderId}`);
+        } else {
+          alert(`خطأ: ${result.error}`);
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', initOrderPage);
+  </script>
+
 </body>
 </html>
