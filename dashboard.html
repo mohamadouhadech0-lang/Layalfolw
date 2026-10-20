@@ -17,6 +17,18 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 .qa:hover .qi{background:#dbeafe;color:#1d4ed8}.qa:active .qi{transform:scale(.92)}
 .qa.danger .qi{background:#fee2e2;color:#dc2626}.qa.danger:hover .qi{background:#fecaca}
 .sb-scroll{scrollbar-width:thin}
+/* ---- Neumorphic balance cards ---- */
+.neo{min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:14px;padding:14px;border-radius:20px;background:#eef3fb;border:1px solid rgba(255,255,255,.7);
+  box-shadow:7px 7px 16px rgba(163,177,198,.55),-7px -7px 16px rgba(255,255,255,.95)}
+.neo-well{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#2563eb;background:#eef3fb;
+  box-shadow:inset 3px 3px 6px rgba(163,177,198,.6),inset -3px -3px 6px rgba(255,255,255,.95)}
+.neo-lbl{min-width:0;font-size:12px;font-weight:600;line-height:1.3;color:#64748b}
+.neo-amt{font-weight:800;line-height:1.1;font-size:clamp(1.1rem,5.4vw,1.65rem);color:#1d4ed8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.neo-amt.sp{color:#0f1f3d}
+@media (min-width:640px){.neo{padding:18px 20px;gap:18px}.neo-lbl{font-size:13px}.neo-well{width:40px;height:40px}}
+.dark .neo{background:#0e1627;border-color:rgba(255,255,255,.04);box-shadow:7px 7px 16px rgba(2,6,15,.7),-6px -6px 14px rgba(36,52,86,.3)}
+.dark .neo-well{background:#0e1627;color:#8ab4ff;box-shadow:inset 3px 3px 6px rgba(2,6,15,.75),inset -3px -3px 6px rgba(36,52,86,.32)}
+.dark .neo-lbl{color:#8d9bb5}.dark .neo-amt{color:#8ab4ff}.dark .neo-amt.sp{color:#e5ebf5}
 #plat svg{width:14px;height:14px}
 html[dir=rtl] .sb{left:auto;right:0;border-right:0;border-left:1px solid #f1f5f9}
 html[dir=rtl] aside.sb.-translate-x-full{--tw-translate-x:100%}
@@ -131,14 +143,20 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       </div>
     </section>
 
-    <section id="balCards" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      <div class="rounded-2xl p-5 bg-white border border-blue-100 shadow-sm">
-        <div class="text-sm text-slate-500">Account balance</div>
-        <div class="text-2xl font-extrabold mt-1 text-blue-700" dir="ltr">$<span id="cBal">0.00</span></div>
+    <section id="balCards" class="grid grid-cols-2 gap-3 sm:gap-4">
+      <div class="neo">
+        <div class="flex items-start justify-between gap-2">
+          <span class="neo-lbl">Account balance</span>
+          <span class="neo-well" id="wBal"></span>
+        </div>
+        <div class="neo-amt"><span dir="ltr" style="unicode-bidi:isolate">$<span id="cBal">0.00</span></span></div>
       </div>
-      <div class="rounded-2xl p-5 bg-white border border-blue-100 shadow-sm">
-        <div class="text-sm text-slate-500">Spent balance</div>
-        <div class="text-2xl font-extrabold mt-1 text-slate-800" dir="ltr">$<span id="cSpent">0.00</span></div>
+      <div class="neo">
+        <div class="flex items-start justify-between gap-2">
+          <span class="neo-lbl">Spent balance</span>
+          <span class="neo-well" id="wSpent"></span>
+        </div>
+        <div class="neo-amt sp"><span dir="ltr" style="unicode-bidi:isolate">$<span id="cSpent">0.00</span></span></div>
       </div>
     </section>
 
@@ -482,7 +500,7 @@ $("#avSave").onclick=()=>{
 /* ---- Drawer quick actions, theme, badges, new sections ---- */
 let tickets=0;
 function tkBadge(){const b=$("#tkBadge");if(!b)return;b.textContent=tickets;b.classList.toggle("hidden",!tickets);b.classList.toggle("grid",!!tickets)}
-$("#qiBal").innerHTML=ic("wallet",20);$("#qiSet").innerHTML=ic("gear",20);$("#qiOut").innerHTML=ic("logout",20);$("#sbCam").innerHTML=ic("camera",15);
+$("#wBal").innerHTML=ic("wallet",18);$("#wSpent").innerHTML=ic("card",18);$("#qiBal").innerHTML=ic("wallet",20);$("#qiSet").innerHTML=ic("gear",20);$("#qiOut").innerHTML=ic("logout",20);$("#sbCam").innerHTML=ic("camera",15);
 function setTheme(dark){
   document.documentElement.classList.toggle("dark",dark);
   $("#qiTheme").innerHTML=ic(dark?"sun":"moon",20);$("#qThemeTxt").textContent=dark?"Light":"Dark";
