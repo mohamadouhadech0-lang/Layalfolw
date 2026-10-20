@@ -369,18 +369,7 @@ function bootDone(){const e=document.getElementById("boot");if(e)e.remove()}
 const $=s=>document.querySelector(s);
 /* ---- بيانات تجريبية: استبدلها ببيانات الخادم لاحقاً ---- */
 let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
-const SERVICES=[
- {id:101,p:"telegram",c:"Telegram Members",n:"Channel Members – Non Drop",r:1.20,min:100,max:50000,d:"Start: 0–1 hour\nSpeed: 5K / day\nRefill: 30 days"},
- {id:102,p:"telegram",c:"Telegram Views",n:"Post Views – Last 5 posts",r:0.15,min:100,max:100000,d:"Start: instant\nSpeed: 20K / day"},
- {id:201,p:"instagram",c:"Instagram Followers",n:"Followers – High Quality",r:2.40,min:50,max:30000,d:"Start: 0–2 hours\nSpeed: 3K / day\nRefill: 30 days"},
- {id:202,p:"instagram",c:"Instagram Likes",n:"Likes – Real Looking",r:0.60,min:50,max:20000,d:"Start: instant\nSpeed: 10K / day"},
- {id:301,p:"tiktok",c:"TikTok Followers",n:"Followers – Fast",r:2.90,min:100,max:20000,d:"Start: 0–1 hour\nSpeed: 2K / day"},
- {id:302,p:"tiktok",c:"TikTok Views",n:"Video Views",r:0.08,min:500,max:1000000,d:"Start: instant\nSpeed: 100K / day"},
- {id:401,p:"x",c:"X Followers",n:"Followers – Stable",r:3.50,min:100,max:10000,d:"Start: 0–6 hours\nSpeed: 1K / day"},
- {id:402,p:"x",c:"X Likes",n:"Post Likes",r:1.10,min:50,max:10000,d:"Start: instant\nSpeed: 5K / day"},
- {id:501,p:"youtube",c:"YouTube Subscribers",n:"Subscribers – Slow & Safe",r:12.0,min:50,max:5000,d:"Start: 0–24 hours\nSpeed: 200 / day\nRefill: 30 days"},
- {id:502,p:"youtube",c:"YouTube Views",n:"Views – Retention 60s+",r:3.20,min:500,max:100000,d:"Start: 0–2 hours\nSpeed: 10K / day"}
-];
+let SERVICES=[]; // تُحمَّل من /api/services بعد تسجيل الدخول
 const I=p=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const PLAT=[
  ["all","All",I('<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>')],
@@ -546,23 +535,54 @@ $("#qBal").onclick=()=>{openSb(false);showSec(3)};
 $("#qSet").onclick=()=>{openSb(false);showSec(7)};
 $("#sbCam").onclick=()=>{openSb(false);showSec(7)};
 $("#cpBtn").onclick=()=>{const v=$("#cpDom").value.trim();toast(/^[\w.-]+\.\w{2,}$/.test(v)?"✓ Request sent (demo)":"Enter a valid domain")};
-$("#mf").onsubmit=e=>{
+
+/* ---- اتصال آمن بالخادم: الخدمات والطلبات ---- */
+const ORDER_ERR={insufficient_balance:"رصيدك غير كافٍ. اشحن رصيدك أولاً.",invalid_link:"أدخل رابطاً صحيحاً يبدأ بـ https://",invalid_quantity:"الكمية غير صحيحة.",unknown_service:"الخدمة غير متاحة.",unauthorized:"انتهت الجلسة. أعد تسجيل الدخول.",provider_error:"تعذّر تنفيذ الطلب لدى المزوّد. أُعيد رصيدك.",services_unavailable:"الخدمات غير متاحة حالياً. حاول لاحقاً."};
+const platOf=s=>{const t=(s.category+" "+s.name).toLowerCase();return /telegram/.test(t)?"telegram":/instagram/.test(t)?"instagram":/tiktok/.test(t)?"tiktok":/youtube/.test(t)?"youtube":/twitter|\bx\b/.test(t)?"x":"other"};
+async function loadServices(){
+  try{
+    const tk=await window.__getToken();
+    const r=await fetch("/api/services",{headers:{Authorization:"Bearer "+tk}});
+    if(!r.ok)throw 0;
+    SERVICES=(await r.json()).map(s=>({id:s.id,p:platOf(s),c:s.category,n:s.name,r:s.rate,min:s.min,max:s.max,d:""}));
+    drawCats();if(tab===1)drawServices();
+  }catch(e){toast("تعذّر تحميل الخدمات")}
+}
+async function placeOrder(service,link,quantity){
+  try{
+    const tk=await window.__getToken();
+    const r=await fetch("/api/create-order",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+tk},body:JSON.stringify({service,link,quantity})});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok)return{ok:false,msg:ORDER_ERR[d.error]||"تعذّر إنشاء الطلب. حاول مرة أخرى."};
+    return{ok:true,data:d};
+  }catch(e){return{ok:false,msg:"تعذّر الاتصال بالخادم."}}
+}
+function setSpent(n){spent=n;refresh()}
+function setOrders(a){ORDERS=a;drawOrders()}   // يُستدعى من Firestore (onSnapshot)
+$("#mf").onsubmit=async e=>{
   e.preventDefault();
-  const m=$("#mMsg");m.textContent="";
+  const f=$("#mf"),m=$("#mMsg");
+  if(f.classList.contains("busy"))return;
+  m.textContent="";
   const rows=$("#mTxt").value.split("\n").map(s=>s.trim()).filter(Boolean);
   if(!rows.length)return m.textContent="Add at least one line: service_id | link | quantity";
-  let total=0;const out=[];
+  let total=0;const jobs=[];
   for(let i=0;i<rows.length;i++){
     const [id,link,q]=rows[i].split("|").map(x=>x.trim()),s=SERVICES.find(x=>x.id===+id),n=+q;
     if(!s)return m.textContent=`Line ${i+1}: unknown service ID`;
     if(!/^https?:\/\/\S+\.\S+/.test(link||""))return m.textContent=`Line ${i+1}: invalid link`;
-    if(!n||n<s.min||n>s.max)return m.textContent=`Line ${i+1}: quantity must be ${s.min}–${s.max}`;
-    const c=n*s.r/1000;total+=c;
-    out.push({id:Date.now().toString().slice(-5)+i,s:s.n,link,n,cost:c,t:new Date().toLocaleString()});
+    if(!Number.isInteger(n)||n<s.min||n>s.max)return m.textContent=`Line ${i+1}: quantity must be ${s.min}–${s.max}`;
+    total+=n*s.r/1000;jobs.push({s,link,n});
   }
   if(total>balance)return m.textContent="Insufficient balance. Please add funds first.";
-  balance-=total;spent+=total;refresh();out.forEach(o=>ORDERS.unshift(o));
-  $("#mTxt").value="";toast(`✓ ${out.length} order(s) created`);
+  f.classList.add("busy");let ok=0;
+  for(const o of jobs){
+    const r=await placeOrder(o.s.id,o.link,o.n);
+    if(!r.ok){m.textContent=`Line ${ok+1}: ${r.msg}`;break}
+    ok++;
+  }
+  f.classList.remove("busy");
+  if(ok){$("#mTxt").value=rows.slice(ok).join("\n");toast(`✓ ${ok} order(s) created`)}
 };
 const pm=$("#pmenu"),ab=$("#avatarBtn");
 const pmOpen=o=>{pm.classList.toggle("hidden",!o);ab.setAttribute("aria-expanded",o)};
@@ -616,23 +636,26 @@ function calc(){
 }
 $("#q").oninput=drawCats;$("#cat").onchange=drawSrv;$("#srv").onchange=pick;$("#qty").oninput=calc;
 
-$("#of").onsubmit=e=>{
+$("#of").onsubmit=async e=>{
   e.preventDefault();
+  const f=$("#of");
+  if(f.classList.contains("busy"))return;
   const err=m=>$("#msg").textContent=m, link=$("#link").value.trim(), n=+$("#qty").value;
   err("");
   if(!cur)return err("اختر خدمة أولاً.");
   if(!/^https?:\/\/\S+\.\S+/.test(link))return err("أدخل رابطاً صحيحاً يبدأ بـ https://");
-  if(!n||n<cur.min||n>cur.max)return err(`الكمية يجب أن تكون بين ${cur.min} و ${cur.max}.`);
-  const cost=n*cur.r/1000;
-  if(cost>balance)return err("رصيدك غير كافٍ. اشحن رصيدك أولاً.");
-  balance-=cost;spent+=cost;refresh();           // استبدلها بطلب إلى الخادم
-  ORDERS.unshift({id:Date.now().toString().slice(-6),s:cur.n,link,n,cost,t:new Date().toLocaleString()});
+  if(!Number.isInteger(n)||n<cur.min||n>cur.max)return err(`الكمية يجب أن تكون بين ${cur.min} و ${cur.max}.`);
+  if(n*cur.r/1000>balance)return err("رصيدك غير كافٍ. اشحن رصيدك أولاً.");
+  f.classList.add("busy");
+  const r=await placeOrder(cur.id,link,n);
+  f.classList.remove("busy");
+  if(!r.ok)return err(r.msg);
   $("#link").value="";$("#qty").value="";calc();
-  toast("✓ تم إنشاء الطلب بنجاح");
+  toast(r.data.status==="review"?"تم استلام الطلب وهو قيد المراجعة":"✓ تم إنشاء الطلب بنجاح");
 };
 
 function drawServices(){
-  const l=SERVICES.filter(s=>plat==="all"||s.p===plat);
+  const l=SERVICES.filter(s=>plat==="all"||s.p===plat).slice(0,300);
   $("#svcList").innerHTML=l.map(s=>`<div class="rounded-xl border border-blue-100 p-3 flex items-center gap-3"><div class="flex-1 min-w-0"><div class="font-semibold text-sm truncate">${s.id} · ${esc(s.n)}</div><div class="text-xs text-slate-500">${esc(s.c)} · min ${s.min} – max ${s.max}</div></div><div class="text-blue-700 font-bold text-sm" dir="ltr">$${s.r.toFixed(2)}/1K</div><button data-pick="${s.id}" class="h-9 px-3 rounded-lg bg-blue-600 text-white text-xs font-semibold">Order</button></div>`).join("")||'<p class="text-slate-500 text-sm">لا توجد خدمات.</p>';
 }
 $("#svcList").onclick=e=>{
@@ -640,8 +663,9 @@ $("#svcList").onclick=e=>{
   const s=SERVICES.find(x=>x.id===+b.dataset.pick);
   plat=s.p;$("#q").value="";drawPlat();drawCats();$("#cat").value=s.c;drawSrv();$("#srv").value=s.id;pick();showSec(0);
 };
+const ST={pending:["Pending","bg-amber-100 text-amber-700"],processing:["Processing","bg-blue-100 text-blue-700"],review:["Under review","bg-violet-100 text-violet-700"],failed:["Failed (refunded)","bg-red-100 text-red-700"]};
 function drawOrders(){
-  $("#ordList").innerHTML=ORDERS.map(o=>`<div class="rounded-xl border border-blue-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${o.id}</b><span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Pending</span></div><div class="mt-1 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div><div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${o.t}</span></div></div>`).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
+  $("#ordList").innerHTML=ORDERS.map(o=>{const st=ST[o.status]||ST.pending;return `<div class="rounded-xl border border-blue-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="text-xs px-2 py-0.5 rounded-full ${st[1]}">${st[0]}</span></div><div class="mt-1 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div><div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
 }
 /* ---- Add funds: Card (Stripe Checkout) / Crypto ---- */
 /* ضع هنا رابط الخادم الذي ينشئ جلسة الدفع. يستقبل {amount, method} ويرجع {url} */
@@ -768,7 +792,7 @@ setTimeout(()=>bootFail(),9000);   // إن لم يستجب Firebase: رسالة 
 </script>
 <script type="module" onerror="bootFail()">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const app = initializeApp({
@@ -803,8 +827,8 @@ async function ensureUserDoc(user) {
   });
 }
 
-let unsubBal = null, sess = 0;                             // مستمع المستند + رقم الجلسة لتجاهل النتائج المتأخرة
-const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } };
+let unsubBal = null, unsubOrd = null, sess = 0;                             // مستمع المستند + رقم الجلسة لتجاهل النتائج المتأخرة
+const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } };
 
 onAuthStateChanged(auth, user => {
   stopBal();                                               // إلغاء أي اشتراك سابق عند تغيّر حالة الدخول
@@ -823,9 +847,19 @@ onAuthStateChanged(auth, user => {
           const b = Number(data.balance);
           setBal(Number.isFinite(b) ? b : 0, false);       // غير موجود/غير رقم → $0.00
           setNumericId(Number.isFinite(Number(data.userId)) && data.userId != null ? data.userId : null);
+          setSpent(Number(data.spent) || 0);
         },
         err => { console.error("user listener:", err); setBal(0, false); setNumericId(null); balError(); }
       );
+      unsubOrd = onSnapshot(
+        query(collection(db, "orders"), where("uid", "==", user.uid)),
+        snap => setOrders(snap.docs.map(d => {
+          const x = d.data();
+          return { id: d.id, s: x.serviceName || "", link: x.link || "", n: x.quantity || 0, cost: Number(x.cost) || 0, status: x.status, ts: x.createdAt ? x.createdAt.toMillis() : Date.now() };
+        }).sort((a, b) => b.ts - a.ts)),
+        err => console.error("orders listener:", err)
+      );
+      loadServices();
     });
   window.__authDone = true;
   bootDone();
@@ -838,73 +872,3 @@ document.getElementById("logout").onclick = out;
 document.getElementById("logout2").onclick = out;
 document.getElementById("logout3").onclick = out;
 </script>
-  <script type="module">
-    alert("مرحباً، السكريبت يعمل!");
-
-    import { db, auth } from "./firebaseConfig.js";
-    import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-    const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://justanotherpanel.com/api/v2");
-    const API_KEY = "feaa69096d501c6ccfc39634a59e2cc8";
-
-    let allServices = [];
-
-    async function fetchServicesDirectly() {
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({ key: API_KEY, action: "services" })
-        });
-
-        const text = await response.text();
-        alert("تم الاتصال بالبروكسي بنجاح!");
-        return JSON.parse(text);
-      } catch (error) {
-        alert("خطأ الاتصال: " + error.message);
-        return [];
-      }
-    }
-
-    async function init() {
-      allServices = await fetchServicesDirectly();
-
-      const categorySelect = document.getElementById('categorySelect');
-      const serviceSelect = document.getElementById('serviceSelect');
-
-      if (!categorySelect || !serviceSelect) {
-        alert("تنبيه: عناصر القوائم غير موجودة في الصفحة!");
-        return;
-      }
-
-      if (!Array.isArray(allServices) || allServices.length === 0) return;
-
-      const categories = [...new Set(allServices.map(s => s.category).filter(Boolean))];
-
-      categorySelect.innerHTML = '<option value="">اختر الفئة...</option>';
-      categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        categorySelect.appendChild(option);
-      });
-
-      categorySelect.addEventListener('change', (e) => {
-        const selectedCategory = e.target.value;
-        const filteredServices = allServices.filter(s => s.category === selectedCategory);
-
-        serviceSelect.innerHTML = '<option value="">اختر الخدمة...</option>';
-        filteredServices.forEach(service => {
-          const option = document.createElement('option');
-          option.value = service.service;
-          option.dataset.rate = service.rate;
-          option.dataset.min = service.min;
-          option.dataset.max = service.max;
-          option.textContent = `${service.name} - ($${service.rate} / 1000)`;
-          serviceSelect.appendChild(option);
-        });
-      });
-    }
-
-    init();
-  </script>
