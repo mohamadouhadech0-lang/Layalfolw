@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>layalflwo – Dashboard</title>
+<title>layal folw – Dashboard</title>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <style>
@@ -88,15 +88,13 @@ html.dark body{background:#0b1220;color:#e5ebf5}
   <!-- Header -->
   <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-blue-100 px-3 sm:px-4 h-16 flex items-center gap-2 sm:gap-3">
     <button id="burger" class="lg:hidden w-10 h-10 rounded-xl bg-blue-50 text-blue-700 text-xl" aria-label="Menu"></button>
-
+    <div class="min-w-0 flex-1 font-extrabold text-blue-700 text-lg tracking-tight truncate">layal folw</div>
 
     <!-- Balance chip (يفتح Add funds) -->
     <button id="balChip" class="shrink-0 flex items-center gap-1.5 h-10 pl-2.5 pr-3 rounded-full bg-blue-50 text-blue-800 text-sm font-bold hover:bg-blue-100 active:scale-95 transition" dir="ltr" aria-label="Account balance">
       <span id="hIc"></span><span>$<span id="hBal">0.00</span></span>
     </button>
 
-
-    
     <!-- Profile -->
     <div class="relative shrink-0">
       <button id="avatarBtn" class="flex items-center gap-2 rounded-full p-0.5 pr-0.5 md:pr-3 hover:bg-slate-100 active:scale-95 transition" aria-haspopup="menu" aria-expanded="false" aria-label="Profile menu">
@@ -375,7 +373,11 @@ const NAV=[["cart","New order"],["grid","Services"],["package","Orders"],["walle
 const money=n=>n.toFixed(2);
 let plat="all", cur=null, toastT;
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.remove("hidden");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add("hidden"),2400)};
-const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=money(balance);$("#cSpent").textContent=money(spent);$("#qBalTxt")&&($("#qBalTxt").textContent="$"+money(balance))};
+let balLoading=true;                                   // حتى وصول أول قراءة من Firestore
+const balStr=()=>balLoading?"…":money(balance);
+const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=balStr();$("#cSpent").textContent=money(spent);$("#qBalTxt")&&($("#qBalTxt").textContent="$"+balStr())};
+function setBal(n,loading){balance=n;balLoading=!!loading;refresh()}        // يُستدعى من Firestore (onSnapshot)
+function balError(){toast("Could not load balance")}
 $("#uname").textContent=user;
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function fillAccount(u){                     // يُستدعى من Firebase بعد التحقق من الدخول
@@ -659,7 +661,7 @@ const PAIRS=[
 ["✓ Payment received. Your balance will be updated shortly","✓ تم الدفع. سيُضاف الرصيد خلال لحظات"],["Payment cancelled","تم إلغاء الدفع"],
 ["Please choose an image file","اختر ملف صورة فقط"],["Image is larger than 5MB","الصورة أكبر من 5MB"],["Could not read the image","تعذّر قراءة الصورة"],["✓ Photo saved","✓ تم حفظ الصورة"],["Saved on this device only","تم الحفظ على هذا الجهاز فقط"],["Could not save the photo","تعذّر حفظ الصورة"],
 ["Please fill in the subject and message","أكمل الموضوع والرسالة"],["✓ Ticket sent (demo)","✓ تم إرسال التذكرة (تجريبي)"],["✓ Request sent (demo)","✓ تم إرسال الطلب (تجريبي)"],["Enter a valid domain","أدخل نطاقاً صحيحاً"],
-["Copied","تم النسخ"],["Copy the link manually","انسخ الرابط يدوياً"],
+["Could not load balance","تعذّر تحميل الرصيد"],["Copied","تم النسخ"],["Copy the link manually","انسخ الرابط يدوياً"],
 ["Add at least one line: service_id | link | quantity","أضف سطراً واحداً على الأقل: service_id | link | quantity"],["unknown service ID","رقم الخدمة غير معروف"],["invalid link","رابط غير صالح"]
 ];
 const AR=new Map(PAIRS),EN=new Map(PAIRS.map(p=>[p[1],p[0]]));
@@ -706,6 +708,7 @@ setTimeout(()=>{if(!window.__authDone)location.replace("index.html")},8000);   /
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const app = initializeApp({
@@ -720,15 +723,31 @@ const app = initializeApp({
 // نفس نوع الحفظ المستخدم في index.html حتى تنتقل الجلسة بين الصفحتين
 const auth = initializeAuth(app, { persistence: browserSessionPersistence });
 
+const db = getFirestore(app);
+let unsubBal = null;                                       // مستمع الرصيد الحالي
+const stopBal = () => { if (unsubBal) { unsubBal(); unsubBal = null; } };
+
 onAuthStateChanged(auth, user => {
+  stopBal();                                               // إلغاء أي اشتراك سابق عند تغيّر حالة الدخول
   if (!user) { location.replace("index.html"); return; }   // غير مسجّل → صفحة الدخول
   fillAccount(user);                                       // الاسم/البريد الحقيقي
+  setBal(0, true);                                         // حالة التحميل: يظهر $…
+  // تحديثات مباشرة لـ users/{uid}.balance
+  unsubBal = onSnapshot(
+    doc(db, "users", user.uid),
+    snap => {
+      const b = snap.exists() ? Number(snap.data().balance) : 0;
+      setBal(Number.isFinite(b) ? b : 0, false);           // غير موجود/غير رقم → $0.00
+    },
+    err => { console.error("balance listener:", err); setBal(0, false); balError(); }
+  );
   window.__authDone = true;
   document.body.style.visibility = "visible";
 });
+addEventListener("pagehide", stopBal);                     // إغلاق الصفحة
 
 window.__getToken = () => auth.currentUser.getIdToken();
-const out = () => signOut(auth).catch(() => {}).finally(() => location.replace("index.html"));
+const out = () => { stopBal(); return signOut(auth).catch(() => {}).finally(() => location.replace("index.html")); };
 document.getElementById("logout").onclick = out;
 document.getElementById("logout2").onclick = out;
 document.getElementById("logout3").onclick = out;
