@@ -16,12 +16,17 @@ export async function getJapServices() {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ key: API_KEY, action: "services" })
     });
-    return await response.json();
+    
+    const text = await response.text();
+    alert("النتيجة من الموقع: " + text.substring(0, 100));
+    
+    return JSON.parse(text);
   } catch (error) {
-    console.error("خطأ في جلب الخدمات:", error);
+    alert("حدث خطأ: " + error.message);
     return [];
   }
 }
+
 
 /**
  * 2. إرسال الطلب للمزود وخصم الرصيد من Firebase
