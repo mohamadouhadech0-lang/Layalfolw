@@ -73,6 +73,15 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 .fld{width:100%;min-height:46px;padding:10px 14px;border-radius:12px;border:1px solid #d5dff0;background:#fff;outline:none;font-size:15px}
 .fld:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
 @keyframes spin{to{transform:rotate(360deg)}}
+.btnspin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:lfspin .7s linear infinite}
+@keyframes lfspin{to{transform:rotate(360deg)}}
+@keyframes okpop{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes okdraw{to{stroke-dashoffset:0}}
+.okcard{animation:okpop .28s cubic-bezier(.2,.9,.3,1.2)}
+.okck{stroke-dasharray:32;stroke-dashoffset:32;animation:okdraw .45s .15s ease forwards}
+#sendBtn{touch-action:manipulation}
+@media (prefers-reduced-motion:reduce){.okcard,.okck,.btnspin{animation-duration:.01s}}
+
 .sec,.pm{animation:fi .22s ease}
 @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -219,7 +228,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
           <span class="text-xl font-extrabold text-blue-700" dir="ltr">$<span id="charge">0.00</span></span>
         </div>
         <p id="msg" class="min-h-[20px] text-sm text-red-500"></p>
-        <button class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25">Submit order</button>
+        <button id="sendBtn" type="submit" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">Submit order</button>
       </form>
     </section>
 
@@ -356,6 +365,27 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <!-- Bottom nav (mobile) -->
 <nav id="bnav" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-blue-100 safe-b grid grid-cols-4 shadow-[0_-4px_20px_rgba(37,99,235,.08)]"></nav>
 
+<div id="okM" class="hidden fixed inset-0 z-[60] grid place-items-center p-4 bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="okT">
+  <div class="okcard w-full max-w-sm rounded-3xl p-6 text-slate-100" style="background:#0f172a;border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 80px rgba(0,0,0,.6)">
+    <div class="mx-auto mb-4 w-20 h-20 rounded-full grid place-items-center" style="background:rgba(16,185,129,.15);box-shadow:0 0 0 8px rgba(16,185,129,.08),0 0 30px rgba(16,185,129,.35)">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="okck" d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+    </div>
+    <h2 id="okT" class="text-center text-xl font-extrabold">Order created successfully! 🎉</h2>
+    <dl class="mt-5 rounded-2xl p-4 space-y-3 text-sm" style="background:#0b1220;border:1px solid rgba(255,255,255,.06)">
+      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Order ID</dt><dd id="okId" data-notr class="font-semibold text-white text-end min-w-0 tracking-wide"></dd></div>
+      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Service</dt><dd id="okSvc" data-notr class="font-semibold text-white text-end min-w-0 "></dd></div>
+      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Link</dt><dd id="okLink" data-notr class="font-semibold text-white text-end min-w-0 break-all text-xs"></dd></div>
+      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Quantity</dt><dd id="okQty" data-notr class="font-semibold text-white text-end min-w-0 "></dd></div>
+      <div class="h-px" style="background:rgba(255,255,255,.08)"></div>
+      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Total cost</dt><dd id="okCost" data-notr class="font-semibold text-white text-end min-w-0 text-amber-300"></dd></div>
+      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Remaining balance</dt><dd id="okBal" data-notr class="font-semibold text-white text-end min-w-0 text-emerald-400"></dd></div>
+    </dl>
+    <div class="mt-5 grid gap-2.5">
+      <button id="okView" type="button" class="h-12 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/30">View orders</button>
+      <button id="okClose" type="button" class="h-11 rounded-xl text-slate-300 hover:bg-white/5 transition font-semibold text-sm">Close</button>
+    </div>
+  </div>
+</div>
 <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-50 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-full shadow-xl"></div>
 
 <script>
@@ -636,22 +666,45 @@ function calc(){
 }
 $("#q").oninput=drawCats;$("#cat").onchange=drawSrv;$("#srv").onchange=pick;$("#qty").oninput=calc;
 
+let sending=false;
+const fmtUsd=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4});
+function showOrderOk(o){
+  $("#okT").textContent=o.status==="review"?"Order received and under review":"Order created successfully! 🎉";
+  $("#okId").textContent="#"+String(o.id).slice(0,6).toUpperCase();
+  $("#okSvc").textContent=o.svc;$("#okLink").textContent=o.link;$("#okLink").dir="ltr";
+  $("#okQty").textContent=Number(o.qty).toLocaleString("en-US");
+  $("#okCost").textContent=fmtUsd(o.cost);$("#okBal").textContent=fmtUsd(Math.max(0,o.bal));
+  $("#okM").classList.remove("hidden");document.body.style.overflow="hidden";$("#okView").focus();
+}
+const closeOk=()=>{$("#okM").classList.add("hidden");document.body.style.overflow=""};
+$("#okClose").onclick=closeOk;
+$("#okM").addEventListener("click",e=>{if(e.target.id==="okM")closeOk()});
+$("#okView").onclick=()=>{closeOk();setNav(2);showSec(2)};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#okM").classList.contains("hidden"))closeOk()});
+
 $("#of").onsubmit=async e=>{
   e.preventDefault();
-  const f=$("#of");
-  if(f.classList.contains("busy"))return;
-  const err=m=>$("#msg").textContent=m, link=$("#link").value.trim(), n=+$("#qty").value;
+  if(sending)return;
+  const err=m=>$("#msg").textContent=m, link=$("#link").value.trim(), n=+$("#qty").value, svc=cur;
   err("");
-  if(!cur)return err("اختر خدمة أولاً.");
+  if(!svc)return err("اختر خدمة أولاً.");
   if(!/^https?:\/\/\S+\.\S+/.test(link))return err("أدخل رابطاً صحيحاً يبدأ بـ https://");
-  if(!Number.isInteger(n)||n<cur.min||n>cur.max)return err(`الكمية يجب أن تكون بين ${cur.min} و ${cur.max}.`);
-  if(n*cur.r/1000>balance)return err("رصيدك غير كافٍ. اشحن رصيدك أولاً.");
-  f.classList.add("busy");
-  const r=await placeOrder(cur.id,link,n);
-  f.classList.remove("busy");
-  if(!r.ok)return err(r.msg);
-  $("#link").value="";$("#qty").value="";calc();
-  toast(r.data.status==="review"?"تم استلام الطلب وهو قيد المراجعة":"✓ تم إنشاء الطلب بنجاح");
+  if(!Number.isInteger(n)||n<svc.min||n>svc.max)return err(`الكمية يجب أن تكون بين ${svc.min} و ${svc.max}.`);
+  if(n*svc.r/1000>balance)return err("رصيدك غير كافٍ. اشحن رصيدك أولاً.");
+  /* استجابة فورية: نعطّل الزر ونُظهر المؤشر قبل أي await */
+  sending=true;
+  const btn=$("#sendBtn"),html=btn.innerHTML;
+  btn.disabled=true;btn.setAttribute("aria-busy","true");
+  btn.innerHTML='<span class="btnspin"></span><span>Sending…</span>';
+  try{
+    const r=await placeOrder(svc.id,link,n);
+    if(!r.ok)return err(r.msg);
+    const d=r.data,cost=d.cost!=null?d.cost:n*svc.r/1000,bal=d.balance!=null?d.balance:balance-cost;
+    $("#link").value="";$("#qty").value="";calc();   // تفريغ النموذج
+    showOrderOk({id:d.id,status:d.status,svc:svc.n,link,qty:n,cost,bal});
+  }finally{
+    sending=false;btn.disabled=false;btn.removeAttribute("aria-busy");btn.innerHTML=html;
+  }
 };
 
 function drawServices(){
@@ -711,6 +764,7 @@ $("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg"
 $("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
 /* ================= i18n (AR / EN) ================= */
 const PAIRS=[
+["Order created successfully! 🎉","تم إنشاء الطلب بنجاح! 🎉"],["Order received and under review","تم استلام الطلب وهو قيد المراجعة"],["Order ID","معرّف الطلب"],["Total cost","التكلفة الإجمالية"],["Remaining balance","الرصيد المتبقي"],["View orders","عرض الطلبات"],["Close","إغلاق"],["Sending…","جاري الإرسال…"],
 ["Customer","عميل"],["Customer account","حساب عميل"],["Guest","ضيف"],["Welcome","مرحباً"],["Hello,","مرحباً،"],["Welcome back","أهلاً بعودتك"],
 ["Profile","الملف الشخصي"],["Logout","تسجيل الخروج"],["Settings","الإعدادات"],["Dark","داكن"],["Light","فاتح"],["Language","اللغة"],
 ["New order","طلب جديد"],["Child Panel","لوحة فرعية"],["NEW","جديد"],["Mass order","طلب جماعي"],["Services","الخدمات"],["Orders","الطلبات"],["Add funds","شحن الرصيد"],["FAQ","الأسئلة الشائعة"],["Tickets","التذاكر"],["Terms","الشروط"],["More","المزيد"],["Account","الحساب"],
