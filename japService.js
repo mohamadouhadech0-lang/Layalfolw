@@ -1,10 +1,11 @@
-import { db, auth } from './firebaseConfig.js'; // تأكد من مسار ملف Firebase الخاص بك
+import { db, auth } from "./firebaseConfig.js";
 import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+// رابط API مع البروكسي لتجاوز حظر CORS في المتصفح
 const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://justanotherpanel.com/api/v2");
 
-
-// ضع مفتاح الـ API الخاص بك هنا من حسابك في JAP
-const API_KEY = "feaa69096d501c6ccfc39634a59e2cc8"; 
+// مفتاح JAP API الخاص بك
+const API_KEY = "feaa69096d501c6ccfc39634a59e2cc8";
 
 /**
  * 1. جلب جميع الخدمات المتاحة
@@ -17,26 +18,27 @@ export async function getJapServices() {
       body: new URLSearchParams({ key: API_KEY, action: "services" })
     });
     
-    const text = await response.text();
-    alert("النتيجة من الموقع: " + text.substring(0, 100));
+    if (!response.ok) {
+      throw new Error("خطأ في الاتصال بالخادم: " + response.status);
+    }
     
-    return JSON.parse(text);
+    const data = await response.json();
+    return data;
   } catch (error) {
-    alert("حدث خطأ: " + error.message);
+    alert("خطأ في جلب الخدمات: " + error.message);
     return [];
   }
 }
 
-
 /**
- * 2. إرسال الطلب للمزود وخصم الرصيد من Firebase
+ * 2. إرسال الطلب إلى المزود وخصم الرصيد من Firebase
  */
 export async function processUserOrder(serviceId, serviceRatePer1K, link, quantity) {
   try {
     const user = auth.currentUser;
     if (!user) return { success: false, error: "يرجى تسجيل الدخول أولاً" };
 
-    // حساب التكلفة الإجمالية للطلب (السعر لكل 1000 * الكمية / 1000)
+    // حساب التكلفة الإجمالية (السعر لكل 1000 * الكمية / 1000)
     const totalCost = (parseFloat(serviceRatePer1K) * parseInt(quantity)) / 1000;
 
     // جلب رصيد المستخدم الحالي من Firestore
@@ -51,7 +53,7 @@ export async function processUserOrder(serviceId, serviceRatePer1K, link, quanti
 
     // التحقق من كفاية الرصيد
     if (currentBalance < totalCost) {
-      return { success: false, error: "رصيدك غير كافٍ لتنفيذ هذا الطلب" };
+      return { success: false, error: "رصيدك غير كاف لتنفيذ هذا الطلب" };
     }
 
     // إرسال الطلب إلى المزود (JAP)
@@ -71,11 +73,11 @@ export async function processUserOrder(serviceId, serviceRatePer1K, link, quanti
 
     // إذا تم قبول الطلب لدى المزود
     if (data.order) {
-      // 1. خصم التكلفة من رصيد المستخدم
+      // خصم التكلفة من رصيد المستخدم
       const newBalance = currentBalance - totalCost;
       await updateDoc(userRef, { balance: newBalance });
 
-      // 2. حرق وتسجيل الطلب في Firestore
+      // حفظ وتسجيل الطلب في Firestore
       await addDoc(collection(db, "orders"), {
         userId: user.uid,
         providerOrderId: data.order,
@@ -93,8 +95,7 @@ export async function processUserOrder(serviceId, serviceRatePer1K, link, quanti
     }
 
   } catch (error) {
-    console.error("خطأ أثناء معالجة الطلب:", error);
-    return { success: false, error: "حدث خطأ غير متوقع" };
+    return { success: false, error: "حدث خطأ غير معتاد: " + error.message };
   }
 }
 
@@ -110,8 +111,7 @@ export async function checkOrderStatus(orderId) {
     });
     return await response.json();
   } catch (error) {
-    console.error("خطأ في فحص حالة الطلب:", error);
+    console.error("خطأ في فحص حالة الطلب", error);
     return null;
   }
 }
-
