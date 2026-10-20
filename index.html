@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>layal folw – Account</title>
+<title>layal folw – تسجيل الدخول</title>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
   
   body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Cairo', sans-serif;
     background-color: #e6ecf5;
     color: #334155;
   }
@@ -33,7 +33,7 @@
   }
 
   .embossed-input:focus {
-    box-shadow: inset 8px 8px 16px #be2e8, inset -8px -8px 16px #ffffff;
+    box-shadow: inset 8px 8px 16px #c8ced8, inset -8px -8px 16px #ffffff;
   }
 
   .embossed-btn {
@@ -42,7 +42,6 @@
     border-radius: 20px;
     color: #2563eb;
     font-weight: 700;
-    letter-spacing: 0.5px;
     transition: all 0.15s ease;
   }
 
@@ -75,120 +74,47 @@
   </div>
 
   <!-- Title & Subtitle -->
-  <h1 id="title" class="text-2xl font-bold text-slate-800 tracking-tight">Create Account</h1>
-  <p id="subtitle" class="text-xs text-slate-400 mt-1 mb-6">Start your journey with us</p>
+  <h1 id="title" class="text-2xl font-bold text-slate-800">إنشاء حساب</h1>
+  <p id="subtitle" class="text-xs text-slate-400 mt-1 mb-6">ابدأ رحلتك معنا اليوم</p>
 
   <form id="authForm" class="space-y-4" onsubmit="return false;">
     <!-- Full Name (Only for Signup) -->
-    <div id="nameWrap" class="text-left">
-      <label class="block text-[11px] font-semibold text-blue-600 mb-1 ml-2">Full Name</label>
-      <input id="name" type="text" class="w-full h-12 px-5 embossed-input" placeholder="nile">
+    <div id="nameWrap" class="text-right">
+      <label class="block text-xs font-semibold text-blue-600 mb-1 mr-2">الاسم الكامل</label>
+      <input id="name" type="text" class="w-full h-12 px-5 embossed-input" placeholder="الاسم الكامل">
     </div>
 
     <!-- Email Address -->
-    <div class="text-left">
-      <label class="block text-[11px] font-semibold text-blue-600 mb-1 ml-2">Email Address</label>
-      <input id="email" type="email" required class="w-full h-12 px-5 embossed-input" placeholder="mhatre@example.com">
+    <div class="text-right">
+      <label class="block text-xs font-semibold text-blue-600 mb-1 mr-2">البريد الإلكتروني</label>
+      <input id="email" type="email" required dir="ltr" class="w-full h-12 px-5 embossed-input" placeholder="name@example.com">
     </div>
 
     <!-- Password -->
-    <div class="text-left">
-      <label class="block text-[11px] font-semibold text-blue-600 mb-1 ml-2">Password</label>
-      <input id="password" type="password" required class="w-full h-12 px-5 embossed-input" placeholder="••••••••">
+    <div class="text-right">
+      <label class="block text-xs font-semibold text-blue-600 mb-1 mr-2">كلمة السر</label>
+      <input id="password" type="password" required dir="ltr" class="w-full h-12 px-5 embossed-input" placeholder="••••••••">
     </div>
 
     <!-- Error Message -->
     <p id="errMsg" class="text-xs text-red-500 min-h-[16px] text-center"></p>
 
     <!-- Submit Button -->
-    <button id="submitBtn" class="w-full h-14 mt-3 embossed-btn text-xs uppercase tracking-wider">
-      CREATE ACCOUNT
+    <button id="submitBtn" class="w-full h-14 mt-2 embossed-btn text-sm">
+      إنشاء حساب
     </button>
   </form>
 
-  <!-- Toggle Section -->
-  <div class="mt-8 pt-4 flex items-center justify-center gap-3 text-xs text-slate-400">
-    <span id="toggleText">Already have an account?</span>
-    <button id="toggleBtn" type="button" class="w-8 h-8 rounded-full embossed-circle-btn flex items-center justify-center text-slate-600 font-bold">
-      →
-    </button>
+  <!-- Divider -->
+  <div class="relative my-6 flex items-center justify-center">
+    <div class="border-t border-slate-300 w-full"></div>
+    <span class="bg-[#e6ecf5] px-3 text-[11px] text-slate-400 font-medium absolute">أو</span>
   </div>
-</div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { initializeAuth, browserSessionPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-
-const app = initializeApp({
-  apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
-  authDomain: "layal-follow.firebaseapp.com",
-  projectId: "layal-follow",
-  storageBucket: "layal-follow.firebasestorage.app",
-  messagingSenderId: "850647879566",
-  appId: "1:850647879566:web:54e2e67a395f5d56101edf",
-  measurementId: "G-KVN372FDCR"
-});
-
-const auth = initializeAuth(app, { persistence: browserSessionPersistence });
-
-let isSignUp = true;
-
-const title = document.getElementById("title");
-const subtitle = document.getElementById("subtitle");
-const nameWrap = document.getElementById("nameWrap");
-const submitBtn = document.getElementById("submitBtn");
-const toggleText = document.getElementById("toggleText");
-const toggleBtn = document.getElementById("toggleBtn");
-const errMsg = document.getElementById("errMsg");
-
-toggleBtn.onclick = () => {
-  isSignUp = !isSignUp;
-  errMsg.textContent = "";
-  if (isSignUp) {
-    title.textContent = "Create Account";
-    subtitle.textContent = "Start your journey with us";
-    nameWrap.style.display = "block";
-    submitBtn.textContent = "CREATE ACCOUNT";
-    toggleText.textContent = "Already have an account?";
-    toggleBtn.textContent = "→";
-  } else {
-    title.textContent = "Welcome Back";
-    subtitle.textContent = "Sign in to continue";
-    nameWrap.style.display = "none";
-    submitBtn.textContent = "SIGN IN";
-    toggleText.textContent = "Need an account?";
-    toggleBtn.textContent = "←";
-  }
-};
-
-submitBtn.onclick = async () => {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const name = document.getElementById("name").value.trim();
-  errMsg.textContent = "";
-
-  if (!email || !password) {
-    errMsg.textContent = "Please fill in all required fields";
-    return;
-  }
-
-  try {
-    if (isSignUp) {
-      if (!name) { errMsg.textContent = "Please enter your full name"; return; }
-      const res = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(res.user, { displayName: name });
-    } else {
-      await signInWithEmailAndPassword(auth, email, password);
-    }
-    location.replace("dashboard.html");
-  } catch (err) {
-    errMsg.textContent = "Error: Invalid credentials or user exists.";
-  }
-};
-
-onAuthStateChanged(auth, user => {
-  if (user) location.replace("dashboard.html");
-});
-</script>
-</body>
-</html>
+  <!-- Google Sign-In Button -->
+  <button id="googleBtn" type="button" class="w-full h-12 embossed-btn flex items-center justify-center gap-3 text-xs font-bold text-slate-700 hover:text-blue-600 transition">
+    <svg class="w-5 h-5" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+      <path fill="#EA4335"
