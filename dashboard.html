@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>layal folw – Dashboard</title>
-<script>try{var t=localStorage.getItem("lf_theme");if((t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"))==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <style>
@@ -18,33 +17,19 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 .qa:hover .qi{background:#dbeafe;color:#1d4ed8}.qa:active .qi{transform:scale(.92)}
 .qa.danger .qi{background:#fee2e2;color:#dc2626}.qa.danger:hover .qi{background:#fecaca}
 .sb-scroll{scrollbar-width:thin}
-/* ---- Neumorphic balance cards (compact) ---- */
-.neo{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:16px;background:#eef3fb;border:1px solid rgba(255,255,255,.7);
-  box-shadow:6px 6px 13px rgba(163,177,198,.55),-6px -6px 13px rgba(255,255,255,.95)}
-.neo-well{flex:none;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#2563eb;background:#eef3fb;
+/* ---- Neumorphic balance cards ---- */
+.neo{min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:14px;padding:14px;border-radius:20px;background:#eef3fb;border:1px solid rgba(255,255,255,.7);
+  box-shadow:7px 7px 16px rgba(163,177,198,.55),-7px -7px 16px rgba(255,255,255,.95)}
+.neo-well{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#2563eb;background:#eef3fb;
   box-shadow:inset 3px 3px 6px rgba(163,177,198,.6),inset -3px -3px 6px rgba(255,255,255,.95)}
-.neo-plus{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,#4c8dff,#1d4ed8);
-  box-shadow:3px 3px 7px rgba(37,99,235,.4),-3px -3px 7px rgba(255,255,255,.95);transition:transform .15s,box-shadow .15s}
-.neo-plus:active{transform:scale(.9);box-shadow:inset 2px 2px 5px rgba(10,40,120,.5)}
-.neo-lbl{min-width:0;font-size:11px;font-weight:600;line-height:1.25;color:#64748b;padding-top:2px}
-.neo-amt{font-weight:800;line-height:1.1;font-size:clamp(1.05rem,4.8vw,1.4rem);color:#1d4ed8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.neo-lbl{min-width:0;font-size:12px;font-weight:600;line-height:1.3;color:#64748b}
+.neo-amt{font-weight:800;line-height:1.1;font-size:clamp(1.1rem,5.4vw,1.65rem);color:#1d4ed8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .neo-amt.sp{color:#0f1f3d}
-@media (min-width:640px){.neo{padding:12px 16px}.neo-lbl{font-size:12px}.neo-amt{font-size:1.5rem}}
-.dark .neo{background:#0e1627;border-color:rgba(255,255,255,.04);box-shadow:6px 6px 13px rgba(2,6,15,.7),-5px -5px 12px rgba(36,52,86,.3)}
+@media (min-width:640px){.neo{padding:18px 20px;gap:18px}.neo-lbl{font-size:13px}.neo-well{width:40px;height:40px}}
+.dark .neo{background:#0e1627;border-color:rgba(255,255,255,.04);box-shadow:7px 7px 16px rgba(2,6,15,.7),-6px -6px 14px rgba(36,52,86,.3)}
 .dark .neo-well{background:#0e1627;color:#8ab4ff;box-shadow:inset 3px 3px 6px rgba(2,6,15,.75),inset -3px -3px 6px rgba(36,52,86,.32)}
-.dark .neo-plus{box-shadow:3px 3px 7px rgba(2,6,15,.7),-3px -3px 7px rgba(36,52,86,.3)}
 .dark .neo-lbl{color:#8d9bb5}.dark .neo-amt{color:#8ab4ff}.dark .neo-amt.sp{color:#e5ebf5}
-/* ---- Platform filter: single centered row, no scroll ---- */
-#plat{display:flex;justify-content:center;gap:6px;overflow:hidden;padding:2px 2px 8px}
-.pchip{flex:1 1 0;min-width:0;max-width:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 2px;border-radius:14px;background:#eef3fb;color:#475569;font-size:10px;font-weight:600;line-height:1;border:1px solid rgba(255,255,255,.7);
-  box-shadow:4px 4px 9px rgba(163,177,198,.55),-4px -4px 9px rgba(255,255,255,.95);transition:transform .15s,box-shadow .15s,color .15s}
-.pchip svg{width:16px;height:16px;flex:none}
-.pchip span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pchip:active{transform:scale(.95)}
-.pchip.on{color:#2563eb;box-shadow:inset 3px 3px 7px rgba(163,177,198,.65),inset -3px -3px 7px rgba(255,255,255,.95)}
-@media (min-width:640px){.pchip{flex-direction:row;gap:6px;padding:10px 12px;font-size:12px;max-width:none}.pchip svg{width:15px;height:15px}}
-.dark .pchip{background:#0e1627;color:#8d9bb5;border-color:rgba(255,255,255,.04);box-shadow:4px 4px 9px rgba(2,6,15,.7),-3px -3px 8px rgba(36,52,86,.3)}
-.dark .pchip.on{color:#8ab4ff;box-shadow:inset 3px 3px 7px rgba(2,6,15,.75),inset -3px -3px 7px rgba(36,52,86,.32)}
+#plat svg{width:14px;height:14px}
 html[dir=rtl] .sb{left:auto;right:0;border-right:0;border-left:1px solid #f1f5f9}
 html[dir=rtl] aside.sb.-translate-x-full{--tw-translate-x:100%}
 html[dir=rtl] #closeSb,html[dir=rtl] #wClose{right:auto;left:.75rem}
@@ -58,7 +43,6 @@ html[dir=rtl] #welcome>div.relative{padding-right:0;padding-left:2.25rem}
 .lb{height:36px;border-radius:10px;font-size:13px;font-weight:600;color:#64748b;transition:all .15s}
 .lb.on{background:#fff;color:#1d4ed8;box-shadow:0 1px 3px rgba(15,31,61,.12)}
 .dark .lb.on{background:#22304a;color:#8ab4ff}
-html.dark #boot{background:#0b1220!important;color:#e5ebf5!important}
 html.dark body{background:#0b1220;color:#e5ebf5}
 .dark .bg-white,.dark .bg-white\/90,.dark .bg-white\/95{background-color:#111a2e!important}
 .dark .bg-blue-50{background-color:#14233f!important}.dark .bg-blue-100{background-color:#1b305a!important}
@@ -72,21 +56,12 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 .dark .qa.danger .qi{background:#3b1519;color:#ff8a8a}
 .fld{width:100%;min-height:46px;padding:10px 14px;border-radius:12px;border:1px solid #d5dff0;background:#fff;outline:none;font-size:15px}
 .fld:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
-@keyframes spin{to{transform:rotate(360deg)}}
 .sec,.pm{animation:fi .22s ease}
 @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style>
 </head>
-<body class="min-h-screen">
-<div id="boot" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#eef3fb;color:#0f1f3d;font-family:system-ui,Segoe UI,Tahoma,sans-serif;text-align:center;padding:24px">
-  <div id="bootSpin" style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(37,99,235,.2);border-top-color:#2563eb;animation:spin .8s linear infinite"></div>
-  <div id="bootMsg" style="font-weight:700">layal folw</div>
-  <div id="bootBtns" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center">
-    <button onclick="location.reload()" style="height:40px;padding:0 18px;border-radius:999px;background:#2563eb;color:#fff;font-weight:600;border:0">Reload</button>
-    <button onclick="location.href='index.html'" style="height:40px;padding:0 18px;border-radius:999px;background:#fff;color:#2563eb;font-weight:600;border:1px solid #bfdbfe">Login</button>
-  </div>
-</div>
+<body class="min-h-screen" style="visibility:hidden">
 
 <div id="scrim" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-30 lg:hidden"></div>
 
@@ -168,11 +143,11 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       </div>
     </section>
 
-    <section id="balCards" class="flex gap-2.5 sm:gap-4">
+    <section id="balCards" class="grid grid-cols-2 gap-3 sm:gap-4">
       <div class="neo">
         <div class="flex items-start justify-between gap-2">
           <span class="neo-lbl">Account balance</span>
-          <button id="plusBtn" type="button" class="neo-plus" aria-label="Add funds"></button>
+          <span class="neo-well" id="wBal"></span>
         </div>
         <div class="neo-amt"><span dir="ltr" style="unicode-bidi:isolate">$<span id="cBal">0.00</span></span></div>
       </div>
@@ -187,7 +162,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
     <!-- Platform filter -->
     <section id="platWrap">
-      <div id="plat"></div>
+      <div id="plat" class="noscroll flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 snap-x"></div>
     </section>
 
     <!-- New order -->
@@ -359,13 +334,6 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-50 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-full shadow-xl"></div>
 
 <script>
-function bootFail(msg){            // يُستدعى عند فشل تحميل Firebase أو انتهاء المهلة
-  const m=document.getElementById("bootMsg"),b=document.getElementById("bootBtns"),s=document.getElementById("bootSpin");
-  if(!m||window.__authDone)return;
-  s.style.display="none";b.style.display="flex";
-  m.textContent=msg||"تعذّر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة. / Could not connect. Check your connection and try again.";
-}
-function bootDone(){const e=document.getElementById("boot");if(e)e.remove()}
 const $=s=>document.querySelector(s);
 /* ---- بيانات تجريبية: استبدلها ببيانات الخادم لاحقاً ---- */
 let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
@@ -387,7 +355,7 @@ const PLAT=[
  ["telegram","Telegram",I('<path d="M21 4 3 11l5 2 2 6 3-4 5 4z"/><path d="M8 13l9-6"/>')],
  ["instagram","Instagram",I('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/>')],
  ["tiktok","TikTok",I('<path d="M14 3v12.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.4 2.6 2.1 4.2 5 4.4"/>')],
- ["x","X",I('<path d="M4 4l16 16M20 4 4 20"/>')],
+ ["x","X / Twitter",I('<path d="M4 4l16 16M20 4 4 20"/>')],
  ["youtube","YouTube",I('<rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/>')]
 ];
 /* أيقونات Lucide (مضمّنة كـ SVG، لا تحتاج اتصالاً بأي CDN) */
@@ -413,7 +381,6 @@ const LUCIDE={
  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
  moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
- plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
  lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
  coins:'<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
  card:'<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>'
@@ -533,7 +500,7 @@ $("#avSave").onclick=()=>{
 /* ---- Drawer quick actions, theme, badges, new sections ---- */
 let tickets=0;
 function tkBadge(){const b=$("#tkBadge");if(!b)return;b.textContent=tickets;b.classList.toggle("hidden",!tickets);b.classList.toggle("grid",!!tickets)}
-$("#plusBtn").innerHTML=ic("plus",16,2.6);$("#plusBtn").onclick=()=>showSec(3);$("#wSpent").innerHTML=ic("card",16);$("#qiBal").innerHTML=ic("wallet",20);$("#qiSet").innerHTML=ic("gear",20);$("#qiOut").innerHTML=ic("logout",20);$("#sbCam").innerHTML=ic("camera",15);
+$("#wBal").innerHTML=ic("wallet",18);$("#wSpent").innerHTML=ic("card",18);$("#qiBal").innerHTML=ic("wallet",20);$("#qiSet").innerHTML=ic("gear",20);$("#qiOut").innerHTML=ic("logout",20);$("#sbCam").innerHTML=ic("camera",15);
 function setTheme(dark){
   document.documentElement.classList.toggle("dark",dark);
   $("#qiTheme").innerHTML=ic(dark?"sun":"moon",20);$("#qThemeTxt").textContent=dark?"Light":"Dark";
@@ -584,7 +551,7 @@ $("#closeSb").onclick=$("#scrim").onclick=()=>openSb(false);
 
 /* ---- platform chips ---- */
 function drawPlat(){
-  $("#plat").innerHTML=PLAT.map(x=>`<button data-p="${x[0]}" class="pchip${plat===x[0]?" on":""}" aria-pressed="${plat===x[0]}">${x[2]}<span>${x[1]}</span></button>`).join("");
+  $("#plat").innerHTML=PLAT.map(x=>`<button data-p="${x[0]}" class="snap-start shrink-0 flex items-center gap-1.5 h-8 px-3 rounded-full border text-xs font-semibold transition active:scale-95 ${plat===x[0]?"bg-blue-600 text-white border-blue-600 shadow shadow-blue-600/25":"bg-white text-slate-700 border-blue-100 hover:border-blue-300"}">${x[2]}<span>${x[1]}</span></button>`).join("");
 }
 $("#plat").onclick=e=>{const b=e.target.closest("[data-p]");if(!b)return;plat=b.dataset.p;drawPlat();drawCats();if(tab===1)drawServices()};
 drawPlat();
@@ -764,9 +731,9 @@ document.querySelectorAll(".lb").forEach(b=>b.onclick=()=>applyLang(b.dataset.la
  applyLang(l||((navigator.language||"").toLowerCase().startsWith("ar")?"ar":"en"))}
 
 drawCats();refresh();
-setTimeout(()=>bootFail(),9000);   // إن لم يستجب Firebase: رسالة واضحة بدل شاشة بيضاء
+setTimeout(()=>{if(!window.__authDone)location.replace("index.html")},8000);   // إن تعذّر تحميل Firebase
 </script>
-<script type="module" onerror="bootFail()">
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -828,7 +795,7 @@ onAuthStateChanged(auth, user => {
       );
     });
   window.__authDone = true;
-  bootDone();
+  document.body.style.visibility = "visible";
 });
 addEventListener("pagehide", stopBal);                     // إغلاق الصفحة
 
