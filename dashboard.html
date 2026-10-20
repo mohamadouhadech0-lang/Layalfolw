@@ -62,11 +62,22 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 
   <main class="p-4 md:p-6 max-w-5xl mx-auto space-y-5">
     <!-- Top cards -->
-    <section class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-      <div class="rounded-2xl p-5 text-white bg-gradient-to-br from-blue-600 to-blue-500 shadow-lg shadow-blue-600/20">
-        <div class="text-sm opacity-90">مرحباً 👋</div>
-        <div id="uname" class="text-xl font-extrabold mt-1 truncate" dir="auto">Guest</div>
+    <section id="welcome" class="relative overflow-hidden rounded-3xl text-white bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 shadow-xl shadow-blue-600/20 p-5 sm:p-6">
+      <span class="pointer-events-none absolute -right-10 -top-12 w-44 h-44 rounded-full bg-white/10"></span>
+      <span class="pointer-events-none absolute right-16 -bottom-16 w-40 h-40 rounded-full bg-white/10"></span>
+      <button id="wClose" type="button" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition grid place-items-center" aria-label="Dismiss"></button>
+      <div class="relative pr-9">
+        <div class="text-xs font-semibold tracking-wide text-blue-100/90 uppercase">Welcome back</div>
+        <div class="mt-1 text-2xl sm:text-3xl font-extrabold leading-tight truncate"><span class="text-base sm:text-lg font-semibold opacity-90">مرحباً، </span><span id="uname" dir="auto">Guest</span></div>
+        <p class="mt-1.5 text-sm text-blue-50/90 max-w-md">اشحن رصيدك وابدأ طلبك الأول في ثوانٍ.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button id="wFunds" type="button" class="h-10 px-5 rounded-full bg-white text-blue-700 text-sm font-bold hover:bg-blue-50 active:scale-95 transition shadow">Add funds</button>
+          <button id="wOrder" type="button" class="h-10 px-5 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-semibold active:scale-95 transition">New order</button>
+        </div>
       </div>
+    </section>
+
+    <section class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div class="rounded-2xl p-5 bg-white border border-blue-100 shadow-sm">
         <div class="text-sm text-slate-500">Account balance</div>
         <div class="text-2xl font-extrabold mt-1 text-blue-700" dir="ltr">$<span id="cBal">0.00</span></div>
@@ -214,7 +225,7 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 <script>
 const $=s=>document.querySelector(s);
 /* ---- بيانات تجريبية: استبدلها ببيانات الخادم لاحقاً ---- */
-let user="Guest", balance=25.00, spent=0, uid="", ORDERS=[], tab=0;
+let user="Guest", balance=0, spent=0, uid="", ORDERS=[], tab=0;
 const SERVICES=[
  {id:101,p:"telegram",c:"Telegram Members",n:"Channel Members – Non Drop",r:1.20,min:100,max:50000,d:"Start: 0–1 hour\nSpeed: 5K / day\nRefill: 30 days"},
  {id:102,p:"telegram",c:"Telegram Views",n:"Post Views – Last 5 posts",r:0.15,min:100,max:100000,d:"Start: instant\nSpeed: 20K / day"},
@@ -340,6 +351,21 @@ $("#avSave").onclick=async()=>{
     try{localStorage.setItem("lf_avatar_"+uid,p.url);toast("تم الحفظ على هذا الجهاز فقط")}catch(e){toast("تعذّر حفظ الصورة")}
   }
 };
+/* ---- Welcome banner ---- */
+{
+  const wb=$("#welcome");
+  $("#wClose").innerHTML=ic("x",16);
+  try{if(sessionStorage.getItem("lf_welcome")==="0")wb.remove()}catch(e){}
+  $("#wClose").onclick=()=>{
+    wb.style.height=wb.offsetHeight+"px";void wb.offsetHeight;
+    wb.style.transition="height .28s ease,opacity .2s ease,padding .28s ease";
+    wb.style.height="0";wb.style.opacity="0";wb.style.paddingTop=wb.style.paddingBottom="0";
+    setTimeout(()=>wb.remove(),290);
+    try{sessionStorage.setItem("lf_welcome","0")}catch(e){}
+  };
+  $("#wFunds").onclick=()=>showSec(3);
+  $("#wOrder").onclick=()=>showSec(0);
+}
 const pm=$("#pmenu"),ab=$("#avatarBtn");
 const pmOpen=o=>{pm.classList.toggle("hidden",!o);ab.setAttribute("aria-expanded",o)};
 ab.onclick=e=>{e.stopPropagation();pmOpen(pm.classList.contains("hidden"))};
