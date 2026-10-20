@@ -1,928 +1,137 @@
-<!DOCTYPE html>
-<html lang="ar" dir="ltr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>layal folw – Dashboard</title>
-<script>try{var t=localStorage.getItem("lf_theme");if((t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"))==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
-<script src="https://js.stripe.com/v3/"></script>
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
-<style>
-body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;background:#eef3fb;color:#0f1f3d;-webkit-tap-highlight-color:transparent}
-.noscroll::-webkit-scrollbar{display:none}.noscroll{scrollbar-width:none}
-.sb{transition:transform .32s cubic-bezier(.32,.72,0,1)}
-#scrim{opacity:0;pointer-events:none;transition:opacity .3s}
-#scrim.on{opacity:1;pointer-events:auto}
-.qa{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;font-weight:500;color:#64748b}
-.qi{width:46px;height:46px;border-radius:9999px;display:grid;place-items:center;background:#f1f5f9;color:#334155;transition:background .15s,color .15s,transform .15s}
-.qa:hover .qi{background:#dbeafe;color:#1d4ed8}.qa:active .qi{transform:scale(.92)}
-.qa.danger .qi{background:#fee2e2;color:#dc2626}.qa.danger:hover .qi{background:#fecaca}
-.sb-scroll{scrollbar-width:thin}
-/* ---- Neumorphic balance cards (compact) ---- */
-.neo{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:16px;background:#eef3fb;border:1px solid rgba(255,255,255,.7);
-  box-shadow:6px 6px 13px rgba(163,177,198,.55),-6px -6px 13px rgba(255,255,255,.95)}
-.neo-well{flex:none;width:30px;height:30px;border-radius:10px;display:grid;place-items:center;color:#2563eb;background:#eef3fb;
-  box-shadow:inset 3px 3px 6px rgba(163,177,198,.6),inset -3px -3px 6px rgba(255,255,255,.95)}
-.neo-plus{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,#4c8dff,#1d4ed8);
-  box-shadow:3px 3px 7px rgba(37,99,235,.4),-3px -3px 7px rgba(255,255,255,.95);transition:transform .15s,box-shadow .15s}
-.neo-plus:active{transform:scale(.9);box-shadow:inset 2px 2px 5px rgba(10,40,120,.5)}
-.neo-lbl{min-width:0;font-size:11px;font-weight:600;line-height:1.25;color:#64748b;padding-top:2px}
-.neo-amt{font-weight:800;line-height:1.1;font-size:clamp(1.05rem,4.8vw,1.4rem);color:#1d4ed8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.neo-amt.sp{color:#0f1f3d}
-@media (min-width:640px){.neo{padding:12px 16px}.neo-lbl{font-size:12px}.neo-amt{font-size:1.5rem}}
-.dark .neo{background:#0e1627;border-color:rgba(255,255,255,.04);box-shadow:6px 6px 13px rgba(2,6,15,.7),-5px -5px 12px rgba(36,52,86,.3)}
-.dark .neo-well{background:#0e1627;color:#8ab4ff;box-shadow:inset 3px 3px 6px rgba(2,6,15,.75),inset -3px -3px 6px rgba(36,52,86,.32)}
-.dark .neo-plus{box-shadow:3px 3px 7px rgba(2,6,15,.7),-3px -3px 7px rgba(36,52,86,.3)}
-.dark .neo-lbl{color:#8d9bb5}.dark .neo-amt{color:#8ab4ff}.dark .neo-amt.sp{color:#e5ebf5}
-/* ---- Platform filter: single centered row, no scroll ---- */
-#plat{display:flex;justify-content:center;gap:6px;overflow:hidden;padding:2px 2px 8px}
-.pchip{flex:1 1 0;min-width:0;max-width:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 2px;border-radius:14px;background:#eef3fb;color:#475569;font-size:10px;font-weight:600;line-height:1;border:1px solid rgba(255,255,255,.7);
-  box-shadow:4px 4px 9px rgba(163,177,198,.55),-4px -4px 9px rgba(255,255,255,.95);transition:transform .15s,box-shadow .15s,color .15s}
-.pchip svg{width:16px;height:16px;flex:none}
-.pchip span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pchip:active{transform:scale(.95)}
-.pchip.on{color:#2563eb;box-shadow:inset 3px 3px 7px rgba(163,177,198,.65),inset -3px -3px 7px rgba(255,255,255,.95)}
-@media (min-width:640px){.pchip{flex-direction:row;gap:6px;padding:10px 12px;font-size:12px;max-width:none}.pchip svg{width:15px;height:15px}}
-.dark .pchip{background:#0e1627;color:#8d9bb5;border-color:rgba(255,255,255,.04);box-shadow:4px 4px 9px rgba(2,6,15,.7),-3px -3px 8px rgba(36,52,86,.3)}
-.dark .pchip.on{color:#8ab4ff;box-shadow:inset 3px 3px 7px rgba(2,6,15,.75),inset -3px -3px 7px rgba(36,52,86,.32)}
-html[dir=rtl] .sb{left:auto;right:0;border-right:0;border-left:1px solid #f1f5f9}
-html[dir=rtl] aside.sb.-translate-x-full{--tw-translate-x:100%}
-html[dir=rtl] #closeSb,html[dir=rtl] #wClose{right:auto;left:.75rem}
-html[dir=rtl] #sbCam,html[dir=rtl] #camBtn{right:auto;left:-2px}
-html[dir=rtl] #pmenu{right:auto;left:0}
-html[dir=rtl] .text-left{text-align:right}
-html[dir=rtl] #nav button{direction:rtl;text-align:right}
-[data-notr]{unicode-bidi:isolate}
-html[dir=rtl] #welcome>div.relative{padding-right:0;padding-left:2.25rem}
-@media (min-width:1024px){html[dir=rtl] aside.sb{--tw-translate-x:0!important}html[dir=rtl] .lg\:ml-72{margin-left:0;margin-right:18rem}}
-.lb{height:36px;border-radius:10px;font-size:13px;font-weight:600;color:#64748b;transition:all .15s}
-.lb.on{background:#fff;color:#1d4ed8;box-shadow:0 1px 3px rgba(15,31,61,.12)}
-.dark .lb.on{background:#22304a;color:#8ab4ff}
-html.dark #boot{background:#0b1220!important;color:#e5ebf5!important}
-html.dark body{background:#0b1220;color:#e5ebf5}
-.dark .bg-white,.dark .bg-white\/90,.dark .bg-white\/95{background-color:#111a2e!important}
-.dark .bg-blue-50{background-color:#14233f!important}.dark .bg-blue-100{background-color:#1b305a!important}
-.dark .bg-slate-50{background-color:#0f1829!important}.dark .bg-slate-100{background-color:#1a2438!important}
-.dark .border-blue-100,.dark .border-blue-200,.dark .border-slate-100,.dark .border-slate-200{border-color:#22304a!important}
-.dark .text-slate-500{color:#8d9bb5!important}.dark .text-slate-600,.dark .text-slate-700{color:#b9c4d9!important}.dark .text-slate-800{color:#e5ebf5!important}
-.dark .text-blue-700,.dark .text-blue-800{color:#8ab4ff!important}
-.dark .fld{background:#0f1829;border-color:#22304a;color:#e5ebf5}
-.dark .hover\:bg-slate-100:hover{background-color:#1a2438!important}.dark .hover\:bg-blue-50:hover{background-color:#14233f!important}
-.dark .qi{background:#1a2438;color:#c7d2e6}.dark .qa{color:#8d9bb5}.dark .qa:hover .qi{background:#1b305a;color:#8ab4ff}
-.dark .qa.danger .qi{background:#3b1519;color:#ff8a8a}
-.fld{width:100%;min-height:46px;padding:10px 14px;border-radius:12px;border:1px solid #d5dff0;background:#fff;outline:none;font-size:15px}
-.fld:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
-@keyframes spin{to{transform:rotate(360deg)}}
-.btnspin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:lfspin .7s linear infinite}
-@keyframes lfspin{to{transform:rotate(360deg)}}
-@keyframes okpop{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
-@keyframes okdraw{to{stroke-dashoffset:0}}
-.okcard{animation:okpop .28s cubic-bezier(.2,.9,.3,1.2)}
-.okck{stroke-dasharray:32;stroke-dashoffset:32;animation:okdraw .45s .15s ease forwards}
-#sendBtn{touch-action:manipulation}
-@media (prefers-reduced-motion:reduce){.okcard,.okck,.btnspin{animation-duration:.01s}}
+// POST /api/create-order   body: { service, link, quantity }
+// Header: Authorization: Bearer <Firebase ID token>
+// الخصم والتحقق والسعر كلها في الخادم؛ المتصفح لا يحدد السعر أبداً.
+//
+// وضع التشخيص: كل رد خطأ يحتوي { error: "<رمز>", detail: "<السبب الحقيقي>" }.
+// بعد حل المشكلة يُفضّل حذف حقل detail من الردود لأسباب أمنية.
 
-.sec,.pm{animation:fi .22s ease}
-@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
-</style>
-</head>
-<body class="min-h-screen">
-<div id="boot" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#eef3fb;color:#0f1f3d;font-family:system-ui,Segoe UI,Tahoma,sans-serif;text-align:center;padding:24px">
-  <div id="bootSpin" style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(37,99,235,.2);border-top-color:#2563eb;animation:spin .8s linear infinite"></div>
-  <div id="bootMsg" style="font-weight:700">layal folw</div>
-  <div id="bootBtns" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center">
-    <button onclick="location.reload()" style="height:40px;padding:0 18px;border-radius:999px;background:#2563eb;color:#fff;font-weight:600;border:0">Reload</button>
-    <button onclick="location.href='index.html'" style="height:40px;padding:0 18px;border-radius:999px;background:#fff;color:#2563eb;font-weight:600;border:1px solid #bfdbfe">Login</button>
-  </div>
-</div>
+const errText = (e) => String((e && (e.message || e.code)) || e).slice(0, 300);
 
-<div id="scrim" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-30 lg:hidden"></div>
+async function handle(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "method_not_allowed", detail: "Use POST" });
 
-<!-- Sidebar / Drawer -->
-<aside id="sb" class="sb fixed z-40 top-0 bottom-0 left-0 w-[86%] max-w-[320px] lg:w-72 -translate-x-full lg:translate-x-0 bg-white border-r border-slate-100 flex flex-col shadow-2xl lg:shadow-none" style="padding-top:env(safe-area-inset-top,0px)" aria-label="Main menu">
-  <button id="closeSb" class="lg:hidden absolute top-3 right-3 w-9 h-9 rounded-full grid place-items-center text-slate-500 hover:bg-slate-100 active:scale-95 transition" aria-label="Close menu"></button>
-
-  <div class="pt-9 pb-4 px-5 text-center">
-    <div class="relative mx-auto w-24 h-24">
-      <div id="sbAv" class="overflow-hidden w-24 h-24 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-3xl font-bold ring-4 ring-blue-50 shadow-lg">G</div>
-      <button id="sbCam" type="button" class="absolute -bottom-0.5 -right-0.5 w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Change photo"></button>
-    </div>
-    <div class="mt-3 flex justify-center items-baseline gap-1.5 min-w-0 text-[17px] font-bold leading-tight"><span class="shrink-0">Welcome</span><span id="sbName" class="truncate" dir="auto">Guest</span></div>
-    <div id="sbRole" class="text-xs text-slate-500 mt-0.5">Customer account</div>
-
-    <div class="mt-4 grid grid-cols-4 gap-1 max-w-[280px] mx-auto">
-      <button id="qBal" type="button" class="qa" aria-label="Balance"><span class="qi" id="qiBal"></span><span id="qBalTxt">$0.00</span></button>
-      <button id="qSet" type="button" class="qa" aria-label="Settings"><span class="qi" id="qiSet"></span><span>Settings</span></button>
-      <button id="qTheme" type="button" class="qa" aria-label="Toggle theme"><span class="qi" id="qiTheme"></span><span id="qThemeTxt">Dark</span></button>
-      <button id="logout3" type="button" class="qa danger" aria-label="Logout"><span class="qi" id="qiOut"></span><span>Logout</span></button>
-    </div>
-  </div>
-
-  <div class="mx-5 h-px bg-slate-100"></div>
-  <nav id="nav" class="sb-scroll flex-1 overflow-y-auto px-3 py-3 space-y-0.5 text-[15px]"></nav>
-  <div class="px-4 py-3 border-t border-slate-100" style="padding-bottom:max(.75rem,env(safe-area-inset-bottom,0px))">
-    <div class="text-[11px] font-semibold text-slate-500 mb-2">Language</div>
-    <div class="grid grid-cols-2 gap-1 bg-slate-100 rounded-xl p-1" role="group" aria-label="Language">
-      <button type="button" class="lb" data-lang="ar">🇸🇦 العربية</button>
-      <button type="button" class="lb" data-lang="en">🇬🇧 English</button>
-    </div>
-  </div>
-</aside>
-
-<div class="lg:ml-72 pb-24 lg:pb-8">
-  <!-- Header -->
-  <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-blue-100 px-3 sm:px-4 h-16 flex items-center gap-2 sm:gap-3">
-    <button id="burger" class="lg:hidden w-10 h-10 rounded-xl bg-blue-50 text-blue-700 text-xl" aria-label="Menu"></button>
-    <div class="min-w-0 flex-1 font-extrabold text-blue-700 text-lg tracking-tight truncate">layal folw</div>
-
-    <!-- Balance chip (يفتح Add funds) -->
-    <button id="balChip" class="shrink-0 flex items-center gap-1.5 h-10 pl-2.5 pr-3 rounded-full bg-blue-50 text-blue-800 text-sm font-bold hover:bg-blue-100 active:scale-95 transition" dir="ltr" aria-label="Account balance">
-      <span id="hIc"></span><span>$<span id="hBal">0.00</span></span>
-    </button>
-
-    <!-- Profile -->
-    <div class="relative shrink-0">
-      <button id="avatarBtn" class="flex items-center gap-2 rounded-full p-0.5 pr-0.5 md:pr-3 hover:bg-slate-100 active:scale-95 transition" aria-haspopup="menu" aria-expanded="false" aria-label="Profile menu">
-        <span id="avInit" class="overflow-hidden w-10 h-10 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-sm font-bold ring-2 ring-white shadow">G</span>
-        <span class="hidden md:block text-left leading-tight max-w-[140px]"><span id="hName" class="block text-sm font-semibold truncate" dir="auto">Guest</span><span id="hRole" class="block text-[11px] text-slate-500">Customer</span></span>
-      </button>
-      <div id="pmenu" class="pm hidden absolute right-0 top-12 w-60 rounded-2xl bg-white border border-blue-100 shadow-xl shadow-blue-900/10 p-1.5" role="menu">
-        <div class="px-3 py-2.5 border-b border-slate-100 mb-1 flex items-center gap-3">
-          <span id="pmAv" class="overflow-hidden w-10 h-10 shrink-0 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-sm font-bold">G</span>
-          <div class="min-w-0"><div id="pmName" class="text-sm font-bold truncate" dir="auto">Guest</div>
-          <div id="pmMail" class="text-xs text-slate-500 truncate" dir="ltr"></div>
-          <div id="pmId" class="text-[11px] font-semibold text-blue-600" dir="ltr"></div></div>
-        </div>
-        <button id="pmProfile" role="menuitem" class="w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-blue-50 active:scale-95 transition"><span id="pmUser"></span>الملف الشخصي</button>
-        <button id="logout" role="menuitem" class="w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 active:scale-95 transition"><span id="pmOut"></span>تسجيل الخروج</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="p-4 md:p-6 max-w-5xl mx-auto flex flex-col gap-5">
-    <!-- Top cards -->
-    <section id="welcome" class="relative overflow-hidden rounded-3xl text-white bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 shadow-xl shadow-blue-600/20 p-5 sm:p-6">
-      <span class="pointer-events-none absolute -right-10 -top-12 w-44 h-44 rounded-full bg-white/10"></span>
-      <span class="pointer-events-none absolute right-16 -bottom-16 w-40 h-40 rounded-full bg-white/10"></span>
-      <button id="wClose" type="button" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition grid place-items-center" aria-label="Dismiss"></button>
-      <div class="relative pr-9">
-        <div class="text-xs font-semibold tracking-wide text-blue-100/90 uppercase">Welcome back</div>
-        <div class="mt-1 flex items-baseline gap-1.5 min-w-0 text-2xl sm:text-3xl font-extrabold leading-tight"><span class="shrink-0 text-base sm:text-lg font-semibold opacity-90">Hello,</span><span id="uname" class="truncate" dir="auto">Guest</span></div>
-        <p class="mt-1.5 text-sm text-blue-50/90 max-w-md">اشحن رصيدك وابدأ طلبك الأول في ثوانٍ.</p>
-        <div class="mt-4 flex flex-wrap gap-2">
-          <button id="wFunds" type="button" class="h-10 px-5 rounded-full bg-white text-blue-700 text-sm font-bold hover:bg-blue-50 active:scale-95 transition shadow">Add funds</button>
-          <button id="wOrder" type="button" class="h-10 px-5 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-semibold active:scale-95 transition">New order</button>
-        </div>
-      </div>
-    </section>
-
-    <section id="balCards" class="flex gap-2.5 sm:gap-4">
-      <div class="neo">
-        <div class="flex items-start justify-between gap-2">
-          <span class="neo-lbl">Account balance</span>
-          <button id="plusBtn" type="button" class="neo-plus" aria-label="Add funds"></button>
-        </div>
-        <div class="neo-amt"><span dir="ltr" style="unicode-bidi:isolate">$<span id="cBal">0.00</span></span></div>
-      </div>
-      <div class="neo">
-        <div class="flex items-start justify-between gap-2">
-          <span class="neo-lbl">Spent balance</span>
-          <span class="neo-well" id="wSpent"></span>
-        </div>
-        <div class="neo-amt sp"><span dir="ltr" style="unicode-bidi:isolate">$<span id="cSpent">0.00</span></span></div>
-      </div>
-    </section>
-
-    <!-- Platform filter -->
-    <section id="platWrap">
-      <div id="plat"></div>
-    </section>
-
-    <!-- New order -->
-    <section id="sec0" class="sec bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h1 class="text-lg font-extrabold mb-4 text-blue-800">New order</h1>
-      <form id="of" class="space-y-4" novalidate>
-        <input id="q" class="fld" placeholder="Search services…" type="search">
-        <div><label class="block text-sm font-semibold mb-1.5" for="cat">Category</label><select id="cat" class="fld"></select></div>
-        <div><label class="block text-sm font-semibold mb-1.5" for="srv">Service</label><select id="srv" class="fld"></select></div>
-
-        <div class="rounded-xl bg-blue-50 border border-blue-100 p-4 text-sm leading-6">
-          <div class="font-bold text-blue-800 mb-1">Description</div>
-          <div id="desc" class="whitespace-pre-line text-slate-700"></div>
-          <div class="font-bold text-blue-800 mt-3 mb-1">Terms</div>
-          <ul class="list-disc ps-5 text-slate-600">
-            <li>تأكد أن الحساب أو الرابط عام وليس خاصاً.</li>
-            <li>لا ترسل أكثر من طلب لنفس الرابط قبل اكتمال الأول.</li>
-            <li>لا يمكن إلغاء الطلب بعد بدء التنفيذ.</li>
-          </ul>
-        </div>
-
-        <div><label class="block text-sm font-semibold mb-1.5" for="link">Link</label><input id="link" class="fld" dir="ltr" inputmode="url" placeholder="https://"></div>
-        <div>
-          <label class="block text-sm font-semibold mb-1.5" for="qty">Quantity <span id="range" class="text-slate-400 font-normal text-xs"></span></label>
-          <input id="qty" class="fld" type="number" inputmode="numeric" placeholder="1000">
-        </div>
-        <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-          <span class="text-sm text-slate-500">Charge</span>
-          <span class="text-xl font-extrabold text-blue-700" dir="ltr">$<span id="charge">0.00</span></span>
-        </div>
-        <p id="msg" class="min-h-[20px] text-sm text-red-500"></p>
-        <button id="sendBtn" type="submit" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">Submit order</button>
-      </form>
-    </section>
-
-    <section id="sec1" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-blue-800">Services</h2><div id="svcList" class="space-y-3"></div></section>
-
-    <section id="sec2" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-blue-800">Orders</h2><div id="ordList" class="space-y-3"></div></section>
-
-    <section id="sec3" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-4 text-blue-800">Add funds</h2>
-
-      <div class="text-sm font-semibold mb-2">Payment method</div>
-      <div id="methods" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5" role="radiogroup">
-        <button type="button" data-m="card" role="radio" class="mth text-left rounded-xl border-2 p-3.5 transition">
-          <div class="flex items-center gap-2 font-bold text-sm"><span id="icCard"></span>Credit / Debit Card</div>
-          <div class="flex items-center gap-1.5 mt-2.5">
-            <svg width="40" height="26" viewBox="0 0 40 26" aria-label="Visa"><rect width="40" height="26" rx="4" fill="#1a1f71"/><text x="20" y="18" text-anchor="middle" font-family="Arial" font-style="italic" font-weight="800" font-size="12" fill="#fff">VISA</text></svg>
-            <svg width="40" height="26" viewBox="0 0 40 26" aria-label="Mastercard"><rect width="40" height="26" rx="4" fill="#fff" stroke="#e2e8f0"/><circle cx="16" cy="13" r="7" fill="#eb001b"/><circle cx="24" cy="13" r="7" fill="#f79e1b" fill-opacity=".9"/></svg>
-          </div>
-        </button>
-        <button type="button" data-m="gpay" role="radio" class="mth text-left rounded-xl border-2 p-3.5 transition">
-          <div class="flex items-center gap-2 font-bold text-sm"><span id="icWallet"></span>Google Pay</div>
-          <div class="flex items-center gap-1.5 mt-2.5">
-            <svg width="52" height="26" viewBox="0 0 52 26" aria-label="Google Pay"><rect width="52" height="26" rx="4" fill="#fff" stroke="#e2e8f0"/><text x="26" y="17.5" text-anchor="middle" font-family="Arial" font-weight="700" font-size="11" fill="#3c4043"><tspan fill="#4285f4">G</tspan> Pay</text></svg>
-          </div>
-        </button>
-        <button type="button" data-m="crypto" role="radio" class="mth text-left rounded-xl border-2 p-3.5 transition">
-          <div class="flex items-center gap-2 font-bold text-sm"><span id="icCoin"></span>Cryptocurrency</div>
-          <div class="flex items-center gap-1.5 mt-2.5 text-[11px] font-bold">
-            <span class="px-2 h-[26px] grid place-items-center rounded bg-emerald-500 text-white">USDT</span>
-            <span class="px-2 h-[26px] grid place-items-center rounded bg-orange-500 text-white">BTC</span>
-            <span class="px-2 h-[26px] grid place-items-center rounded bg-slate-700 text-white">ETH</span>
-          </div>
-        </button>
-      </div>
-
-      <div class="text-sm font-semibold mb-2">Amount (USD)</div>
-      <div class="grid grid-cols-4 gap-2 mb-3" id="presets"></div>
-      <input id="fund" class="fld mb-4" type="number" inputmode="decimal" min="1" placeholder="Custom amount">
-
-      <p id="payMsg" class="min-h-[20px] text-sm text-amber-600 mb-2"></p>
-      <button id="payBtn" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25">Continue to payment</button>
-
-      <div class="mt-4 flex items-start gap-2.5 rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs leading-5 text-emerald-800">
-        <span id="icLock" class="mt-0.5 shrink-0"></span>
-        <span>الدفع يتم عبر صفحة آمنة ومشفّرة (SSL/TLS) لدى بوابة الدفع. لا نرى بيانات بطاقتك ولا نخزّنها على خوادمنا.</span>
-      </div>
-    </section>
-
-    <section id="sec4" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-4 text-blue-800">Tickets</h2>
-      <form id="tf" class="space-y-3"><input id="tsub" class="fld" placeholder="Subject"><textarea id="tmsg" rows="4" class="fld" placeholder="Message"></textarea>
-      <button class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold">Send ticket</button></form>
-    </section>
-
-    <section id="sec5" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-3 text-blue-800">API</h2>
-      <div class="text-sm text-slate-500 mb-1">API URL</div><div class="rounded-xl bg-slate-50 border p-3 text-sm break-all" dir="ltr">https://your-domain.com/api/v2</div>
-      <p class="text-xs text-slate-500 mt-3">يتم توليد مفتاح الـAPI من الخادم لكل مستخدم.</p>
-    </section>
-
-    <section id="sec6" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-3 text-blue-800">Affiliates</h2>
-      <div class="text-sm text-slate-500 mb-1">Your referral link</div>
-      <div class="flex gap-2"><input id="ref" class="fld" dir="ltr" readonly><button id="copyRef" class="px-5 rounded-xl bg-blue-600 text-white font-semibold">Copy</button></div>
-    </section>
-
-    <section id="sec7" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-4 text-blue-800">Account</h2>
-      <div class="flex items-center gap-4 mb-5 pb-5 border-b border-slate-100">
-        <div class="relative shrink-0">
-          <div id="accAv" class="overflow-hidden w-24 h-24 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-3xl font-bold ring-4 ring-blue-50">G</div>
-          <button id="camBtn" type="button" class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Upload photo"></button>
-        </div>
-        <div class="min-w-0 flex-1">
-          <div class="font-bold text-sm">Profile photo</div>
-          <div class="text-xs text-slate-500 mb-2.5">JPG أو PNG حتى 5MB. تُقصّ الصورة إلى مربع تلقائياً.</div>
-          <input id="avFile" type="file" accept="image/*" class="hidden">
-          <button id="upBtn" type="button" class="h-9 px-4 rounded-lg border border-blue-200 text-blue-700 text-sm font-semibold hover:bg-blue-50 active:scale-95 transition">Upload photo</button>
-          <div id="avActs" class="hidden flex gap-2">
-            <button id="avSave" type="button" class="h-9 px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold active:scale-95 transition">Save</button>
-            <button id="avCancel" type="button" class="h-9 px-4 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold active:scale-95 transition">Cancel</button>
-          </div>
-        </div>
-      </div>
-      <dl class="text-sm divide-y divide-slate-100">
-        <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500">Name</dt><dd id="accName" class="font-semibold truncate" dir="auto"></dd></div>
-        <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500">Email</dt><dd id="accMail" class="font-semibold truncate" dir="ltr"></dd></div>
-        <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500">User ID</dt><dd id="accUid" class="font-mono text-xs truncate" dir="ltr"></dd></div>
-      </dl>
-      <button id="logout2" class="mt-4 w-full h-12 rounded-xl border border-red-200 text-red-600 font-bold hover:bg-red-50">Logout</button>
-    </section>
-
-    <section id="sec8" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-1 text-blue-800">Child Panel</h2>
-      <p class="text-sm text-slate-500 mb-4">Resell our services under your own domain with your own prices.</p>
-      <div class="space-y-3">
-        <input id="cpDom" class="fld" dir="ltr" placeholder="yourpanel.com">
-        <button id="cpBtn" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold">Request child panel</button>
-      </div>
-    </section>
-
-    <section id="sec9" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-1 text-blue-800">Mass order</h2>
-      <p class="text-sm text-slate-500 mb-3">One order per line: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs" dir="ltr">service_id | link | quantity</code></p>
-      <form id="mf" class="space-y-3" novalidate>
-        <textarea id="mTxt" rows="6" dir="ltr" class="fld font-mono text-sm" placeholder="101 | https://t.me/channel | 1000"></textarea>
-        <p id="mMsg" class="min-h-[20px] text-sm text-red-500"></p>
-        <button class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold">Submit orders</button>
-      </form>
-    </section>
-
-    <section id="sec10" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-3 text-blue-800">FAQ</h2>
-      <div class="divide-y divide-slate-100 text-sm">
-        <details class="py-3"><summary class="font-semibold cursor-pointer">How long until my order starts?</summary><p class="mt-2 text-slate-500">Most services start within minutes to a few hours. See the service description for details.</p></details>
-        <details class="py-3"><summary class="font-semibold cursor-pointer">Can I cancel an order?</summary><p class="mt-2 text-slate-500">Orders cannot be cancelled once processing has started.</p></details>
-        <details class="py-3"><summary class="font-semibold cursor-pointer">Does my account need to be public?</summary><p class="mt-2 text-slate-500">Yes. Private accounts or links cannot be processed.</p></details>
-        <details class="py-3"><summary class="font-semibold cursor-pointer">How do I add funds?</summary><p class="mt-2 text-slate-500">Open Add funds, choose an amount and a payment method.</p></details>
-      </div>
-    </section>
-
-    <section id="sec11" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-3 text-blue-800">Terms</h2>
-      <ul class="list-disc ps-5 space-y-2 text-sm text-slate-600">
-        <li>Results can vary; delivery times are estimates, not guarantees.</li>
-        <li>Do not place multiple orders for the same link until the first is complete.</li>
-        <li>Payments are non-refundable once an order has started.</li>
-        <li>You are responsible for complying with the rules of each platform you use.</li>
-      </ul>
-    </section>
-  </main>
-</div>
-
-<!-- Bottom nav (mobile) -->
-<nav id="bnav" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-blue-100 safe-b grid grid-cols-4 shadow-[0_-4px_20px_rgba(37,99,235,.08)]"></nav>
-
-<div id="okM" class="hidden fixed inset-0 z-[60] grid place-items-center p-4 bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="okT">
-  <div class="okcard w-full max-w-sm rounded-3xl p-6 text-slate-100" style="background:#0f172a;border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 80px rgba(0,0,0,.6)">
-    <div class="mx-auto mb-4 w-20 h-20 rounded-full grid place-items-center" style="background:rgba(16,185,129,.15);box-shadow:0 0 0 8px rgba(16,185,129,.08),0 0 30px rgba(16,185,129,.35)">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="okck" d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-    </div>
-    <h2 id="okT" class="text-center text-xl font-extrabold">Order created successfully! 🎉</h2>
-    <dl class="mt-5 rounded-2xl p-4 space-y-3 text-sm" style="background:#0b1220;border:1px solid rgba(255,255,255,.06)">
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Order ID</dt><dd id="okId" data-notr class="font-semibold text-white text-end min-w-0 tracking-wide"></dd></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Service</dt><dd id="okSvc" data-notr class="font-semibold text-white text-end min-w-0 "></dd></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Link</dt><dd id="okLink" data-notr class="font-semibold text-white text-end min-w-0 break-all text-xs"></dd></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Quantity</dt><dd id="okQty" data-notr class="font-semibold text-white text-end min-w-0 "></dd></div>
-      <div class="h-px" style="background:rgba(255,255,255,.08)"></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Total cost</dt><dd id="okCost" data-notr class="font-semibold text-white text-end min-w-0 text-amber-300"></dd></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Remaining balance</dt><dd id="okBal" data-notr class="font-semibold text-white text-end min-w-0 text-emerald-400"></dd></div>
-    </dl>
-    <div class="mt-5 grid gap-2.5">
-      <button id="okView" type="button" class="h-12 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/30">View orders</button>
-      <button id="okClose" type="button" class="h-11 rounded-xl text-slate-300 hover:bg-white/5 transition font-semibold text-sm">Close</button>
-    </div>
-  </div>
-</div>
-<div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-50 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-full shadow-xl"></div>
-
-<script>
-function bootFail(msg){            // يُستدعى عند فشل تحميل Firebase أو انتهاء المهلة
-  const m=document.getElementById("bootMsg"),b=document.getElementById("bootBtns"),s=document.getElementById("bootSpin");
-  if(!m||window.__authDone)return;
-  s.style.display="none";b.style.display="flex";
-  m.textContent=msg||"تعذّر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة. / Could not connect. Check your connection and try again.";
-}
-function bootDone(){const e=document.getElementById("boot");if(e)e.remove()}
-const $=s=>document.querySelector(s);
-/* ---- بيانات تجريبية: استبدلها ببيانات الخادم لاحقاً ---- */
-let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
-let SERVICES=[]; // تُحمَّل من /api/services بعد تسجيل الدخول
-const I=p=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
-const PLAT=[
- ["telegram","Telegram",I('<path d="M21 4 3 11l5 2 2 6 3-4 5 4z"/><path d="M8 13l9-6"/>')],
- ["instagram","Instagram",I('<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/>')],
- ["facebook","Facebook",I('<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>')],
- ["tiktok","TikTok",I('<path d="M14 3v12.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.4 2.6 2.1 4.2 5 4.4"/>')],
- ["x","X",I('<path d="M4 4l16 16M20 4 4 20"/>')],
- ["youtube","YouTube",I('<rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10 9.5v5l4.5-2.5z" fill="currentColor"/>')]
-];
-/* أيقونات Lucide (مضمّنة كـ SVG، لا تحتاج اتصالاً بأي CDN) */
-const LUCIDE={
- cart:'<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
- grid:'<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
- package:'<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
- wallet:'<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
- ticket:'<path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/>',
- code:'<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
- users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
- user:'<circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/>',
- menu:'<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',
- x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
- logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
- layers:'<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
- checks:'<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
- heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
- filetext:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
- filecheck:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/>',
- help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
- gear:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
- sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
- moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
- camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
- plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
- lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
- coins:'<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
- card:'<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>'
-};
-const ic=(n,sz=22,sw=2)=>`<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${LUCIDE[n]}</svg>`;
-const NAV=[["cart","New order"],["grid","Services"],["package","Orders"],["wallet","Add funds"],["ticket","Tickets"],["code","API"],["users","Affiliates"],["user","Account"]];
-
-/* ---- helpers ---- */
-const money=n=>n.toFixed(2);
-let plat="telegram", cur=null, toastT;
-const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.remove("hidden");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add("hidden"),2400)};
-let balLoading=true;                                   // حتى وصول أول قراءة من Firestore
-const balStr=()=>balLoading?"…":money(balance);
-const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=balStr();$("#cSpent").textContent=money(spent);$("#qBalTxt")&&($("#qBalTxt").textContent="$"+balStr())};
-function setBal(n,loading){balance=n;balLoading=!!loading;refresh()}        // يُستدعى من Firestore (onSnapshot)
-function balError(){toast("Could not load balance")}
-function idError(){toast("Could not set up your account ID")}
-function setNumericId(id){                              // معرّف الحساب الرقمي (الحقل userId)
-  numId=id;
-  $("#accUid").textContent=id==null?"—":String(id);
-  $("#ref").value=id==null?"":location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+id;
-  $("#hRole").textContent=id==null?"Customer":"ID #"+id;          // الهيدر
-  $("#sbRole").textContent=id==null?"Customer account":"ID #"+id; // القائمة الجانبية
-  $("#pmId").textContent=id==null?"":"ID #"+id;                   // القائمة المنسدلة
-}
-$("#uname").textContent=user;
-const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function fillAccount(u){                     // يُستدعى من Firebase بعد التحقق من الدخول
-  user=u.displayName||u.email||"User"; uid=u.uid; uemail=u.email||"";
-  $("#uname").textContent=user;$("#sbName").textContent=user;
-  const w=user.trim().split(/[\s@._-]+/).filter(Boolean);
-  ini=(w.length>1?w[0][0]+w[1][0]:user.trim().slice(0,2)).toUpperCase()||"G";
-  let saved="";try{saved=localStorage.getItem("lf_avatar_"+u.uid)||""}catch(e){}
-  applyAvatar(saved||u.photoURL||"");
-  $("#hName").textContent=user;$("#pmName").textContent=user;$("#pmMail").textContent=u.email||"";
-  $("#accName").textContent=u.displayName||"—";$("#accMail").textContent=u.email||"—";$("#accUid").textContent="…";
-}
-$("#hIc").innerHTML=ic("card",18);$("#pmUser").innerHTML=ic("user",18);$("#pmOut").innerHTML=ic("logout",18);$("#burger").innerHTML=ic("menu",22);$("#closeSb").innerHTML=ic("x",20);
-
-/* ---- nav (sidebar + bottom bar) ---- */
-const setNav=i=>{
-  document.querySelectorAll("[data-n]").forEach(el=>{
-    const on=+el.dataset.n===i;
-    if(el.closest("#nav"))el.className=`w-full flex items-center gap-3 h-11 px-3 rounded-xl text-left active:scale-[.98] transition ${on?"bg-blue-50 text-blue-700 font-semibold":"text-slate-600 font-medium hover:bg-slate-100"}`;
-    else{
-      el.className=`flex flex-col items-center justify-center gap-1 h-16 text-[11px] leading-none ${on?"text-blue-700 font-bold":"text-slate-500 font-medium"}`;
-      el.firstElementChild.className=`grid place-items-center w-14 h-8 rounded-full transition-colors ${on?"bg-blue-100 text-blue-700":""}`;
-      el.setAttribute("aria-current",on?"page":"false");
-    }
-  });
-};
-/* [section index, icon, label, badge] */
-const MENU=[[0,"cart","New order"],[8,"layers","Child Panel","new"],[9,"checks","Mass order"],[1,"heart","Services"],[2,"package","Orders"],[3,"card","Add funds"],[10,"help","FAQ"],[5,"code","API"],[4,"ticket","Tickets","tk"],[11,"filecheck","Terms"]];
-$("#nav").innerHTML=MENU.map(x=>`<button data-n="${x[0]}"><span class="shrink-0">${ic(x[1],20)}</span><span class="flex-1 text-left">${x[2]}</span>${x[3]==="tk"?'<span id="tkBadge" class="hidden min-w-[22px] h-[22px] px-1.5 rounded-full bg-orange-500 text-white text-xs font-bold place-items-center shadow-sm shadow-orange-500/30">0</span>':x[3]==="new"?'<span class="px-2 h-[22px] rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold grid place-items-center">NEW</span>':""}</button>`).join("");
-$("#bnav").innerHTML=[0,1,2,3].map(i=>`<button data-n="${i}"><span>${ic(NAV[i][0],24)}</span><span>${NAV[i][1]}</span></button>`).join("");
-function showSec(i){
-  tab=i;
-  for(let k=0;k<12;k++)$("#sec"+k).classList.toggle("hidden",k!==i);
-  $("#platWrap").classList.toggle("hidden",i>1);
-  $("#balCards").classList.toggle("hidden",i!==0);          // بطاقات الرصيد: الصفحة الرئيسية فقط
-  const wb=$("#welcome");if(wb)wb.classList.toggle("hidden",i!==0);   // بطاقة الترحيب: الصفحة الرئيسية فقط
-  const el=$("#sec"+i);el.classList.remove("sec");void el.offsetWidth;el.classList.add("sec");
-  if(i===1)drawServices();if(i===2)drawOrders();
-  setNav(i);window.scrollTo({top:0,behavior:"smooth"});
-}
-/* ---- Profile picture ---- */
-let ini="G", avUrl="", pend=null;
-function setAv(el,url){
-  el.textContent="";
-  if(url){const i=new Image();i.src=url;i.alt="";i.referrerPolicy="no-referrer";i.className="w-full h-full object-cover";el.appendChild(i)}
-  else el.textContent=ini;
-}
-function applyAvatar(url){avUrl=url;["#avInit","#pmAv","#accAv","#sbAv"].forEach(s=>setAv($(s),url))}
-$("#camBtn").innerHTML=ic("camera",18);
-const pickPhoto=()=>$("#avFile").click();
-$("#camBtn").onclick=$("#upBtn").onclick=pickPhoto;
-function prep(file){return new Promise((res,rej)=>{
-  const fr=new FileReader(),img=new Image();
-  fr.onload=()=>{img.onload=()=>{
-    const S=256,c=document.createElement("canvas");c.width=c.height=S;
-    const m=Math.min(img.width,img.height);
-    c.getContext("2d").drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,S,S);
-    c.toBlob(b=>b?res({blob:b,url:c.toDataURL("image/jpeg",.85)}):rej(),"image/jpeg",.85)};
-    img.onerror=rej;img.src=fr.result};
-  fr.onerror=rej;fr.readAsDataURL(file);
-})}
-const avUI=on=>{$("#avActs").classList.toggle("hidden",!on);$("#upBtn").classList.toggle("hidden",on)};
-$("#avFile").onchange=async e=>{
-  const f=e.target.files[0];if(!f)return;
-  if(!f.type.startsWith("image/"))return toast("اختر ملف صورة فقط");
-  if(f.size>5*1024*1024)return toast("الصورة أكبر من 5MB");
-  try{pend=await prep(f);setAv($("#accAv"),pend.url);avUI(true)}catch(err){toast("تعذّر قراءة الصورة")}
-};
-$("#avCancel").onclick=()=>{pend=null;$("#avFile").value="";setAv($("#accAv"),avUrl);avUI(false)};
-$("#avSave").onclick=()=>{
-  if(!pend)return;
-  const p=pend;pend=null;$("#avFile").value="";avUI(false);
-  try{localStorage.setItem("lf_avatar_"+uid,p.url);toast("✓ Photo saved")}   // حفظ دائم في المتصفح
-  catch(e){toast("Could not save the photo")}
-  applyAvatar(p.url);                                                         // تحديث فوري: الهيدر + القائمة + الحساب
-};
-/* ---- Welcome banner ---- */
-{
-  const wb=$("#welcome");
-  $("#wClose").innerHTML=ic("x",16);
-  try{if(sessionStorage.getItem("lf_welcome")==="0")wb.remove()}catch(e){}
-  $("#wClose").onclick=()=>{
-    wb.style.height=wb.offsetHeight+"px";void wb.offsetHeight;
-    wb.style.transition="height .28s ease,opacity .2s ease,padding .28s ease";
-    wb.style.height="0";wb.style.opacity="0";wb.style.paddingTop=wb.style.paddingBottom="0";
-    setTimeout(()=>wb.remove(),290);
-    try{sessionStorage.setItem("lf_welcome","0")}catch(e){}
-  };
-  $("#wFunds").onclick=()=>showSec(3);
-  $("#wOrder").onclick=()=>showSec(0);
-}
-/* ---- Drawer quick actions, theme, badges, new sections ---- */
-let tickets=0;
-function tkBadge(){const b=$("#tkBadge");if(!b)return;b.textContent=tickets;b.classList.toggle("hidden",!tickets);b.classList.toggle("grid",!!tickets)}
-$("#plusBtn").innerHTML=ic("plus",16,2.6);$("#plusBtn").onclick=()=>showSec(3);$("#wSpent").innerHTML=ic("card",16);$("#qiBal").innerHTML=ic("wallet",20);$("#qiSet").innerHTML=ic("gear",20);$("#qiOut").innerHTML=ic("logout",20);$("#sbCam").innerHTML=ic("camera",15);
-function setTheme(dark){
-  document.documentElement.classList.toggle("dark",dark);
-  $("#qiTheme").innerHTML=ic(dark?"sun":"moon",20);$("#qThemeTxt").textContent=dark?"Light":"Dark";
-  try{localStorage.setItem("lf_theme",dark?"dark":"light")}catch(e){}
-}
-{let t=null;try{t=localStorage.getItem("lf_theme")}catch(e){}
- setTheme(t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches)}
-$("#qTheme").onclick=()=>setTheme(!document.documentElement.classList.contains("dark"));
-$("#qBal").onclick=()=>{openSb(false);showSec(3)};
-$("#qSet").onclick=()=>{openSb(false);showSec(7)};
-$("#sbCam").onclick=()=>{openSb(false);showSec(7)};
-$("#cpBtn").onclick=()=>{const v=$("#cpDom").value.trim();toast(/^[\w.-]+\.\w{2,}$/.test(v)?"✓ Request sent (demo)":"Enter a valid domain")};
-
-/* ---- اتصال آمن بالخادم: الخدمات والطلبات ---- */
-const ORDER_ERR={insufficient_balance:"رصيدك غير كافٍ. اشحن رصيدك أولاً.",invalid_link:"أدخل رابطاً صحيحاً يبدأ بـ https://",invalid_quantity:"الكمية غير صحيحة.",unknown_service:"الخدمة غير متاحة.",unauthorized:"انتهت الجلسة. أعد تسجيل الدخول.",provider_error:"تعذّر تنفيذ الطلب لدى المزوّد. أُعيد رصيدك.",services_unavailable:"الخدمات غير متاحة حالياً. حاول لاحقاً."};
-const platOf=s=>{const t=(s.category+" "+s.name).toLowerCase();return /telegram/.test(t)?"telegram":/instagram/.test(t)?"instagram":/facebook/.test(t)?"facebook":/tiktok/.test(t)?"tiktok":/youtube/.test(t)?"youtube":/twitter|\bx\b/.test(t)?"x":"other"};
-async function loadServices(){
-  try{
-    const tk=await window.__getToken();
-    const r=await fetch("/api/services",{headers:{Authorization:"Bearer "+tk}});
-    if(!r.ok)throw 0;
-    SERVICES=(await r.json()).map(s=>({id:s.id,p:platOf(s),c:s.category,n:s.name,r:s.rate,min:s.min,max:s.max,d:""}));
-    drawCats();if(tab===1)drawServices();
-  }catch(e){toast("تعذّر تحميل الخدمات")}
-}
-async function placeOrder(service,link,quantity){
-  try{
-    const tk=await window.__getToken();
-    const r=await fetch("/api/create-order",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+tk},body:JSON.stringify({service,link,quantity})});
-    const d=await r.json().catch(()=>({}));
-    if(!r.ok)return{ok:false,msg:ORDER_ERR[d.error]||"تعذّر إنشاء الطلب. حاول مرة أخرى."};
-    return{ok:true,data:d};
-  }catch(e){return{ok:false,msg:"تعذّر الاتصال بالخادم."}}
-}
-function setSpent(n){spent=n;refresh()}
-function setOrders(a){ORDERS=a;drawOrders()}   // يُستدعى من Firestore (onSnapshot)
-$("#mf").onsubmit=async e=>{
-  e.preventDefault();
-  const f=$("#mf"),m=$("#mMsg");
-  if(f.classList.contains("busy"))return;
-  m.textContent="";
-  const rows=$("#mTxt").value.split("\n").map(s=>s.trim()).filter(Boolean);
-  if(!rows.length)return m.textContent="Add at least one line: service_id | link | quantity";
-  let total=0;const jobs=[];
-  for(let i=0;i<rows.length;i++){
-    const [id,link,q]=rows[i].split("|").map(x=>x.trim()),s=SERVICES.find(x=>x.id===+id),n=+q;
-    if(!s)return m.textContent=`Line ${i+1}: unknown service ID`;
-    if(!/^https?:\/\/\S+\.\S+/.test(link||""))return m.textContent=`Line ${i+1}: invalid link`;
-    if(!Number.isInteger(n)||n<s.min||n>s.max)return m.textContent=`Line ${i+1}: quantity must be ${s.min}–${s.max}`;
-    total+=n*s.r/1000;jobs.push({s,link,n});
+  // تحميل الاعتمادات هنا (وليس أعلى الملف) كي يظهر أي خطأ تهيئة داخل الرد
+  // مثل: Cannot find module / FIREBASE_SERVICE_ACCOUNT غير صالح / JAP_API_KEY ناقص
+  let admin, db, auth, jap, getServices;
+  try {
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT) throw new Error("Missing env FIREBASE_SERVICE_ACCOUNT");
+    if (!process.env.JAP_API_KEY) throw new Error("Missing env JAP_API_KEY");
+    ({ admin, db, auth } = require("../lib/firebase"));
+    ({ jap, getServices } = require("../lib/jap"));
+  } catch (e) {
+    console.error("init_failed", e);
+    return res.status(500).json({ error: "init_failed", detail: errText(e) });
   }
-  if(total>balance)return m.textContent="Insufficient balance. Please add funds first.";
-  f.classList.add("busy");let ok=0;
-  for(const o of jobs){
-    const r=await placeOrder(o.s.id,o.link,o.n);
-    if(!r.ok){m.textContent=`Line ${ok+1}: ${r.msg}`;break}
-    ok++;
+  const FV = admin.firestore.FieldValue;
+
+  // 1) المستخدم
+  let uid;
+  try {
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "unauthorized", detail: "Missing Authorization header" });
+    uid = (await auth.verifyIdToken(token)).uid;
+  } catch (e) {
+    console.error("auth failed", e);
+    return res.status(401).json({ error: "unauthorized", detail: errText(e) });
   }
-  f.classList.remove("busy");
-  if(ok){$("#mTxt").value=rows.slice(ok).join("\n");toast(`✓ ${ok} order(s) created`)}
-};
-const pm=$("#pmenu"),ab=$("#avatarBtn");
-const pmOpen=o=>{pm.classList.toggle("hidden",!o);ab.setAttribute("aria-expanded",o)};
-ab.onclick=e=>{e.stopPropagation();pmOpen(pm.classList.contains("hidden"))};
-document.addEventListener("click",e=>{if(!pm.contains(e.target))pmOpen(false)});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")pmOpen(false)});
-$("#pmProfile").onclick=()=>{pmOpen(false);showSec(7)};
-$("#logout").addEventListener("click",()=>pmOpen(false));
-$("#balChip").onclick=()=>showSec(3);
-const openSb=o=>{$("#sb").classList.toggle("-translate-x-full",!o);$("#scrim").classList.toggle("on",o);document.body.style.overflow=o?"hidden":""};
-document.addEventListener("click",e=>{
-  const b=e.target.closest("[data-n]"); if(!b)return;
-  const i=+b.dataset.n; setNav(i); openSb(false);
-  showSec(i);
-});
-setNav(0);
-$("#burger").onclick=()=>openSb(true);
-$("#closeSb").onclick=$("#scrim").onclick=()=>openSb(false);
 
-/* ---- platform chips ---- */
-function drawPlat(){
-  $("#plat").innerHTML=PLAT.map(x=>`<button data-p="${x[0]}" class="pchip${plat===x[0]?" on":""}" aria-pressed="${plat===x[0]}">${x[2]}<span>${x[1]}</span></button>`).join("");
-}
-$("#plat").onclick=e=>{const b=e.target.closest("[data-p]");if(!b)return;plat=b.dataset.p;drawPlat();drawCats();if(tab===1)drawServices()};
-drawPlat();
+  // 2) التحقق من المدخلات + السعر من قائمة المزوّد
+  const body = req.body || {};
+  const serviceId = Number(body.service);
+  const quantity = Number(body.quantity);
+  const link = String(body.link || "").trim();
 
-/* ---- order form ---- */
-const filtered=()=>{
-  const q=$("#q").value.trim().toLowerCase();
-  return SERVICES.filter(s=>(plat==="all"||s.p===plat)&&(!q||(s.n+" "+s.c+" "+s.id).toLowerCase().includes(q)));
-};
-function drawCats(){
-  const cats=[...new Set(filtered().map(s=>s.c))];
-  $("#cat").innerHTML=cats.length?cats.map(c=>`<option>${c}</option>`).join(""):`<option value="">لا توجد نتائج</option>`;
-  drawSrv();
-}
-function drawSrv(){
-  const list=filtered().filter(s=>s.c===$("#cat").value);
-  $("#srv").innerHTML=list.length?list.map(s=>`<option value="${s.id}">${s.id} – ${s.n} – $${s.r.toFixed(2)}/1K</option>`).join(""):`<option value="">—</option>`;
-  pick();
-}
-function pick(){
-  cur=SERVICES.find(s=>s.id===+$("#srv").value)||null;
-  $("#desc").textContent=cur?cur.d:"اختر خدمة لعرض الوصف.";
-  $("#range").textContent=cur?`(min ${cur.min} – max ${cur.max})`:"";
-  calc();
-}
-function calc(){
-  const n=+$("#qty").value||0;
-  $("#charge").textContent=cur?money(n*cur.r/1000):"0.00";
-}
-$("#q").oninput=drawCats;$("#cat").onchange=drawSrv;$("#srv").onchange=pick;$("#qty").oninput=calc;
-
-let sending=false;
-const fmtUsd=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4});
-function showOrderOk(o){
-  $("#okT").textContent=o.status==="review"?"Order received and under review":"Order created successfully! 🎉";
-  $("#okId").textContent="#"+String(o.id).slice(0,6).toUpperCase();
-  $("#okSvc").textContent=o.svc;$("#okLink").textContent=o.link;$("#okLink").dir="ltr";
-  $("#okQty").textContent=Number(o.qty).toLocaleString("en-US");
-  $("#okCost").textContent=fmtUsd(o.cost);$("#okBal").textContent=fmtUsd(Math.max(0,o.bal));
-  $("#okM").classList.remove("hidden");document.body.style.overflow="hidden";$("#okView").focus();
-}
-const closeOk=()=>{$("#okM").classList.add("hidden");document.body.style.overflow=""};
-$("#okClose").onclick=closeOk;
-$("#okM").addEventListener("click",e=>{if(e.target.id==="okM")closeOk()});
-$("#okView").onclick=()=>{closeOk();setNav(2);showSec(2)};
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#okM").classList.contains("hidden"))closeOk()});
-
-$("#of").onsubmit=async e=>{
-  e.preventDefault();
-  if(sending)return;
-  const err=m=>$("#msg").textContent=m, link=$("#link").value.trim(), n=+$("#qty").value, svc=cur;
-  err("");
-  if(!svc)return err("اختر خدمة أولاً.");
-  if(!/^https?:\/\/\S+\.\S+/.test(link))return err("أدخل رابطاً صحيحاً يبدأ بـ https://");
-  if(!Number.isInteger(n)||n<svc.min||n>svc.max)return err(`الكمية يجب أن تكون بين ${svc.min} و ${svc.max}.`);
-  if(n*svc.r/1000>balance)return err("رصيدك غير كافٍ. اشحن رصيدك أولاً.");
-  /* استجابة فورية: نعطّل الزر ونُظهر المؤشر قبل أي await */
-  sending=true;
-  const btn=$("#sendBtn"),html=btn.innerHTML;
-  btn.disabled=true;btn.setAttribute("aria-busy","true");
-  btn.innerHTML='<span class="btnspin"></span><span>Sending…</span>';
-  try{
-    const r=await placeOrder(svc.id,link,n);
-    if(!r.ok)return err(r.msg);
-    const d=r.data,cost=d.cost!=null?d.cost:n*svc.r/1000,bal=d.balance!=null?d.balance:balance-cost;
-    $("#link").value="";$("#qty").value="";calc();   // تفريغ النموذج
-    showOrderOk({id:d.id,status:d.status,svc:svc.n,link,qty:n,cost,bal});
-  }finally{
-    sending=false;btn.disabled=false;btn.removeAttribute("aria-busy");btn.innerHTML=html;
+  try {
+    const u = new URL(link);
+    if (!/^https?:$/.test(u.protocol) || link.length > 500) throw new Error("bad protocol or too long");
+  } catch (e) {
+    return res.status(400).json({ error: "invalid_link", detail: errText(e) });
   }
-};
 
-function drawServices(){
-  const l=SERVICES.filter(s=>plat==="all"||s.p===plat).slice(0,300);
-  $("#svcList").innerHTML=l.map(s=>`<div class="rounded-xl border border-blue-100 p-3 flex items-center gap-3"><div class="flex-1 min-w-0"><div class="font-semibold text-sm truncate">${s.id} · ${esc(s.n)}</div><div class="text-xs text-slate-500">${esc(s.c)} · min ${s.min} – max ${s.max}</div></div><div class="text-blue-700 font-bold text-sm" dir="ltr">$${s.r.toFixed(2)}/1K</div><button data-pick="${s.id}" class="h-9 px-3 rounded-lg bg-blue-600 text-white text-xs font-semibold">Order</button></div>`).join("")||'<p class="text-slate-500 text-sm">لا توجد خدمات.</p>';
-}
-$("#svcList").onclick=e=>{
-  const b=e.target.closest("[data-pick]");if(!b)return;
-  const s=SERVICES.find(x=>x.id===+b.dataset.pick);
-  plat=s.p;$("#q").value="";drawPlat();drawCats();$("#cat").value=s.c;drawSrv();$("#srv").value=s.id;pick();showSec(0);
-};
-const ST={pending:["Pending","bg-amber-100 text-amber-700"],processing:["Processing","bg-blue-100 text-blue-700"],review:["Under review","bg-violet-100 text-violet-700"],failed:["Failed (refunded)","bg-red-100 text-red-700"]};
-function drawOrders(){
-  $("#ordList").innerHTML=ORDERS.map(o=>{const st=ST[o.status]||ST.pending;return `<div class="rounded-xl border border-blue-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="text-xs px-2 py-0.5 rounded-full ${st[1]}">${st[0]}</span></div><div class="mt-1 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div><div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
-}
-/* ---- Add funds: Card (Stripe Checkout) / Crypto ---- */
-/* ضع هنا رابط الخادم الذي ينشئ جلسة الدفع. يستقبل {amount, method} ويرجع {url} */
-const stripe = typeof Stripe!=="undefined" ? Stripe('pk_live_51SiumcEhUQAuIFHKiDW0umETBNa4rgWlbwg6hzt5OpGx3FXXKgXRfVhzUWg1X4b8UKsgM64j7BXMZ9iN5kwNYN6Q00YVDICxKg') : null;
-/* روابط الدفع من Stripe (Payment Links): أنشئ رابطاً لكل مبلغ من لوحة Stripe ثم الصقه هنا.
-   لا حاجة لخادم. الرابط الذي يبدأ بـ https://buy.stripe.com/... */
-const PAYMENT_LINKS = {
-  5:  "",
-  10: "",
-  25: "",
-  50: ""
-};
-let uemail="";
-let method="card";
-$("#icCard").innerHTML=ic("card",20);$("#icCoin").innerHTML=ic("coins",20);$("#icWallet").innerHTML=ic("wallet",20);$("#icLock").innerHTML=ic("lock",16);
-function drawMethods(){
-  document.querySelectorAll(".mth").forEach(b=>{
-    const on=b.dataset.m===method;
-    b.className="mth text-left rounded-xl border-2 p-3.5 transition "+(on?"border-blue-600 bg-blue-50":"border-slate-200 hover:border-blue-300");
-    b.setAttribute("aria-checked",on);
-  });
-}
-$("#methods").onclick=e=>{const b=e.target.closest("[data-m]");if(b){method=b.dataset.m;drawMethods()}};
-drawMethods();
-$("#presets").innerHTML=[5,10,25,50].map(v=>`<button type="button" data-v="${v}" class="h-11 rounded-xl border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">$${v}</button>`).join("");
-$("#presets").onclick=e=>{const b=e.target.closest("[data-v]");if(b){$("#fund").value=b.dataset.v;$("#payMsg").textContent=""}};
-$("#payBtn").onclick=()=>{
-  const m=$("#payMsg"),amount=+$("#fund").value;
-  m.textContent="";
-  if(method==="crypto")return m.textContent="الدفع بالعملات الرقمية سيتوفر قريباً. اختر البطاقة أو Google Pay.";
-  if(!amount)return m.textContent="اختر مبلغاً: $5 أو $10 أو $25 أو $50.";
-  const link=PAYMENT_LINKS[amount];
-  if(!link)return m.textContent="اختر أحد المبالغ الجاهزة ($5, $10, $25, $50).";
-  const u=new URL(link);                                   // تحويل مباشر إلى صفحة Stripe الآمنة
-  if(uid)u.searchParams.set("client_reference_id",uid);   // UID = معرّف مستند users/{uid}   // لربط الدفعة بالمستخدم
-  if(uemail)u.searchParams.set("prefilled_email",uemail);
-  location.href=u.toString();
-};
-{const p=new URLSearchParams(location.search).get("paid");     // العودة من صفحة الدفع
- if(p==="success")setTimeout(()=>toast("✓ تم الدفع. سيُضاف الرصيد خلال لحظات"),600);
- if(p==="cancel")setTimeout(()=>toast("تم إلغاء الدفع"),600);}
-$("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg").value.trim())return toast("أكمل الموضوع والرسالة");e.target.reset();tickets++;tkBadge();toast("✓ Ticket sent (demo)")};
-$("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
-/* ================= i18n (AR / EN) ================= */
-const PAIRS=[
-["Order created successfully! 🎉","تم إنشاء الطلب بنجاح! 🎉"],["Order received and under review","تم استلام الطلب وهو قيد المراجعة"],["Order ID","معرّف الطلب"],["Total cost","التكلفة الإجمالية"],["Remaining balance","الرصيد المتبقي"],["View orders","عرض الطلبات"],["Close","إغلاق"],["Sending…","جاري الإرسال…"],
-["Customer","عميل"],["Customer account","حساب عميل"],["Guest","ضيف"],["Welcome","مرحباً"],["Hello,","مرحباً،"],["Welcome back","أهلاً بعودتك"],
-["Profile","الملف الشخصي"],["Logout","تسجيل الخروج"],["Settings","الإعدادات"],["Dark","داكن"],["Light","فاتح"],["Language","اللغة"],
-["New order","طلب جديد"],["Child Panel","لوحة فرعية"],["NEW","جديد"],["Mass order","طلب جماعي"],["Services","الخدمات"],["Orders","الطلبات"],["Add funds","شحن الرصيد"],["FAQ","الأسئلة الشائعة"],["Tickets","التذاكر"],["Terms","الشروط"],["More","المزيد"],["Account","الحساب"],
-["Top up your balance and place your first order in seconds.","اشحن رصيدك وابدأ طلبك الأول في ثوانٍ."],
-["Account balance","رصيد الحساب"],["Spent balance","الرصيد المنفق"],["All","الكل"],
-["Search services…","ابحث في الخدمات…"],["Category","الفئة"],["Service","الخدمة"],["Description","الوصف"],["Link","الرابط"],["Quantity","الكمية"],["Charge","التكلفة"],["Submit order","إرسال الطلب"],
-["Make sure the account or link is public, not private.","تأكد أن الحساب أو الرابط عام وليس خاصاً."],
-["Do not place more than one order for the same link before the first completes.","لا ترسل أكثر من طلب لنفس الرابط قبل اكتمال الأول."],
-["Orders cannot be cancelled once processing has started.","لا يمكن إلغاء الطلب بعد بدء التنفيذ."],
-["No results","لا توجد نتائج"],["Select a service to see its description.","اختر خدمة لعرض الوصف."],["No services.","لا توجد خدمات."],["No orders yet.","لا توجد طلبات بعد."],
-["Order","اطلب"],["Pending","قيد الانتظار"],
-["Payment method","طريقة الدفع"],["Credit / Debit Card","بطاقة ائتمان / خصم"],["Cryptocurrency","عملات رقمية"],["Amount (USD)","المبلغ (بالدولار)"],["Custom amount","مبلغ مخصص"],["Continue to payment","المتابعة إلى الدفع"],
-["Payments are processed on a secure, encrypted (SSL/TLS) page by the payment provider. We never see or store your card details.","الدفع يتم عبر صفحة آمنة ومشفّرة (SSL/TLS) لدى بوابة الدفع. لا نرى بيانات بطاقتك ولا نخزّنها على خوادمنا."],
-["Subject","الموضوع"],["Message","الرسالة"],["Send ticket","إرسال التذكرة"],
-["API URL","رابط الـAPI"],["API keys are generated per user by the server.","يتم توليد مفتاح الـAPI من الخادم لكل مستخدم."],
-["Profile photo","الصورة الشخصية"],["JPG or PNG up to 5MB. The photo is cropped to a square automatically.","JPG أو PNG حتى 5MB. تُقصّ الصورة إلى مربع تلقائياً."],
-["Upload photo","رفع صورة"],["Save","حفظ"],["Cancel","إلغاء"],["Name","الاسم"],["Email","البريد الإلكتروني"],["User ID","معرّف المستخدم"],
-["Resell our services under your own domain with your own prices.","أعد بيع خدماتنا تحت نطاقك الخاص وبأسعارك."],["Request child panel","طلب لوحة فرعية"],
-["One order per line:","طلب واحد في كل سطر:"],["Submit orders","إرسال الطلبات"],
-["How long until my order starts?","كم يستغرق بدء الطلب؟"],["Most services start within minutes to a few hours. See the service description for details.","تبدأ معظم الخدمات خلال دقائق إلى ساعات قليلة. راجع وصف الخدمة للتفاصيل."],
-["Can I cancel an order?","هل يمكنني إلغاء الطلب؟"],["Does my account need to be public?","هل يجب أن يكون حسابي عاماً؟"],["Yes. Private accounts or links cannot be processed.","نعم. لا يمكن تنفيذ الطلبات على حسابات أو روابط خاصة."],
-["How do I add funds?","كيف أشحن رصيدي؟"],["Open Add funds, choose an amount and a payment method.","افتح «شحن الرصيد» ثم اختر المبلغ وطريقة الدفع."],
-["Results can vary; delivery times are estimates, not guarantees.","قد تختلف النتائج؛ أوقات التنفيذ تقديرية وليست مضمونة."],
-["Do not place multiple orders for the same link until the first is complete.","لا تُرسل عدة طلبات لنفس الرابط قبل اكتمال الأول."],
-["Payments are non-refundable once an order has started.","لا يمكن استرداد المبلغ بعد بدء تنفيذ الطلب."],
-["You are responsible for complying with the rules of each platform you use.","أنت مسؤول عن الالتزام بقواعد كل منصة تستخدمها."],
-["Search…","بحث…"],["Menu","القائمة"],["Close menu","إغلاق القائمة"],["Profile menu","قائمة الملف الشخصي"],["Change photo","تغيير الصورة"],["Dismiss","إغلاق"],["Balance","الرصيد"],["Toggle theme","تبديل المظهر"],
-["Please select a service first.","اختر خدمة أولاً."],["Enter a valid link starting with https://","أدخل رابطاً صحيحاً يبدأ بـ https://"],
-["Insufficient balance. Please add funds first.","رصيدك غير كافٍ. اشحن رصيدك أولاً."],["✓ Order created successfully","✓ تم إنشاء الطلب بنجاح"],
-["Crypto payments are coming soon. Please use Card or Google Pay.","الدفع بالعملات الرقمية سيتوفر قريباً. اختر البطاقة أو Google Pay."],
-["Choose an amount: $5, $10, $25 or $50.","اختر مبلغاً: $5 أو $10 أو $25 أو $50."],["Choose one of the preset amounts ($5, $10, $25, $50).","اختر أحد المبالغ الجاهزة ($5, $10, $25, $50)."],
-["✓ Payment received. Your balance will be updated shortly","✓ تم الدفع. سيُضاف الرصيد خلال لحظات"],["Payment cancelled","تم إلغاء الدفع"],
-["Please choose an image file","اختر ملف صورة فقط"],["Image is larger than 5MB","الصورة أكبر من 5MB"],["Could not read the image","تعذّر قراءة الصورة"],["✓ Photo saved","✓ تم حفظ الصورة"],["Saved on this device only","تم الحفظ على هذا الجهاز فقط"],["Could not save the photo","تعذّر حفظ الصورة"],
-["Please fill in the subject and message","أكمل الموضوع والرسالة"],["✓ Ticket sent (demo)","✓ تم إرسال التذكرة (تجريبي)"],["✓ Request sent (demo)","✓ تم إرسال الطلب (تجريبي)"],["Enter a valid domain","أدخل نطاقاً صحيحاً"],
-["Could not load balance","تعذّر تحميل الرصيد"],["Could not set up your account ID","تعذّر إعداد معرّف حسابك"],["Copied","تم النسخ"],["Copy the link manually","انسخ الرابط يدوياً"],
-["Add at least one line: service_id | link | quantity","أضف سطراً واحداً على الأقل: service_id | link | quantity"],["unknown service ID","رقم الخدمة غير معروف"],["invalid link","رابط غير صالح"]
-];
-const AR=new Map(PAIRS),EN=new Map(PAIRS.map(p=>[p[1],p[0]]));
-const RULES=[
- [/^\(min (\d+) – max (\d+)\)$/,m=>`(الحد الأدنى ${m[1]} – الأقصى ${m[2]})`,/^\(الحد الأدنى (\d+) – الأقصى (\d+)\)$/,m=>`(min ${m[1]} – max ${m[2]})`],
- [/^Quantity must be between (\d+) and (\d+)\.$/,m=>`الكمية يجب أن تكون بين ${m[1]} و ${m[2]}.`,/^الكمية يجب أن تكون بين (\d+) و (\d+)\.$/,m=>`Quantity must be between ${m[1]} and ${m[2]}.`],
- [/^quantity must be (\d+)–(\d+)$/,m=>`الكمية يجب أن تكون بين ${m[1]} و ${m[2]}`,/^الكمية يجب أن تكون بين (\d+) و (\d+)$/,m=>`quantity must be ${m[1]}–${m[2]}`],
- [/^Qty (\d+)$/,m=>`الكمية ${m[1]}`,/^الكمية (\d+)$/,m=>`Qty ${m[1]}`],
- [/^Line (\d+): (.*)$/,m=>`السطر ${m[1]}: ${tr(m[2])}`,/^السطر (\d+): (.*)$/,m=>`Line ${m[1]}: ${tr(m[2])}`]
-];
-let lang="en";
-function tr(s){
-  const k=s.trim();if(!k)return s;
-  let o;
-  if(lang==="ar"){o=AR.get(k);if(o==null)for(const r of RULES){const m=k.match(r[0]);if(m){o=r[1](m);break}}}
-  else{o=EN.get(k);if(o==null)for(const r of RULES){const m=k.match(r[2]);if(m){o=r[3](m);break}}}
-  return o==null?s:s.slice(0,s.indexOf(k))+o+s.slice(s.indexOf(k)+k.length);
-}
-const skip=n=>{const p=n.parentElement;return !p||/^(SCRIPT|STYLE)$/.test(p.nodeName)||p.closest("[data-notr]")};
-const fixText=n=>{if(skip(n))return;const v=tr(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v};
-function walk(root){
-  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode())fixText(n);
-  (root.querySelectorAll?root:document).querySelectorAll("[placeholder],[aria-label]").forEach(el=>["placeholder","aria-label"].forEach(a=>{
-    const v=el.getAttribute(a);if(v){const t=tr(v);if(t!==v)el.setAttribute(a,t)}}));
-}
-new MutationObserver(ms=>ms.forEach(m=>{
-  if(m.type==="characterData")fixText(m.target);
-  else m.addedNodes.forEach(n=>n.nodeType===3?fixText(n):n.nodeType===1&&walk(n));
-})).observe(document.body,{childList:true,subtree:true,characterData:true});
-["uname","sbName","hName","pmName","pmMail","accName","accMail","accUid","avInit","pmAv","accAv","sbAv","ref"].forEach(id=>{const e=document.getElementById(id);e&&e.setAttribute("data-notr","")});
-function applyLang(l){
-  lang=l;const h=document.documentElement;
-  h.lang=l;h.dir=l==="ar"?"rtl":"ltr";
-  try{localStorage.setItem("lf_lang",l)}catch(e){}
-  walk(document.body);
-  document.querySelectorAll(".lb").forEach(b=>b.classList.toggle("on",b.dataset.lang===l));
-}
-document.querySelectorAll(".lb").forEach(b=>b.onclick=()=>applyLang(b.dataset.lang));
-{let l=null;try{l=localStorage.getItem("lf_lang")}catch(e){}
- applyLang(l||((navigator.language||"").toLowerCase().startsWith("ar")?"ar":"en"))}
+  let svc;
+  try {
+    svc = (await getServices()).map.get(serviceId);
+  } catch (e) {
+    console.error("services failed", e);
+    return res.status(502).json({ error: "services_unavailable", detail: errText(e) });
+  }
+  if (!svc) return res.status(400).json({ error: "unknown_service", detail: "Service id " + serviceId + " not found in provider list" });
+  if (!Number.isInteger(quantity) || quantity < svc.min || quantity > svc.max)
+    return res.status(400).json({ error: "invalid_quantity", detail: `Allowed ${svc.min}–${svc.max}`, min: svc.min, max: svc.max });
 
-drawCats();refresh();
-setTimeout(()=>bootFail(),9000);   // إن لم يستجب Firebase: رسالة واضحة بدل شاشة بيضاء
-</script>
-<script type="module" onerror="bootFail()">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  const cost = Math.round(((quantity * svc.rate) / 1000) * 10000) / 10000;
+  if (!(cost > 0)) return res.status(400).json({ error: "invalid_quantity", detail: "Computed cost is 0" });
 
-const app = initializeApp({
-  apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
-  authDomain: "layal-follow.firebaseapp.com",
-  projectId: "layal-follow",
-  storageBucket: "layal-follow.firebasestorage.app",
-  messagingSenderId: "850647879566",
-  appId: "1:850647879566:web:54e2e67a395f5d56101edf",
-  measurementId: "G-KVN372FDCR"
-});
-// نفس نوع الحفظ المستخدم في index.html حتى تنتقل الجلسة بين الصفحتين
-const auth = initializeAuth(app, { persistence: browserSessionPersistence });
-
-const db = getFirestore(app);
-
-/* ---------- إنشاء مستند المستخدم تلقائياً ----------
-   users/{uid}      { balance: 0, userId: 1000+, email, createdAt }
-   counters/users   { next: 1000 }   ← يُنشأ يدوياً مرة واحدة من Console
-   الإنشاء داخل Transaction واحدة لضمان معرّف رقمي فريد ومتسلسل. */
-async function ensureUserDoc(user) {
-  const ref = doc(db, "users", user.uid);
-  if ((await getDoc(ref)).exists()) return;               // موجود مسبقاً
-  await runTransaction(db, async tx => {
-    if ((await tx.get(ref)).exists()) return;             // سبقه تبويب آخر
-    const cRef = doc(db, "counters", "users");
-    const c = await tx.get(cRef);
-    if (!c.exists()) throw new Error("counters/users is missing");
-    const userId = c.data().next;
-    tx.update(cRef, { next: userId + 1 });
-    tx.set(ref, { balance: 0, userId, email: user.email || "", createdAt: serverTimestamp() });
-  });
-}
-
-let unsubBal = null, unsubOrd = null, sess = 0;                             // مستمع المستند + رقم الجلسة لتجاهل النتائج المتأخرة
-const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } };
-
-onAuthStateChanged(auth, user => {
-  stopBal();                                               // إلغاء أي اشتراك سابق عند تغيّر حالة الدخول
-  const my = sess;
-  if (!user) { location.replace("index.html"); return; }   // غير مسجّل → صفحة الدخول
-  fillAccount(user);
-  setBal(0, true);                                         // حالة التحميل: يظهر $…
-  ensureUserDoc(user)
-    .catch(err => { if (my === sess) { console.error("create user doc:", err); idError(); } })
-    .then(() => {
-      if (my !== sess) return;
-      unsubBal = onSnapshot(
-        doc(db, "users", user.uid),                        // مباشر: users/{uid}
-        snap => {
-          const data = snap.exists() ? snap.data() : {};
-          const b = Number(data.balance);
-          setBal(Number.isFinite(b) ? b : 0, false);       // غير موجود/غير رقم → $0.00
-          setNumericId(Number.isFinite(Number(data.userId)) && data.userId != null ? data.userId : null);
-          setSpent(Number(data.spent) || 0);
-        },
-        err => { console.error("user listener:", err); setBal(0, false); setNumericId(null); balError(); }
-      );
-      unsubOrd = onSnapshot(
-        query(collection(db, "orders"), where("uid", "==", user.uid)),
-        snap => setOrders(snap.docs.map(d => {
-          const x = d.data();
-          return { id: d.id, s: x.serviceName || "", link: x.link || "", n: x.quantity || 0, cost: Number(x.cost) || 0, status: x.status, ts: x.createdAt ? x.createdAt.toMillis() : Date.now() };
-        }).sort((a, b) => b.ts - a.ts)),
-        err => console.error("orders listener:", err)
-      );
-      loadServices();
+  // 3) خصم الرصيد وإنشاء الطلب (pending) في معاملة واحدة
+  const userRef = db.collection("users").doc(uid);
+  const orderRef = db.collection("orders").doc();
+  let newBalance = 0;
+  let seenBalance = 0;
+  try {
+    await db.runTransaction(async (tx) => {
+      const u = await tx.get(userRef);
+      if (!u.exists) throw new Error("user_not_found");
+      const bal = Number(u.data().balance) || 0;
+      seenBalance = bal;
+      if (bal < cost) throw new Error("insufficient_balance");
+      newBalance = Math.round((bal - cost) * 10000) / 10000;
+      tx.update(userRef, { balance: FV.increment(-cost), spent: FV.increment(cost) });
+      tx.set(orderRef, {
+        uid, service: serviceId, serviceName: svc.name, link, quantity, cost,
+        status: "pending", createdAt: FV.serverTimestamp(),
+      });
     });
-  window.__authDone = true;
-  bootDone();
-});
-addEventListener("pagehide", stopBal);                     // إغلاق الصفحة
+  } catch (e) {
+    if (e.message === "insufficient_balance")
+      return res.status(402).json({ error: "insufficient_balance", detail: `Balance $${seenBalance} < cost $${cost}` });
+    if (e.message === "user_not_found")
+      return res.status(404).json({ error: "user_not_found", detail: "Document users/" + uid + " does not exist" });
+    console.error("transaction failed", e);
+    return res.status(500).json({ error: "server_error", detail: "Firestore: " + errText(e) });
+  }
 
-window.__getToken = () => auth.currentUser.getIdToken();
-const out = () => { stopBal(); return signOut(auth).catch(() => {}).finally(() => location.replace("index.html")); };
-document.getElementById("logout").onclick = out;
-document.getElementById("logout2").onclick = out;
-document.getElementById("logout3").onclick = out;
-</script>
+  // 4) إرسال الطلب للمزوّد
+  let r;
+  try {
+    r = await jap({ action: "add", service: serviceId, link, quantity });
+  } catch (e) {
+    // مهلة/رد غير مفهوم: قد يكون الطلب وصل للمزوّد، فلا نُرجع الرصيد تلقائياً — يُراجع يدوياً
+    console.error("jap add unknown result", orderRef.id, e);
+    await orderRef.update({ status: "review" }).catch(() => {});
+    return res.status(202).json({
+      id: orderRef.id, status: "review", cost, balance: newBalance,
+      detail: "Provider response unclear: " + errText(e),
+    });
+  }
+
+  if (r && r.order) {
+    await orderRef.update({ status: "processing", japOrder: String(r.order) }).catch((e) => console.error(e));
+    return res.status(200).json({ id: orderRef.id, status: "processing", cost, balance: newBalance });
+  }
+
+  // 5) رفض صريح من المزوّد: نُرجع الرصيد ونُعلّم الطلب failed
+  const providerMsg = String((r && (r.error || JSON.stringify(r))) || "empty response").slice(0, 300);
+  console.error("jap add rejected", orderRef.id, r);
+  try {
+    await db.runTransaction(async (tx) => {
+      tx.update(userRef, { balance: FV.increment(cost), spent: FV.increment(-cost) });
+      tx.update(orderRef, { status: "failed", error: providerMsg });
+    });
+  } catch (e) {
+    console.error("REFUND FAILED", orderRef.id, uid, cost, e);
+    return res.status(502).json({
+      error: "provider_error", id: orderRef.id,
+      detail: "Provider: " + providerMsg + " | REFUND FAILED: " + errText(e),
+    });
+  }
+  return res.status(502).json({ error: "provider_error", id: orderRef.id, detail: "Provider: " + providerMsg });
+}
+
+module.exports = async (req, res) => {
+  try {
+    return await handle(req, res);
+  } catch (e) {
+    console.error("unhandled", e);
+    if (!res.headersSent) return res.status(500).json({ error: "server_error", detail: errText(e) });
+  }
+};
