@@ -108,4 +108,102 @@ html.dark body{background:#0b1220;color:#e5ebf5}
           <div id="pmMail" class="text-xs text-slate-500 truncate" dir="ltr"></div></div>
         </div>
         <button id="pmProfile" role="menuitem" class="w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-blue-50 active:scale-95 transition"><span id="pmUser"></span>الملف الشخصي</button>
-        <button id="logout" role="menuitem" class="w-full flex items-
+        <button id="logout" role="menuitem" class="w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 active:scale-95 transition"><span id="pmOut"></span>تسجيل الخروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="p-4 md:p-6 max-w-5xl mx-auto flex flex-col gap-5">
+    <!-- Top cards -->
+    <section id="welcome" class="relative overflow-hidden rounded-3xl text-white bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 shadow-xl shadow-blue-600/20 p-5 sm:p-6">
+      <span class="pointer-events-none absolute -right-10 -top-12 w-44 h-44 rounded-full bg-white/10"></span>
+      <span class="pointer-events-none absolute right-16 -bottom-16 w-40 h-40 rounded-full bg-white/10"></span>
+      <button id="wClose" type="button" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition grid place-items-center" aria-label="Dismiss"></button>
+      <div class="relative pr-9">
+        <div class="text-xs font-semibold tracking-wide text-blue-100/90 uppercase">Welcome back</div>
+        <div class="mt-1 flex items-baseline gap-1.5 min-w-0 text-2xl sm:text-3xl font-extrabold leading-tight"><span class="shrink-0 text-base sm:text-lg font-semibold opacity-90">Hello,</span><span id="uname" class="truncate" dir="auto">Guest</span></div>
+        <p class="mt-1.5 text-sm text-blue-50/90 max-w-md">اشحن رصيدك وابدأ طلبك الأول في ثوانٍ.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button id="wFunds" type="button" class="h-10 px-5 rounded-full bg-white text-blue-700 text-sm font-bold hover:bg-blue-50 active:scale-95 transition shadow">Add funds</button>
+          <button id="wOrder" type="button" class="h-10 px-5 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm font-semibold active:scale-95 transition">New order</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- بطاقات الرصيد في سطر واحد -->
+    <section id="balCards" class="grid grid-cols-2 gap-3">
+      <div class="rounded-2xl p-5 bg-white border border-blue-100 shadow-sm flex flex-col justify-between">
+        <div class="text-sm text-slate-500">رصيد الحساب</div>
+        <div class="text-2xl font-extrabold mt-1 text-emerald-600" dir="ltr">$<span id="cBal">0.00</span></div>
+      </div>
+      <div class="rounded-2xl p-5 bg-white border border-blue-100 shadow-sm flex flex-col justify-between">
+        <div class="text-sm text-slate-500">الرصيد المنفق</div>
+        <div class="text-2xl font-extrabold mt-1 text-rose-600" dir="ltr">$<span id="cSpent">0.00</span></div>
+      </div>
+    </section>
+
+    <!-- Platform filter -->
+    <section id="platWrap">
+      <div id="plat" class="noscroll flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 snap-x"></div>
+    </section>
+
+    <!-- New order -->
+    <section id="sec0" class="sec bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
+      <h1 class="text-lg font-extrabold mb-4 text-blue-800">New order</h1>
+      <form id="of" class="space-y-4" novalidate>
+        <input id="q" class="fld" placeholder="Search services…" type="search">
+        <div><label class="block text-sm font-semibold mb-1.5" for="cat">Category</label><select id="cat" class="fld"></select></div>
+        <div><label class="block text-sm font-semibold mb-1.5" for="srv">Service</label><select id="srv" class="fld"></select></div>
+
+        <div class="rounded-xl bg-blue-50 border border-blue-100 p-4 text-sm leading-6">
+          <div class="font-bold text-blue-800 mb-1">Description</div>
+          <div id="desc" class="whitespace-pre-line text-slate-700"></div>
+          <div class="font-bold text-blue-800 mt-3 mb-1">Terms</div>
+          <ul class="list-disc ps-5 text-slate-600">
+            <li>تأكد أن الحساب أو الرابط عام وليس خاصاً.</li>
+            <li>لا ترسل أكثر من طلب لنفس الرابط قبل اكتمال الأول.</li>
+            <li>لا يمكن إلغاء الطلب بعد بدء التنفيذ.</li>
+          </ul>
+        </div>
+
+        <div><label class="block text-sm font-semibold mb-1.5" for="link">Link</label><input id="link" class="fld" dir="ltr" inputmode="url" placeholder="https://"></div>
+        <div>
+          <label class="block text-sm font-semibold mb-1.5" for="qty">Quantity <span id="range" class="text-slate-400 font-normal text-xs"></span></label>
+          <input id="qty" class="fld" type="number" inputmode="numeric" placeholder="1000">
+        </div>
+        <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
+          <span class="text-sm text-slate-500">Charge</span>
+          <span class="text-xl font-extrabold text-blue-700" dir="ltr">$<span id="charge">0.00</span></span>
+        </div>
+        <p id="msg" class="min-h-[20px] text-sm text-red-500"></p>
+        <button class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25">Submit order</button>
+      </form>
+    </section>
+
+    <section id="sec1" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-blue-800">Services</h2><div id="svcList" class="space-y-3"></div></section>
+
+    <section id="sec2" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-blue-800">Orders</h2><div id="ordList" class="space-y-3"></div></section>
+
+    <section id="sec3" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-4 text-blue-800">Add funds</h2>
+
+      <div class="text-sm font-semibold mb-2">Payment method</div>
+      <div id="methods" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5" role="radiogroup">
+        <button type="button" data-m="card" role="radio" class="mth text-left rounded-xl border-2 p-3.5 transition">
+          <div class="flex items-center gap-2 font-bold text-sm"><span id="icCard"></span>Credit / Debit Card</div>
+          <div class="flex items-center gap-1.5 mt-2.5">
+            <svg width="40" height="26" viewBox="0 0 40 26" aria-label="Visa"><rect width="40" height="26" rx="4" fill="#1a1f71"/><text x="20" y="18" text-anchor="middle" font-family="Arial" font-style="italic" font-weight="800" font-size="12" fill="#fff">VISA</text></svg>
+            <svg width="40" height="26" viewBox="0 0 40 26" aria-label="Mastercard"><rect width="40" height="26" rx="4" fill="#fff" stroke="#e2e8f0"/><circle cx="16" cy="13" r="7" fill="#eb001b"/><circle cx="24" cy="13" r="7" fill="#f79e1b" fill-opacity=".9"/></svg>
+          </div>
+        </button>
+        <button type="button" data-m="gpay" role="radio" class="mth text-left rounded-xl border-2 p-3.5 transition">
+          <div class="flex items-center gap-2 font-bold text-sm"><span id="icWallet"></span>Google Pay</div>
+          <div class="flex items-center gap-1.5 mt-2.5">
+            <svg width="52" height="26" viewBox="0 0 52 26" aria-label="Google Pay"><rect width="52" height="26" rx="4" fill="#fff" stroke="#e2e8f0"/><text x="26" y="17.5" text-anchor="middle" font-family="Arial" font-weight="700" font-size="11" fill="#3c4043"><tspan fill="#4285f4">G</tspan> Pay</text></svg>
+          </div>
+        </button>
+        <button type="button" data-m="crypto" role="radio" class="mth text-left rounded-xl border-2 p-3.5 transition">
+          <div class="flex items-center gap-2 font-bold text-sm"><span id="icCoin"></span>Cryptocurrency</div>
+          <div class="flex items-center gap-1.5 mt-2.5 text-[11px] font-bold">
+            <span class="px-2 h-[26px] grid place-items-center rounded bg-emerald-500 text-white">USDT</span>
+            <span class="px-2 h
