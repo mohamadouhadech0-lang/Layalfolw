@@ -5,7 +5,7 @@ import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'fir
 const API_URL = "https://justanotherpanel.com/api/v2";
 
 // ضع مفتاح الـ API الخاص بك هنا من حسابك في JAP
-const API_KEY = "YOUR_JAP_API_KEY_HERE"; 
+const API_KEY = "feaa69096d501c6ccfc39634a59e2cc8"; 
 
 /**
  * 1. جلب جميع الخدمات المتاحة
