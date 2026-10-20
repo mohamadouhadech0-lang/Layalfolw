@@ -45,13 +45,14 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
     <!-- Profile -->
     <div class="relative shrink-0">
       <button id="avatarBtn" class="flex items-center gap-2 rounded-full p-0.5 pr-0.5 md:pr-3 hover:bg-slate-100 active:scale-95 transition" aria-haspopup="menu" aria-expanded="false" aria-label="Profile menu">
-        <span id="avInit" class="w-10 h-10 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-sm font-bold ring-2 ring-white shadow">G</span>
+        <span id="avInit" class="overflow-hidden w-10 h-10 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-sm font-bold ring-2 ring-white shadow">G</span>
         <span class="hidden md:block text-left leading-tight max-w-[140px]"><span id="hName" class="block text-sm font-semibold truncate" dir="auto">Guest</span><span class="block text-[11px] text-slate-500">Customer</span></span>
       </button>
       <div id="pmenu" class="pm hidden absolute right-0 top-12 w-60 rounded-2xl bg-white border border-blue-100 shadow-xl shadow-blue-900/10 p-1.5" role="menu">
-        <div class="px-3 py-2.5 border-b border-slate-100 mb-1">
-          <div id="pmName" class="text-sm font-bold truncate" dir="auto">Guest</div>
-          <div id="pmMail" class="text-xs text-slate-500 truncate" dir="ltr"></div>
+        <div class="px-3 py-2.5 border-b border-slate-100 mb-1 flex items-center gap-3">
+          <span id="pmAv" class="overflow-hidden w-10 h-10 shrink-0 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-sm font-bold">G</span>
+          <div class="min-w-0"><div id="pmName" class="text-sm font-bold truncate" dir="auto">Guest</div>
+          <div id="pmMail" class="text-xs text-slate-500 truncate" dir="ltr"></div></div>
         </div>
         <button id="pmProfile" role="menuitem" class="w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-blue-50 active:scale-95 transition"><span id="pmUser"></span>الملف الشخصي</button>
         <button id="logout" role="menuitem" class="w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 active:scale-95 transition"><span id="pmOut"></span>تسجيل الخروج</button>
@@ -179,6 +180,22 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 
     <section id="sec7" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
       <h2 class="text-lg font-extrabold mb-4 text-blue-800">Account</h2>
+      <div class="flex items-center gap-4 mb-5 pb-5 border-b border-slate-100">
+        <div class="relative shrink-0">
+          <div id="accAv" class="overflow-hidden w-24 h-24 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-3xl font-bold ring-4 ring-blue-50">G</div>
+          <button id="camBtn" type="button" class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Upload photo"></button>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="font-bold text-sm">Profile photo</div>
+          <div class="text-xs text-slate-500 mb-2.5">JPG أو PNG حتى 5MB. تُقصّ الصورة إلى مربع تلقائياً.</div>
+          <input id="avFile" type="file" accept="image/*" class="hidden">
+          <button id="upBtn" type="button" class="h-9 px-4 rounded-lg border border-blue-200 text-blue-700 text-sm font-semibold hover:bg-blue-50 active:scale-95 transition">Upload photo</button>
+          <div id="avActs" class="hidden flex gap-2">
+            <button id="avSave" type="button" class="h-9 px-4 rounded-lg bg-blue-600 text-white text-sm font-semibold active:scale-95 transition">Save</button>
+            <button id="avCancel" type="button" class="h-9 px-4 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold active:scale-95 transition">Cancel</button>
+          </div>
+        </div>
+      </div>
       <dl class="text-sm divide-y divide-slate-100">
         <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500">Name</dt><dd id="accName" class="font-semibold truncate" dir="auto"></dd></div>
         <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500">Email</dt><dd id="accMail" class="font-semibold truncate" dir="ltr"></dd></div>
@@ -232,6 +249,7 @@ const LUCIDE={
  menu:'<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',
  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+ camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
  lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
  coins:'<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
  card:'<rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>'
@@ -250,7 +268,9 @@ function fillAccount(u){                     // يُستدعى من Firebase ب�
   user=u.displayName||u.email||"User"; uid=u.uid; uemail=u.email||"";
   $("#uname").textContent=user;
   const w=user.trim().split(/[\s@._-]+/).filter(Boolean);
-  $("#avInit").textContent=(w.length>1?w[0][0]+w[1][0]:user.trim().slice(0,2)).toUpperCase()||"G";
+  ini=(w.length>1?w[0][0]+w[1][0]:user.trim().slice(0,2)).toUpperCase()||"G";
+  let saved="";try{saved=localStorage.getItem("lf_avatar_"+u.uid)||""}catch(e){}
+  applyAvatar(saved||u.photoURL||"");
   $("#hName").textContent=user;$("#pmName").textContent=user;$("#pmMail").textContent=u.email||"";
   $("#accName").textContent=u.displayName||"—";$("#accMail").textContent=u.email||"—";$("#accUid").textContent=u.uid;
   $("#ref").value=location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+u.uid.slice(0,8);
@@ -279,6 +299,47 @@ function showSec(i){
   if(i===1)drawServices();if(i===2)drawOrders();
   setNav(i);window.scrollTo({top:0,behavior:"smooth"});
 }
+/* ---- Profile picture ---- */
+let ini="G", avUrl="", pend=null;
+function setAv(el,url){
+  el.textContent="";
+  if(url){const i=new Image();i.src=url;i.alt="";i.referrerPolicy="no-referrer";i.className="w-full h-full object-cover";el.appendChild(i)}
+  else el.textContent=ini;
+}
+function applyAvatar(url){avUrl=url;["#avInit","#pmAv","#accAv"].forEach(s=>setAv($(s),url))}
+$("#camBtn").innerHTML=ic("camera",18);
+const pickPhoto=()=>$("#avFile").click();
+$("#camBtn").onclick=$("#upBtn").onclick=pickPhoto;
+function prep(file){return new Promise((res,rej)=>{
+  const fr=new FileReader(),img=new Image();
+  fr.onload=()=>{img.onload=()=>{
+    const S=256,c=document.createElement("canvas");c.width=c.height=S;
+    const m=Math.min(img.width,img.height);
+    c.getContext("2d").drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,S,S);
+    c.toBlob(b=>b?res({blob:b,url:c.toDataURL("image/jpeg",.85)}):rej(),"image/jpeg",.85)};
+    img.onerror=rej;img.src=fr.result};
+  fr.onerror=rej;fr.readAsDataURL(file);
+})}
+const avUI=on=>{$("#avActs").classList.toggle("hidden",!on);$("#upBtn").classList.toggle("hidden",on)};
+$("#avFile").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(!f.type.startsWith("image/"))return toast("اختر ملف صورة فقط");
+  if(f.size>5*1024*1024)return toast("الصورة أكبر من 5MB");
+  try{pend=await prep(f);setAv($("#accAv"),pend.url);avUI(true)}catch(err){toast("تعذّر قراءة الصورة")}
+};
+$("#avCancel").onclick=()=>{pend=null;$("#avFile").value="";setAv($("#accAv"),avUrl);avUI(false)};
+$("#avSave").onclick=async()=>{
+  if(!pend)return;
+  const p=pend;pend=null;$("#avFile").value="";avUI(false);
+  applyAvatar(p.url);                                   // تحديث فوري في الشريط العلوي والقائمة
+  try{
+    const url=await window.__saveAvatar(p.blob);        // Firebase Storage + حفظ الرابط في حساب المستخدم
+    try{localStorage.removeItem("lf_avatar_"+uid)}catch(e){}
+    applyAvatar(url);toast("✓ تم حفظ الصورة");
+  }catch(err){
+    try{localStorage.setItem("lf_avatar_"+uid,p.url);toast("تم الحفظ على هذا الجهاز فقط")}catch(e){toast("تعذّر حفظ الصورة")}
+  }
+};
 const pm=$("#pmenu"),ab=$("#avatarBtn");
 const pmOpen=o=>{pm.classList.toggle("hidden",!o);ab.setAttribute("aria-expanded",o)};
 ab.onclick=e=>{e.stopPropagation();pmOpen(pm.classList.contains("hidden"))};
@@ -405,7 +466,8 @@ setTimeout(()=>{if(!window.__authDone)location.replace("index.html")},8000);   /
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
@@ -426,6 +488,15 @@ onAuthStateChanged(auth, user => {
   document.body.style.visibility = "visible";
 });
 
+// رفع الصورة إلى Firebase Storage وحفظ رابطها في ملف المستخدم (photoURL)
+window.__saveAvatar = async blob => {
+  const u = auth.currentUser;
+  const r = ref(getStorage(app), "avatars/" + u.uid + ".jpg");
+  await uploadBytes(r, blob, { contentType: "image/jpeg" });
+  const url = await getDownloadURL(r);
+  await updateProfile(u, { photoURL: url });
+  return url;
+};
 window.__getToken = () => auth.currentUser.getIdToken();
 const out = () => signOut(auth).catch(() => {}).finally(() => location.replace("index.html"));
 document.getElementById("logout").onclick = out;
