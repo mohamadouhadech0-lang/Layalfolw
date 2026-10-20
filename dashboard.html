@@ -92,7 +92,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
     </div>
   </header>
 
-  <main class="p-4 md:p-6 max-w-5xl mx-auto space-y-5">
+  <main class="p-4 md:p-6 max-w-5xl mx-auto flex flex-col gap-5">
     <!-- Top cards -->
     <section id="welcome" class="relative overflow-hidden rounded-3xl text-white bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 shadow-xl shadow-blue-600/20 p-5 sm:p-6">
       <span class="pointer-events-none absolute -right-10 -top-12 w-44 h-44 rounded-full bg-white/10"></span>
@@ -109,7 +109,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       </div>
     </section>
 
-    <section class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <section id="balCards" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div class="rounded-2xl p-5 bg-white border border-blue-100 shadow-sm">
         <div class="text-sm text-slate-500">Account balance</div>
         <div class="text-2xl font-extrabold mt-1 text-blue-700" dir="ltr">$<span id="cBal">0.00</span></div>
@@ -388,6 +388,8 @@ function showSec(i){
   tab=i;
   for(let k=0;k<12;k++)$("#sec"+k).classList.toggle("hidden",k!==i);
   $("#platWrap").classList.toggle("hidden",i>1);
+  $("#balCards").classList.toggle("hidden",i!==0);          // بطاقات الرصيد: الصفحة الرئيسية فقط
+  const wb=$("#welcome");if(wb)wb.classList.toggle("hidden",i!==0);   // بطاقة الترحيب: الصفحة الرئيسية فقط
   const el=$("#sec"+i);el.classList.remove("sec");void el.offsetWidth;el.classList.add("sec");
   if(i===1)drawServices();if(i===2)drawOrders();
   setNav(i);window.scrollTo({top:0,behavior:"smooth"});
