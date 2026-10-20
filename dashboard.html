@@ -17,12 +17,15 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 .qa:hover .qi{background:#dbeafe;color:#1d4ed8}.qa:active .qi{transform:scale(.92)}
 .qa.danger .qi{background:#fee2e2;color:#dc2626}.qa.danger:hover .qi{background:#fecaca}
 .sb-scroll{scrollbar-width:thin}
+#plat svg{width:14px;height:14px}
 html[dir=rtl] .sb{left:auto;right:0;border-right:0;border-left:1px solid #f1f5f9}
 html[dir=rtl] aside.sb.-translate-x-full{--tw-translate-x:100%}
 html[dir=rtl] #closeSb,html[dir=rtl] #wClose{right:auto;left:.75rem}
 html[dir=rtl] #sbCam,html[dir=rtl] #camBtn{right:auto;left:-2px}
 html[dir=rtl] #pmenu{right:auto;left:0}
 html[dir=rtl] .text-left{text-align:right}
+html[dir=rtl] #nav button{direction:rtl;text-align:right}
+[data-notr]{unicode-bidi:isolate}
 html[dir=rtl] #welcome>div.relative{padding-right:0;padding-left:2.25rem}
 @media (min-width:1024px){html[dir=rtl] aside.sb{--tw-translate-x:0!important}html[dir=rtl] .lg\:ml-72{margin-left:0;margin-right:18rem}}
 .lb{height:36px;border-radius:10px;font-size:13px;font-weight:600;color:#64748b;transition:all .15s}
@@ -59,7 +62,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <div id="sbAv" class="overflow-hidden w-24 h-24 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-3xl font-bold ring-4 ring-blue-50 shadow-lg">G</div>
       <button id="sbCam" type="button" class="absolute -bottom-0.5 -right-0.5 w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Change photo"></button>
     </div>
-    <div class="mt-3 text-[17px] font-bold leading-tight truncate" dir="auto">Welcome <span id="sbName">Guest</span></div>
+    <div class="mt-3 flex justify-center items-baseline gap-1.5 min-w-0 text-[17px] font-bold leading-tight"><span class="shrink-0">Welcome</span><span id="sbName" class="truncate" dir="auto">Guest</span></div>
     <div class="text-xs text-slate-500 mt-0.5">Customer account</div>
 
     <div class="mt-4 grid grid-cols-4 gap-1 max-w-[280px] mx-auto">
@@ -118,7 +121,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <button id="wClose" type="button" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 transition grid place-items-center" aria-label="Dismiss"></button>
       <div class="relative pr-9">
         <div class="text-xs font-semibold tracking-wide text-blue-100/90 uppercase">Welcome back</div>
-        <div class="mt-1 text-2xl sm:text-3xl font-extrabold leading-tight truncate"><span class="text-base sm:text-lg font-semibold opacity-90">مرحباً، </span><span id="uname" dir="auto">Guest</span></div>
+        <div class="mt-1 flex items-baseline gap-1.5 min-w-0 text-2xl sm:text-3xl font-extrabold leading-tight"><span class="shrink-0 text-base sm:text-lg font-semibold opacity-90">Hello,</span><span id="uname" class="truncate" dir="auto">Guest</span></div>
         <p class="mt-1.5 text-sm text-blue-50/90 max-w-md">اشحن رصيدك وابدأ طلبك الأول في ثوانٍ.</p>
         <div class="mt-4 flex flex-wrap gap-2">
           <button id="wFunds" type="button" class="h-10 px-5 rounded-full bg-white text-blue-700 text-sm font-bold hover:bg-blue-50 active:scale-95 transition shadow">Add funds</button>
@@ -140,7 +143,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
     <!-- Platform filter -->
     <section id="platWrap">
-      <div id="plat" class="noscroll flex gap-3 overflow-x-auto -mx-4 px-4 pb-1 snap-x"></div>
+      <div id="plat" class="noscroll flex gap-2 overflow-x-auto -mx-4 px-4 pb-1 snap-x"></div>
     </section>
 
     <!-- New order -->
@@ -441,17 +444,12 @@ $("#avFile").onchange=async e=>{
   try{pend=await prep(f);setAv($("#accAv"),pend.url);avUI(true)}catch(err){toast("تعذّر قراءة الصورة")}
 };
 $("#avCancel").onclick=()=>{pend=null;$("#avFile").value="";setAv($("#accAv"),avUrl);avUI(false)};
-$("#avSave").onclick=async()=>{
+$("#avSave").onclick=()=>{
   if(!pend)return;
   const p=pend;pend=null;$("#avFile").value="";avUI(false);
-  applyAvatar(p.url);                                   // تحديث فوري في الشريط العلوي والقائمة
-  try{
-    const url=await window.__saveAvatar(p.blob);        // Firebase Storage + حفظ الرابط في حساب المستخدم
-    try{localStorage.removeItem("lf_avatar_"+uid)}catch(e){}
-    applyAvatar(url);toast("✓ تم حفظ الصورة");
-  }catch(err){
-    try{localStorage.setItem("lf_avatar_"+uid,p.url);toast("تم الحفظ على هذا الجهاز فقط")}catch(e){toast("تعذّر حفظ الصورة")}
-  }
+  try{localStorage.setItem("lf_avatar_"+uid,p.url);toast("✓ Photo saved")}   // حفظ دائم في المتصفح
+  catch(e){toast("Could not save the photo")}
+  applyAvatar(p.url);                                                         // تحديث فوري: الهيدر + القائمة + الحساب
 };
 /* ---- Welcome banner ---- */
 {
@@ -522,7 +520,7 @@ $("#closeSb").onclick=$("#scrim").onclick=()=>openSb(false);
 
 /* ---- platform chips ---- */
 function drawPlat(){
-  $("#plat").innerHTML=PLAT.map(x=>`<button data-p="${x[0]}" class="snap-start shrink-0 flex items-center gap-2 h-12 px-4 rounded-2xl border text-sm font-semibold transition active:scale-95 ${plat===x[0]?"bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-600/25":"bg-white text-slate-700 border-blue-100 hover:border-blue-300"}">${x[2]}<span>${x[1]}</span></button>`).join("");
+  $("#plat").innerHTML=PLAT.map(x=>`<button data-p="${x[0]}" class="snap-start shrink-0 flex items-center gap-1.5 h-8 px-3 rounded-full border text-xs font-semibold transition active:scale-95 ${plat===x[0]?"bg-blue-600 text-white border-blue-600 shadow shadow-blue-600/25":"bg-white text-slate-700 border-blue-100 hover:border-blue-300"}">${x[2]}<span>${x[1]}</span></button>`).join("");
 }
 $("#plat").onclick=e=>{const b=e.target.closest("[data-p]");if(!b)return;plat=b.dataset.p;drawPlat();drawCats();if(tab===1)drawServices()};
 drawPlat();
@@ -706,8 +704,7 @@ setTimeout(()=>{if(!window.__authDone)location.replace("index.html")},8000);   /
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
@@ -728,15 +725,6 @@ onAuthStateChanged(auth, user => {
   document.body.style.visibility = "visible";
 });
 
-// رفع الصورة إلى Firebase Storage وحفظ رابطها في ملف المستخدم (photoURL)
-window.__saveAvatar = async blob => {
-  const u = auth.currentUser;
-  const r = ref(getStorage(app), "avatars/" + u.uid + ".jpg");
-  await uploadBytes(r, blob, { contentType: "image/jpeg" });
-  const url = await getDownloadURL(r);
-  await updateProfile(u, { photoURL: url });
-  return url;
-};
 window.__getToken = () => auth.currentUser.getIdToken();
 const out = () => signOut(auth).catch(() => {}).finally(() => location.replace("index.html"));
 document.getElementById("logout").onclick = out;
