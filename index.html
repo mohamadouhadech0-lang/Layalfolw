@@ -42,7 +42,7 @@ html.dark .embossed-input {
   box-shadow: inset 4px 4px 8px #060a12, inset -4px -4px 8px #182442;
 }
 .embossed-input:focus {
-  box-shadow: inset 7px 7px 12px #bc2e8, inset -7px -7px 12px #ffffff;
+  box-shadow: inset 7px 7px 12px #b8bec8, inset -7px -7px 12px #ffffff;
 }
 html.dark .embossed-input:focus {
   box-shadow: inset 6px 6px 12px #04070d, inset -6px -6px 12px #1a2747;
@@ -52,6 +52,7 @@ html.dark .embossed-input:focus {
   box-shadow: 6px 6px 14px #c8ced8, -6px -6px 14px #ffffff;
   border-radius: 16px;
   transition: all 0.15s ease;
+  cursor: pointer;
 }
 html.dark .embossed-btn {
   background: #0f172a;
@@ -67,6 +68,7 @@ html.dark .embossed-btn:active {
 .embossed-icon, .embossed-circle-btn {
   background: #e6ecf5;
   box-shadow: 6px 6px 12px #c8ced8, -6px -6px 12px #ffffff;
+  cursor: pointer;
 }
 html.dark .embossed-icon, html.dark .embossed-circle-btn {
   background: #0f172a;
@@ -94,20 +96,20 @@ html.dark .embossed-icon, html.dark .embossed-circle-btn {
 
       <div class="flex items-center justify-between mb-1">
         <h1 class="text-xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">layal folw</h1>
-        <button class="themeBtn rounded-full w-9 h-9 grid place-items-center embossed-circle-btn text-slate-600 dark:text-slate-300" aria-label="تبديل الوضع">🌓</button>
+        <button type="button" class="themeBtn rounded-full w-9 h-9 grid place-items-center embossed-circle-btn text-slate-600 dark:text-slate-300" aria-label="تبديل الوضع">🌓</button>
       </div>
       <p class="text-xs text-slate-400 dark:text-slate-500 mb-5 text-right">أهلاً بك، ابدأ رحلتك معنا اليوم</p>
 
       <!-- التبديل بين الدخول والتسجيل -->
       <div class="grid grid-cols-2 rounded-2xl p-1.5 mb-6 text-sm font-semibold gap-2 embossed-input">
-        <button id="tabIn" class="py-2.5 rounded-xl bg-[#e6ecf5] dark:bg-slate-800 shadow text-indigo-600 dark:text-indigo-400 transition">تسجيل الدخول</button>
-        <button id="tabUp" class="py-2.5 rounded-xl text-slate-500 dark:text-slate-400 transition">إنشاء حساب</button>
+        <button type="button" id="tabIn" class="py-2.5 rounded-xl bg-[#e6ecf5] dark:bg-slate-800 shadow text-indigo-600 dark:text-indigo-400 transition">تسجيل الدخول</button>
+        <button type="button" id="tabUp" class="py-2.5 rounded-xl text-slate-500 dark:text-slate-400 transition">إنشاء حساب</button>
       </div>
 
-      <form id="authForm" class="space-y-4" novalidate>
-        <div id="nameWrap" class="text-right">
+      <form id="authForm" class="space-y-4" onsubmit="return false;">
+        <div id="nameWrap" class="text-right hidden">
           <label class="block text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 mb-1 mr-2">الاسم الكامل</label>
-          <input id="name" class="hidden w-full h-12 px-4 embossed-input text-slate-700 dark:text-slate-200 text-sm" placeholder="الاسم الكامل">
+          <input id="name" class="w-full h-12 px-4 embossed-input text-slate-700 dark:text-slate-200 text-sm" placeholder="الاسم الكامل">
         </div>
 
         <div class="text-right">
@@ -128,7 +130,7 @@ html.dark .embossed-icon, html.dark .embossed-circle-btn {
           <button type="button" id="forgot" class="text-indigo-600 dark:text-indigo-400 hover:underline whitespace-nowrap mr-2">نسيت كلمة المرور؟</button>
         </div>
 
-        <button id="authBtn" class="w-full h-13 mt-2 embossed-btn text-indigo-600 dark:text-indigo-400 font-bold text-sm py-3 rounded-2xl">دخول</button>
+        <button type="button" id="authBtn" class="w-full h-13 mt-2 embossed-btn text-indigo-600 dark:text-indigo-400 font-bold text-sm py-3 rounded-2xl">دخول</button>
       </form>
 
       <div class="relative my-6 flex items-center justify-center">
@@ -154,14 +156,18 @@ html.dark .embossed-icon, html.dark .embossed-circle-btn {
   <aside id="sb" class="sb fixed top-0 bottom-0 right-0 z-40 w-64 translate-x-full lg:translate-x-0 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col" style="padding-top:env(safe-area-inset-top,0px)">
     <div class="h-16 flex items-center justify-between px-4 border-b border-slate-200 dark:border-slate-800">
       <span class="lbl text-xl font-extrabold text-indigo-600 dark:text-indigo-400">◆ layal folw</span>
-      <button id="collapse" class="hidden lg:grid w-8 h-8 place-items-center rounded hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="طي القائمة">⇆</button>
+      <button type="button" id="collapse" class="hidden lg:grid w-8 h-8 place-items-center rounded hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="طي القائمة">⇆</button>
     </div>
     <nav class="p-3 space-y-1 text-sm font-medium" id="nav"></nav>
-    <button id="logout" class="mt-auto m-3 h-10 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-3 px-3"><span>⎋</span><span class="lbl">تسجيل الخروج</span></button>
+    <button type="button" id="logout" class="mt-auto m-3 h-10 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-3 px-3"><span>⎋</span><span class="lbl">تسجيل الخروج</span></button>
   </aside>
 
   <div id="main" class="sb lg:mr-64">
     <header class="sticky z-20 h-16 flex items-center gap-3 px-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur border-b border-slate-200 dark:border-slate-800" style="top:env(safe-area-inset-top,0px)">
-      <button id="burger" class="lg:hidden w-10 h-10 rounded hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="القائمة">☰</button>
+      <button type="button" id="burger" class="lg:hidden w-10 h-10 rounded hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="القائمة">☰</button>
       <input class="hidden sm:block flex-1 max-w-sm h-10 px-4 rounded-full bg-slate-100 dark:bg-slate-800 outline-none focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="ابحث…">
-      <div class
+      <div class="flex-1 sm:hidden"></div>
+      <button type="button" class="themeBtn w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="تبديل الوضع">🌓</button>
+      <div class="relative">
+        <button type="button" id="bell" class="w-10 h-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 relative" aria-label="الإشعارات">🔔<span class="absolute top-1.5 right-2 w-2.5 h-2.5 bg-red-500 rounded-full"></span></button>
+        <div id="notif" class="hidden absolute left-0 mt-2 w-72 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl p-2 text-
