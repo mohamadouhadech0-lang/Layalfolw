@@ -17,6 +17,17 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 .qa:hover .qi{background:#dbeafe;color:#1d4ed8}.qa:active .qi{transform:scale(.92)}
 .qa.danger .qi{background:#fee2e2;color:#dc2626}.qa.danger:hover .qi{background:#fecaca}
 .sb-scroll{scrollbar-width:thin}
+html[dir=rtl] .sb{left:auto;right:0;border-right:0;border-left:1px solid #f1f5f9}
+html[dir=rtl] aside.sb.-translate-x-full{--tw-translate-x:100%}
+html[dir=rtl] #closeSb,html[dir=rtl] #wClose{right:auto;left:.75rem}
+html[dir=rtl] #sbCam,html[dir=rtl] #camBtn{right:auto;left:-2px}
+html[dir=rtl] #pmenu{right:auto;left:0}
+html[dir=rtl] .text-left{text-align:right}
+html[dir=rtl] #welcome>div.relative{padding-right:0;padding-left:2.25rem}
+@media (min-width:1024px){html[dir=rtl] aside.sb{--tw-translate-x:0!important}html[dir=rtl] .lg\:ml-72{margin-left:0;margin-right:18rem}}
+.lb{height:36px;border-radius:10px;font-size:13px;font-weight:600;color:#64748b;transition:all .15s}
+.lb.on{background:#fff;color:#1d4ed8;box-shadow:0 1px 3px rgba(15,31,61,.12)}
+.dark .lb.on{background:#22304a;color:#8ab4ff}
 html.dark body{background:#0b1220;color:#e5ebf5}
 .dark .bg-white,.dark .bg-white\/90,.dark .bg-white\/95{background-color:#111a2e!important}
 .dark .bg-blue-50{background-color:#14233f!important}.dark .bg-blue-100{background-color:#1b305a!important}
@@ -61,6 +72,13 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
   <div class="mx-5 h-px bg-slate-100"></div>
   <nav id="nav" class="sb-scroll flex-1 overflow-y-auto px-3 py-3 space-y-0.5 text-[15px]"></nav>
+  <div class="px-4 py-3 border-t border-slate-100" style="padding-bottom:max(.75rem,env(safe-area-inset-bottom,0px))">
+    <div class="text-[11px] font-semibold text-slate-500 mb-2">Language</div>
+    <div class="grid grid-cols-2 gap-1 bg-slate-100 rounded-xl p-1" role="group" aria-label="Language">
+      <button type="button" class="lb" data-lang="ar">🇸🇦 العربية</button>
+      <button type="button" class="lb" data-lang="en">🇬🇧 English</button>
+    </div>
+  </div>
 </aside>
 
 <div class="lg:ml-72 pb-24 lg:pb-8">
@@ -605,6 +623,84 @@ $("#payBtn").onclick=()=>{
  if(p==="cancel")setTimeout(()=>toast("تم إلغاء الدفع"),600);}
 $("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg").value.trim())return toast("أكمل الموضوع والرسالة");e.target.reset();tickets++;tkBadge();toast("✓ Ticket sent (demo)")};
 $("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
+/* ================= i18n (AR / EN) ================= */
+const PAIRS=[
+["Customer","عميل"],["Customer account","حساب عميل"],["Guest","ضيف"],["Welcome","مرحباً"],["Hello,","مرحباً،"],["Welcome back","أهلاً بعودتك"],
+["Profile","الملف الشخصي"],["Logout","تسجيل الخروج"],["Settings","الإعدادات"],["Dark","داكن"],["Light","فاتح"],["Language","اللغة"],
+["New order","طلب جديد"],["Child Panel","لوحة فرعية"],["NEW","جديد"],["Mass order","طلب جماعي"],["Services","الخدمات"],["Orders","الطلبات"],["Add funds","شحن الرصيد"],["FAQ","الأسئلة الشائعة"],["Tickets","التذاكر"],["Terms","الشروط"],["More","المزيد"],["Account","الحساب"],
+["Top up your balance and place your first order in seconds.","اشحن رصيدك وابدأ طلبك الأول في ثوانٍ."],
+["Account balance","رصيد الحساب"],["Spent balance","الرصيد المنفق"],["All","الكل"],
+["Search services…","ابحث في الخدمات…"],["Category","الفئة"],["Service","الخدمة"],["Description","الوصف"],["Link","الرابط"],["Quantity","الكمية"],["Charge","التكلفة"],["Submit order","إرسال الطلب"],
+["Make sure the account or link is public, not private.","تأكد أن الحساب أو الرابط عام وليس خاصاً."],
+["Do not place more than one order for the same link before the first completes.","لا ترسل أكثر من طلب لنفس الرابط قبل اكتمال الأول."],
+["Orders cannot be cancelled once processing has started.","لا يمكن إلغاء الطلب بعد بدء التنفيذ."],
+["No results","لا توجد نتائج"],["Select a service to see its description.","اختر خدمة لعرض الوصف."],["No services.","لا توجد خدمات."],["No orders yet.","لا توجد طلبات بعد."],
+["Order","اطلب"],["Pending","قيد الانتظار"],
+["Payment method","طريقة الدفع"],["Credit / Debit Card","بطاقة ائتمان / خصم"],["Cryptocurrency","عملات رقمية"],["Amount (USD)","المبلغ (بالدولار)"],["Custom amount","مبلغ مخصص"],["Continue to payment","المتابعة إلى الدفع"],
+["Payments are processed on a secure, encrypted (SSL/TLS) page by the payment provider. We never see or store your card details.","الدفع يتم عبر صفحة آمنة ومشفّرة (SSL/TLS) لدى بوابة الدفع. لا نرى بيانات بطاقتك ولا نخزّنها على خوادمنا."],
+["Subject","الموضوع"],["Message","الرسالة"],["Send ticket","إرسال التذكرة"],
+["API URL","رابط الـAPI"],["API keys are generated per user by the server.","يتم توليد مفتاح الـAPI من الخادم لكل مستخدم."],
+["Profile photo","الصورة الشخصية"],["JPG or PNG up to 5MB. The photo is cropped to a square automatically.","JPG أو PNG حتى 5MB. تُقصّ الصورة إلى مربع تلقائياً."],
+["Upload photo","رفع صورة"],["Save","حفظ"],["Cancel","إلغاء"],["Name","الاسم"],["Email","البريد الإلكتروني"],["User ID","معرّف المستخدم"],
+["Resell our services under your own domain with your own prices.","أعد بيع خدماتنا تحت نطاقك الخاص وبأسعارك."],["Request child panel","طلب لوحة فرعية"],
+["One order per line:","طلب واحد في كل سطر:"],["Submit orders","إرسال الطلبات"],
+["How long until my order starts?","كم يستغرق بدء الطلب؟"],["Most services start within minutes to a few hours. See the service description for details.","تبدأ معظم الخدمات خلال دقائق إلى ساعات قليلة. راجع وصف الخدمة للتفاصيل."],
+["Can I cancel an order?","هل يمكنني إلغاء الطلب؟"],["Does my account need to be public?","هل يجب أن يكون حسابي عاماً؟"],["Yes. Private accounts or links cannot be processed.","نعم. لا يمكن تنفيذ الطلبات على حسابات أو روابط خاصة."],
+["How do I add funds?","كيف أشحن رصيدي؟"],["Open Add funds, choose an amount and a payment method.","افتح «شحن الرصيد» ثم اختر المبلغ وطريقة الدفع."],
+["Results can vary; delivery times are estimates, not guarantees.","قد تختلف النتائج؛ أوقات التنفيذ تقديرية وليست مضمونة."],
+["Do not place multiple orders for the same link until the first is complete.","لا تُرسل عدة طلبات لنفس الرابط قبل اكتمال الأول."],
+["Payments are non-refundable once an order has started.","لا يمكن استرداد المبلغ بعد بدء تنفيذ الطلب."],
+["You are responsible for complying with the rules of each platform you use.","أنت مسؤول عن الالتزام بقواعد كل منصة تستخدمها."],
+["Search…","بحث…"],["Menu","القائمة"],["Close menu","إغلاق القائمة"],["Profile menu","قائمة الملف الشخصي"],["Change photo","تغيير الصورة"],["Dismiss","إغلاق"],["Balance","الرصيد"],["Toggle theme","تبديل المظهر"],
+["Please select a service first.","اختر خدمة أولاً."],["Enter a valid link starting with https://","أدخل رابطاً صحيحاً يبدأ بـ https://"],
+["Insufficient balance. Please add funds first.","رصيدك غير كافٍ. اشحن رصيدك أولاً."],["✓ Order created successfully","✓ تم إنشاء الطلب بنجاح"],
+["Crypto payments are coming soon. Please use Card or Google Pay.","الدفع بالعملات الرقمية سيتوفر قريباً. اختر البطاقة أو Google Pay."],
+["Choose an amount: $5, $10, $25 or $50.","اختر مبلغاً: $5 أو $10 أو $25 أو $50."],["Choose one of the preset amounts ($5, $10, $25, $50).","اختر أحد المبالغ الجاهزة ($5, $10, $25, $50)."],
+["✓ Payment received. Your balance will be updated shortly","✓ تم الدفع. سيُضاف الرصيد خلال لحظات"],["Payment cancelled","تم إلغاء الدفع"],
+["Please choose an image file","اختر ملف صورة فقط"],["Image is larger than 5MB","الصورة أكبر من 5MB"],["Could not read the image","تعذّر قراءة الصورة"],["✓ Photo saved","✓ تم حفظ الصورة"],["Saved on this device only","تم الحفظ على هذا الجهاز فقط"],["Could not save the photo","تعذّر حفظ الصورة"],
+["Please fill in the subject and message","أكمل الموضوع والرسالة"],["✓ Ticket sent (demo)","✓ تم إرسال التذكرة (تجريبي)"],["✓ Request sent (demo)","✓ تم إرسال الطلب (تجريبي)"],["Enter a valid domain","أدخل نطاقاً صحيحاً"],
+["Copied","تم النسخ"],["Copy the link manually","انسخ الرابط يدوياً"],
+["Add at least one line: service_id | link | quantity","أضف سطراً واحداً على الأقل: service_id | link | quantity"],["unknown service ID","رقم الخدمة غير معروف"],["invalid link","رابط غير صالح"]
+];
+const AR=new Map(PAIRS),EN=new Map(PAIRS.map(p=>[p[1],p[0]]));
+const RULES=[
+ [/^\(min (\d+) – max (\d+)\)$/,m=>`(الحد الأدنى ${m[1]} – الأقصى ${m[2]})`,/^\(الحد الأدنى (\d+) – الأقصى (\d+)\)$/,m=>`(min ${m[1]} – max ${m[2]})`],
+ [/^Quantity must be between (\d+) and (\d+)\.$/,m=>`الكمية يجب أن تكون بين ${m[1]} و ${m[2]}.`,/^الكمية يجب أن تكون بين (\d+) و (\d+)\.$/,m=>`Quantity must be between ${m[1]} and ${m[2]}.`],
+ [/^quantity must be (\d+)–(\d+)$/,m=>`الكمية يجب أن تكون بين ${m[1]} و ${m[2]}`,/^الكمية يجب أن تكون بين (\d+) و (\d+)$/,m=>`quantity must be ${m[1]}–${m[2]}`],
+ [/^Qty (\d+)$/,m=>`الكمية ${m[1]}`,/^الكمية (\d+)$/,m=>`Qty ${m[1]}`],
+ [/^Line (\d+): (.*)$/,m=>`السطر ${m[1]}: ${tr(m[2])}`,/^السطر (\d+): (.*)$/,m=>`Line ${m[1]}: ${tr(m[2])}`]
+];
+let lang="en";
+function tr(s){
+  const k=s.trim();if(!k)return s;
+  let o;
+  if(lang==="ar"){o=AR.get(k);if(o==null)for(const r of RULES){const m=k.match(r[0]);if(m){o=r[1](m);break}}}
+  else{o=EN.get(k);if(o==null)for(const r of RULES){const m=k.match(r[2]);if(m){o=r[3](m);break}}}
+  return o==null?s:s.slice(0,s.indexOf(k))+o+s.slice(s.indexOf(k)+k.length);
+}
+const skip=n=>{const p=n.parentElement;return !p||/^(SCRIPT|STYLE)$/.test(p.nodeName)||p.closest("[data-notr]")};
+const fixText=n=>{if(skip(n))return;const v=tr(n.nodeValue);if(v!==n.nodeValue)n.nodeValue=v};
+function walk(root){
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode())fixText(n);
+  (root.querySelectorAll?root:document).querySelectorAll("[placeholder],[aria-label]").forEach(el=>["placeholder","aria-label"].forEach(a=>{
+    const v=el.getAttribute(a);if(v){const t=tr(v);if(t!==v)el.setAttribute(a,t)}}));
+}
+new MutationObserver(ms=>ms.forEach(m=>{
+  if(m.type==="characterData")fixText(m.target);
+  else m.addedNodes.forEach(n=>n.nodeType===3?fixText(n):n.nodeType===1&&walk(n));
+})).observe(document.body,{childList:true,subtree:true,characterData:true});
+["uname","sbName","hName","pmName","pmMail","accName","accMail","accUid","avInit","pmAv","accAv","sbAv","ref"].forEach(id=>{const e=document.getElementById(id);e&&e.setAttribute("data-notr","")});
+function applyLang(l){
+  lang=l;const h=document.documentElement;
+  h.lang=l;h.dir=l==="ar"?"rtl":"ltr";
+  try{localStorage.setItem("lf_lang",l)}catch(e){}
+  walk(document.body);
+  document.querySelectorAll(".lb").forEach(b=>b.classList.toggle("on",b.dataset.lang===l));
+}
+document.querySelectorAll(".lb").forEach(b=>b.onclick=()=>applyLang(b.dataset.lang));
+{let l=null;try{l=localStorage.getItem("lf_lang")}catch(e){}
+ applyLang(l||((navigator.language||"").toLowerCase().startsWith("ar")?"ar":"en"))}
+
 drawCats();refresh();
 setTimeout(()=>{if(!window.__authDone)location.replace("index.html")},8000);   // إن تعذّر تحميل Firebase
 </script>
