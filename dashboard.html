@@ -317,7 +317,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <script>
 const $=s=>document.querySelector(s);
 /* ---- بيانات تجريبية: استبدلها ببيانات الخادم لاحقاً ---- */
-let user="Guest", balance=0, spent=0, uid="", ORDERS=[], tab=0;
+let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
 const SERVICES=[
  {id:101,p:"telegram",c:"Telegram Members",n:"Channel Members – Non Drop",r:1.20,min:100,max:50000,d:"Start: 0–1 hour\nSpeed: 5K / day\nRefill: 30 days"},
  {id:102,p:"telegram",c:"Telegram Views",n:"Post Views – Last 5 posts",r:0.15,min:100,max:100000,d:"Start: instant\nSpeed: 20K / day"},
@@ -378,6 +378,12 @@ const balStr=()=>balLoading?"…":money(balance);
 const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=balStr();$("#cSpent").textContent=money(spent);$("#qBalTxt")&&($("#qBalTxt").textContent="$"+balStr())};
 function setBal(n,loading){balance=n;balLoading=!!loading;refresh()}        // يُستدعى من Firestore (onSnapshot)
 function balError(){toast("Could not load balance")}
+function idError(){toast("Could not set up your account ID")}
+function setNumericId(id){                              // المعرّف الرقمي النظيف بدل UID الطويل
+  numId=id;
+  $("#accUid").textContent=id==null?"—":String(id);
+  $("#ref").value=id==null?"":location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+id;
+}
 $("#uname").textContent=user;
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function fillAccount(u){                     // يُستدعى من Firebase بعد التحقق من الدخول
@@ -388,8 +394,7 @@ function fillAccount(u){                     // يُستدعى من Firebase ب�
   let saved="";try{saved=localStorage.getItem("lf_avatar_"+u.uid)||""}catch(e){}
   applyAvatar(saved||u.photoURL||"");
   $("#hName").textContent=user;$("#pmName").textContent=user;$("#pmMail").textContent=u.email||"";
-  $("#accName").textContent=u.displayName||"—";$("#accMail").textContent=u.email||"—";$("#accUid").textContent=u.uid;
-  $("#ref").value=location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+u.uid.slice(0,8);
+  $("#accName").textContent=u.displayName||"—";$("#accMail").textContent=u.email||"—";$("#accUid").textContent="…";
 }
 $("#hIc").innerHTML=ic("card",18);$("#pmUser").innerHTML=ic("user",18);$("#pmOut").innerHTML=ic("logout",18);$("#burger").innerHTML=ic("menu",22);$("#closeSb").innerHTML=ic("x",20);
 
@@ -616,7 +621,7 @@ $("#payBtn").onclick=()=>{
   const link=PAYMENT_LINKS[amount];
   if(!link)return m.textContent="اختر أحد المبالغ الجاهزة ($5, $10, $25, $50).";
   const u=new URL(link);                                   // تحويل مباشر إلى صفحة Stripe الآمنة
-  if(uid)u.searchParams.set("client_reference_id",uid);   // لربط الدفعة بالمستخدم
+  if(numId||uid)u.searchParams.set("client_reference_id",String(numId||uid));   // لربط الدفعة بالمستخدم
   if(uemail)u.searchParams.set("prefilled_email",uemail);
   location.href=u.toString();
 };
@@ -661,7 +666,7 @@ const PAIRS=[
 ["✓ Payment received. Your balance will be updated shortly","✓ تم الدفع. سيُضاف الرصيد خلال لحظات"],["Payment cancelled","تم إلغاء الدفع"],
 ["Please choose an image file","اختر ملف صورة فقط"],["Image is larger than 5MB","الصورة أكبر من 5MB"],["Could not read the image","تعذّر قراءة الصورة"],["✓ Photo saved","✓ تم حفظ الصورة"],["Saved on this device only","تم الحفظ على هذا الجهاز فقط"],["Could not save the photo","تعذّر حفظ الصورة"],
 ["Please fill in the subject and message","أكمل الموضوع والرسالة"],["✓ Ticket sent (demo)","✓ تم إرسال التذكرة (تجريبي)"],["✓ Request sent (demo)","✓ تم إرسال الطلب (تجريبي)"],["Enter a valid domain","أدخل نطاقاً صحيحاً"],
-["Could not load balance","تعذّر تحميل الرصيد"],["Copied","تم النسخ"],["Copy the link manually","انسخ الرابط يدوياً"],
+["Could not load balance","تعذّر تحميل الرصيد"],["Could not set up your account ID","تعذّر إعداد معرّف حسابك"],["Copied","تم النسخ"],["Copy the link manually","انسخ الرابط يدوياً"],
 ["Add at least one line: service_id | link | quantity","أضف سطراً واحداً على الأقل: service_id | link | quantity"],["unknown service ID","رقم الخدمة غير معروف"],["invalid link","رابط غير صالح"]
 ];
 const AR=new Map(PAIRS),EN=new Map(PAIRS.map(p=>[p[1],p[0]]));
@@ -708,7 +713,7 @@ setTimeout(()=>{if(!window.__authDone)location.replace("index.html")},8000);   /
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const app = initializeApp({
@@ -724,23 +729,54 @@ const app = initializeApp({
 const auth = initializeAuth(app, { persistence: browserSessionPersistence });
 
 const db = getFirestore(app);
-let unsubBal = null;                                       // مستمع الرصيد الحالي
-const stopBal = () => { if (unsubBal) { unsubBal(); unsubBal = null; } };
+
+/* ---------- معرّف رقمي تسلسلي لكل مستخدم ----------
+   counters/users        { next: 1000 }          ← يُنشأ يدوياً مرة واحدة من Console
+   uidMap/{authUid}      { id: 1000 }            ← يربط UID بالمعرّف الرقمي
+   users/{id}            { uid, balance, createdAt }
+   الإنشاء يتم داخل Transaction واحدة (ذرّية)، وقواعد Firestore تفرض التسلسل ومنع التلاعب. */
+async function ensureNumericId(user) {
+  const mapRef = doc(db, "uidMap", user.uid);
+  const known = await getDoc(mapRef);
+  if (known.exists()) return known.data().id;             // مستخدم قديم: لديه معرّف
+  return runTransaction(db, async tx => {
+    const m = await tx.get(mapRef);
+    if (m.exists()) return m.data().id;                   // سبقه تبويب آخر
+    const cRef = doc(db, "counters", "users");
+    const c = await tx.get(cRef);
+    if (!c.exists()) throw new Error("counters/users is missing");
+    const id = c.data().next;
+    tx.update(cRef, { next: id + 1 });
+    tx.set(mapRef, { id });
+    tx.set(doc(db, "users", String(id)), { uid: user.uid, balance: 0, createdAt: serverTimestamp() });
+    return id;
+  });
+}
+
+let unsubBal = null, sess = 0;                             // مستمع الرصيد + رقم الجلسة لتجاهل النتائج المتأخرة
+const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } };
 
 onAuthStateChanged(auth, user => {
   stopBal();                                               // إلغاء أي اشتراك سابق عند تغيّر حالة الدخول
+  const my = sess;
   if (!user) { location.replace("index.html"); return; }   // غير مسجّل → صفحة الدخول
-  fillAccount(user);                                       // الاسم/البريد الحقيقي
+  fillAccount(user);
   setBal(0, true);                                         // حالة التحميل: يظهر $…
-  // تحديثات مباشرة لـ users/{uid}.balance
-  unsubBal = onSnapshot(
-    doc(db, "users", user.uid),
-    snap => {
-      const b = snap.exists() ? Number(snap.data().balance) : 0;
-      setBal(Number.isFinite(b) ? b : 0, false);           // غير موجود/غير رقم → $0.00
-    },
-    err => { console.error("balance listener:", err); setBal(0, false); balError(); }
-  );
+  ensureNumericId(user).then(id => {
+    if (my !== sess) return;                               // تغيّرت الحالة أثناء الانتظار
+    setNumericId(id);
+    unsubBal = onSnapshot(
+      doc(db, "users", String(id)),                        // users/{المعرّف الرقمي}
+      snap => {
+        const b = snap.exists() ? Number(snap.data().balance) : 0;
+        setBal(Number.isFinite(b) ? b : 0, false);         // غير موجود/غير رقم → $0.00
+      },
+      err => { console.error("balance listener:", err); setBal(0, false); balError(); }
+    );
+  }).catch(err => {
+    if (my !== sess) return;
+    console.error("numeric id:", err); setNumericId(null); setBal(0, false); idError();
+  });
   window.__authDone = true;
   document.body.style.visibility = "visible";
 });
