@@ -63,7 +63,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <button id="sbCam" type="button" class="absolute -bottom-0.5 -right-0.5 w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Change photo"></button>
     </div>
     <div class="mt-3 flex justify-center items-baseline gap-1.5 min-w-0 text-[17px] font-bold leading-tight"><span class="shrink-0">Welcome</span><span id="sbName" class="truncate" dir="auto">Guest</span></div>
-    <div class="text-xs text-slate-500 mt-0.5">Customer account</div>
+    <div id="sbRole" class="text-xs text-slate-500 mt-0.5">Customer account</div>
 
     <div class="mt-4 grid grid-cols-4 gap-1 max-w-[280px] mx-auto">
       <button id="qBal" type="button" class="qa" aria-label="Balance"><span class="qi" id="qiBal"></span><span id="qBalTxt">$0.00</span></button>
@@ -99,13 +99,14 @@ html.dark body{background:#0b1220;color:#e5ebf5}
     <div class="relative shrink-0">
       <button id="avatarBtn" class="flex items-center gap-2 rounded-full p-0.5 pr-0.5 md:pr-3 hover:bg-slate-100 active:scale-95 transition" aria-haspopup="menu" aria-expanded="false" aria-label="Profile menu">
         <span id="avInit" class="overflow-hidden w-10 h-10 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-sm font-bold ring-2 ring-white shadow">G</span>
-        <span class="hidden md:block text-left leading-tight max-w-[140px]"><span id="hName" class="block text-sm font-semibold truncate" dir="auto">Guest</span><span class="block text-[11px] text-slate-500">Customer</span></span>
+        <span class="hidden md:block text-left leading-tight max-w-[140px]"><span id="hName" class="block text-sm font-semibold truncate" dir="auto">Guest</span><span id="hRole" class="block text-[11px] text-slate-500">Customer</span></span>
       </button>
       <div id="pmenu" class="pm hidden absolute right-0 top-12 w-60 rounded-2xl bg-white border border-blue-100 shadow-xl shadow-blue-900/10 p-1.5" role="menu">
         <div class="px-3 py-2.5 border-b border-slate-100 mb-1 flex items-center gap-3">
           <span id="pmAv" class="overflow-hidden w-10 h-10 shrink-0 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-sm font-bold">G</span>
           <div class="min-w-0"><div id="pmName" class="text-sm font-bold truncate" dir="auto">Guest</div>
-          <div id="pmMail" class="text-xs text-slate-500 truncate" dir="ltr"></div></div>
+          <div id="pmMail" class="text-xs text-slate-500 truncate" dir="ltr"></div>
+          <div id="pmId" class="text-[11px] font-semibold text-blue-600" dir="ltr"></div></div>
         </div>
         <button id="pmProfile" role="menuitem" class="w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-blue-50 active:scale-95 transition"><span id="pmUser"></span>الملف الشخصي</button>
         <button id="logout" role="menuitem" class="w-full flex items-center gap-3 h-11 px-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 active:scale-95 transition"><span id="pmOut"></span>تسجيل الخروج</button>
@@ -379,10 +380,13 @@ const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=balStr();$("#cS
 function setBal(n,loading){balance=n;balLoading=!!loading;refresh()}        // يُستدعى من Firestore (onSnapshot)
 function balError(){toast("Could not load balance")}
 function idError(){toast("Could not set up your account ID")}
-function setNumericId(id){                              // المعرّف الرقمي النظيف بدل UID الطويل
+function setNumericId(id){                              // معرّف الحساب الرقمي (الحقل userId)
   numId=id;
   $("#accUid").textContent=id==null?"—":String(id);
   $("#ref").value=id==null?"":location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+id;
+  $("#hRole").textContent=id==null?"Customer":"ID #"+id;          // الهيدر
+  $("#sbRole").textContent=id==null?"Customer account":"ID #"+id; // القائمة الجانبية
+  $("#pmId").textContent=id==null?"":"ID #"+id;                   // القائمة المنسدلة
 }
 $("#uname").textContent=user;
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -621,7 +625,7 @@ $("#payBtn").onclick=()=>{
   const link=PAYMENT_LINKS[amount];
   if(!link)return m.textContent="اختر أحد المبالغ الجاهزة ($5, $10, $25, $50).";
   const u=new URL(link);                                   // تحويل مباشر إلى صفحة Stripe الآمنة
-  if(numId||uid)u.searchParams.set("client_reference_id",String(numId||uid));   // لربط الدفعة بالمستخدم
+  if(uid)u.searchParams.set("client_reference_id",uid);   // UID = معرّف مستند users/{uid}   // لربط الدفعة بالمستخدم
   if(uemail)u.searchParams.set("prefilled_email",uemail);
   location.href=u.toString();
 };
@@ -730,30 +734,25 @@ const auth = initializeAuth(app, { persistence: browserSessionPersistence });
 
 const db = getFirestore(app);
 
-/* ---------- معرّف رقمي تسلسلي لكل مستخدم ----------
-   counters/users        { next: 1000 }          ← يُنشأ يدوياً مرة واحدة من Console
-   uidMap/{authUid}      { id: 1000 }            ← يربط UID بالمعرّف الرقمي
-   users/{id}            { uid, balance, createdAt }
-   الإنشاء يتم داخل Transaction واحدة (ذرّية)، وقواعد Firestore تفرض التسلسل ومنع التلاعب. */
-async function ensureNumericId(user) {
-  const mapRef = doc(db, "uidMap", user.uid);
-  const known = await getDoc(mapRef);
-  if (known.exists()) return known.data().id;             // مستخدم قديم: لديه معرّف
-  return runTransaction(db, async tx => {
-    const m = await tx.get(mapRef);
-    if (m.exists()) return m.data().id;                   // سبقه تبويب آخر
+/* ---------- إنشاء مستند المستخدم تلقائياً ----------
+   users/{uid}      { balance: 0, userId: 1000+, email, createdAt }
+   counters/users   { next: 1000 }   ← يُنشأ يدوياً مرة واحدة من Console
+   الإنشاء داخل Transaction واحدة لضمان معرّف رقمي فريد ومتسلسل. */
+async function ensureUserDoc(user) {
+  const ref = doc(db, "users", user.uid);
+  if ((await getDoc(ref)).exists()) return;               // موجود مسبقاً
+  await runTransaction(db, async tx => {
+    if ((await tx.get(ref)).exists()) return;             // سبقه تبويب آخر
     const cRef = doc(db, "counters", "users");
     const c = await tx.get(cRef);
     if (!c.exists()) throw new Error("counters/users is missing");
-    const id = c.data().next;
-    tx.update(cRef, { next: id + 1 });
-    tx.set(mapRef, { id });
-    tx.set(doc(db, "users", String(id)), { uid: user.uid, balance: 0, createdAt: serverTimestamp() });
-    return id;
+    const userId = c.data().next;
+    tx.update(cRef, { next: userId + 1 });
+    tx.set(ref, { balance: 0, userId, email: user.email || "", createdAt: serverTimestamp() });
   });
 }
 
-let unsubBal = null, sess = 0;                             // مستمع الرصيد + رقم الجلسة لتجاهل النتائج المتأخرة
+let unsubBal = null, sess = 0;                             // مستمع المستند + رقم الجلسة لتجاهل النتائج المتأخرة
 const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } };
 
 onAuthStateChanged(auth, user => {
@@ -762,21 +761,21 @@ onAuthStateChanged(auth, user => {
   if (!user) { location.replace("index.html"); return; }   // غير مسجّل → صفحة الدخول
   fillAccount(user);
   setBal(0, true);                                         // حالة التحميل: يظهر $…
-  ensureNumericId(user).then(id => {
-    if (my !== sess) return;                               // تغيّرت الحالة أثناء الانتظار
-    setNumericId(id);
-    unsubBal = onSnapshot(
-      doc(db, "users", String(id)),                        // users/{المعرّف الرقمي}
-      snap => {
-        const b = snap.exists() ? Number(snap.data().balance) : 0;
-        setBal(Number.isFinite(b) ? b : 0, false);         // غير موجود/غير رقم → $0.00
-      },
-      err => { console.error("balance listener:", err); setBal(0, false); balError(); }
-    );
-  }).catch(err => {
-    if (my !== sess) return;
-    console.error("numeric id:", err); setNumericId(null); setBal(0, false); idError();
-  });
+  ensureUserDoc(user)
+    .catch(err => { if (my === sess) { console.error("create user doc:", err); idError(); } })
+    .then(() => {
+      if (my !== sess) return;
+      unsubBal = onSnapshot(
+        doc(db, "users", user.uid),                        // مباشر: users/{uid}
+        snap => {
+          const data = snap.exists() ? snap.data() : {};
+          const b = Number(data.balance);
+          setBal(Number.isFinite(b) ? b : 0, false);       // غير موجود/غير رقم → $0.00
+          setNumericId(Number.isFinite(Number(data.userId)) && data.userId != null ? data.userId : null);
+        },
+        err => { console.error("user listener:", err); setBal(0, false); setNumericId(null); balError(); }
+      );
+    });
   window.__authDone = true;
   document.body.style.visibility = "visible";
 });
