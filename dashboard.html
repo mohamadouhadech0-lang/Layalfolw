@@ -70,12 +70,21 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 .dark .qa.danger .qi{background:#3b1519;color:#ff8a8a}
 .fld{width:100%;min-height:46px;padding:10px 14px;border-radius:12px;border:1px solid #d5dff0;background:#fff;outline:none;font-size:15px}
 .fld:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+@keyframes spin{to{transform:rotate(360deg)}}
 .sec,.pm{animation:fi .22s ease}
 @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style>
 </head>
-<body class="min-h-screen" style="visibility:hidden">
+<body class="min-h-screen">
+<div id="boot" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#eef3fb;color:#0f1f3d;font-family:system-ui,Segoe UI,Tahoma,sans-serif;text-align:center;padding:24px">
+  <div id="bootSpin" style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(37,99,235,.2);border-top-color:#2563eb;animation:spin .8s linear infinite"></div>
+  <div id="bootMsg" style="font-weight:700">layal folw</div>
+  <div id="bootBtns" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center">
+    <button onclick="location.reload()" style="height:40px;padding:0 18px;border-radius:999px;background:#2563eb;color:#fff;font-weight:600;border:0">Reload</button>
+    <button onclick="location.href='index.html'" style="height:40px;padding:0 18px;border-radius:999px;background:#fff;color:#2563eb;font-weight:600;border:1px solid #bfdbfe">Login</button>
+  </div>
+</div>
 
 <div id="scrim" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-30 lg:hidden"></div>
 
@@ -348,6 +357,13 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-50 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-full shadow-xl"></div>
 
 <script>
+function bootFail(msg){            // يُستدعى عند فشل تحميل Firebase أو انتهاء المهلة
+  const m=document.getElementById("bootMsg"),b=document.getElementById("bootBtns"),s=document.getElementById("bootSpin");
+  if(!m||window.__authDone)return;
+  s.style.display="none";b.style.display="flex";
+  m.textContent=msg||"تعذّر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة. / Could not connect. Check your connection and try again.";
+}
+function bootDone(){const e=document.getElementById("boot");if(e)e.remove()}
 const $=s=>document.querySelector(s);
 /* ---- بيانات تجريبية: استبدلها ببيانات الخادم لاحقاً ---- */
 let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
@@ -746,9 +762,9 @@ document.querySelectorAll(".lb").forEach(b=>b.onclick=()=>applyLang(b.dataset.la
  applyLang(l||((navigator.language||"").toLowerCase().startsWith("ar")?"ar":"en"))}
 
 drawCats();refresh();
-setTimeout(()=>{if(!window.__authDone)location.replace("index.html")},8000);   // إن تعذّر تحميل Firebase
+setTimeout(()=>bootFail(),9000);   // إن لم يستجب Firebase: رسالة واضحة بدل شاشة بيضاء
 </script>
-<script type="module">
+<script type="module" onerror="bootFail()">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
@@ -810,7 +826,7 @@ onAuthStateChanged(auth, user => {
       );
     });
   window.__authDone = true;
-  document.body.style.visibility = "visible";
+  bootDone();
 });
 addEventListener("pagehide", stopBal);                     // إغلاق الصفحة
 
