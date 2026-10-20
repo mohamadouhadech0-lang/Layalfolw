@@ -838,83 +838,73 @@ document.getElementById("logout").onclick = out;
 document.getElementById("logout2").onclick = out;
 document.getElementById("logout3").onclick = out;
 </script>
-<script type="module">
   <script type="module">
-  alert("مرحباً، السكريبت يعمل!");
+    alert("مرحباً، السكريبت يعمل!");
 
-  import { db, auth } from "./firebaseConfig.js";
-  import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-  
-  // باقي الكود...
+    import { db, auth } from "./firebaseConfig.js";
+    import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-  import { db, auth } from "./firebaseConfig.js";
-  import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://justanotherpanel.com/api/v2");
+    const API_URL = "https://corsproxy.io/?" + encodeURIComponent("https://justanotherpanel.com/api/v2");
+    const API_KEY = "feaa69096d501c6ccfc39634a59e2cc8";
 
-  const API_KEY = "feaa69096d501c6ccfc39634a59e2cc8";
+    let allServices = [];
 
-  let allServices = [];
+    async function fetchServicesDirectly() {
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ key: API_KEY, action: "services" })
+        });
 
-  // جلب الخدمات مباشرة
-  async function fetchServicesDirectly() {
-    try {
-      const response = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ key: API_KEY, action: "services" })
-      });
-
-      const text = await response.text();
-      
-      // سنظهر لك نتيجة الاتصال لترى أن الكود يعمل بنجاح
-      alert("تم الاتصال بنجاح! الطول: " + text.length);
-
-      return JSON.parse(text);
-    } catch (error) {
-      alert("خطأ في الاتصال: " + error.message);
-      return [];
-    }
-  }
-
-  async function init() {
-    allServices = await fetchServicesDirectly();
-
-    const categorySelect = document.getElementById('categorySelect');
-    const serviceSelect = document.getElementById('serviceSelect');
-
-    if (!categorySelect || !serviceSelect) {
-      alert("عناصر القوائم غير موجودة في الصفحة!");
-      return;
+        const text = await response.text();
+        alert("تم الاتصال بالبروكسي بنجاح!");
+        return JSON.parse(text);
+      } catch (error) {
+        alert("خطأ الاتصال: " + error.message);
+        return [];
+      }
     }
 
-    if (!Array.isArray(allServices) || allServices.length === 0) return;
+    async function init() {
+      allServices = await fetchServicesDirectly();
 
-    const categories = [...new Set(allServices.map(s => s.category).filter(Boolean))];
+      const categorySelect = document.getElementById('categorySelect');
+      const serviceSelect = document.getElementById('serviceSelect');
 
-    categorySelect.innerHTML = '<option value="">اختر الفئة...</option>';
-    categories.forEach(category => {
-      const option = document.createElement('option');
-      option.value = category;
-      option.textContent = category;
-      categorySelect.appendChild(option);
-    });
+      if (!categorySelect || !serviceSelect) {
+        alert("تنبيه: عناصر القوائم غير موجودة في الصفحة!");
+        return;
+      }
 
-    categorySelect.addEventListener('change', (e) => {
-      const selectedCategory = e.target.value;
-      const filteredServices = allServices.filter(s => s.category === selectedCategory);
+      if (!Array.isArray(allServices) || allServices.length === 0) return;
 
-      serviceSelect.innerHTML = '<option value="">اختر الخدمة...</option>';
-      filteredServices.forEach(service => {
+      const categories = [...new Set(allServices.map(s => s.category).filter(Boolean))];
+
+      categorySelect.innerHTML = '<option value="">اختر الفئة...</option>';
+      categories.forEach(category => {
         const option = document.createElement('option');
-        option.value = service.service;
-        option.dataset.rate = service.rate;
-        option.dataset.min = service.min;
-        option.dataset.max = service.max;
-        option.textContent = `${service.name} - ($${service.rate} / 1000)`;
-        serviceSelect.appendChild(option);
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
       });
-    });
-  }
 
-  init();
-</script>
+      categorySelect.addEventListener('change', (e) => {
+        const selectedCategory = e.target.value;
+        const filteredServices = allServices.filter(s => s.category === selectedCategory);
+
+        serviceSelect.innerHTML = '<option value="">اختر الخدمة...</option>';
+        filteredServices.forEach(service => {
+          const option = document.createElement('option');
+          option.value = service.service;
+          option.dataset.rate = service.rate;
+          option.dataset.min = service.min;
+          option.dataset.max = service.max;
+          option.textContent = `${service.name} - ($${service.rate} / 1000)`;
+          serviceSelect.appendChild(option);
+        });
+      });
+    }
+
+    init();
+  </script>
