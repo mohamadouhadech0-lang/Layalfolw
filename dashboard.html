@@ -9,7 +9,25 @@
 <style>
 body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;background:#eef3fb;color:#0f1f3d;-webkit-tap-highlight-color:transparent}
 .noscroll::-webkit-scrollbar{display:none}.noscroll{scrollbar-width:none}
-.sb{transition:transform .25s}
+.sb{transition:transform .32s cubic-bezier(.32,.72,0,1)}
+#scrim{opacity:0;pointer-events:none;transition:opacity .3s}
+#scrim.on{opacity:1;pointer-events:auto}
+.qa{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;font-weight:500;color:#64748b}
+.qi{width:46px;height:46px;border-radius:9999px;display:grid;place-items:center;background:#f1f5f9;color:#334155;transition:background .15s,color .15s,transform .15s}
+.qa:hover .qi{background:#dbeafe;color:#1d4ed8}.qa:active .qi{transform:scale(.92)}
+.qa.danger .qi{background:#fee2e2;color:#dc2626}.qa.danger:hover .qi{background:#fecaca}
+.sb-scroll{scrollbar-width:thin}
+html.dark body{background:#0b1220;color:#e5ebf5}
+.dark .bg-white,.dark .bg-white\/90,.dark .bg-white\/95{background-color:#111a2e!important}
+.dark .bg-blue-50{background-color:#14233f!important}.dark .bg-blue-100{background-color:#1b305a!important}
+.dark .bg-slate-50{background-color:#0f1829!important}.dark .bg-slate-100{background-color:#1a2438!important}
+.dark .border-blue-100,.dark .border-blue-200,.dark .border-slate-100,.dark .border-slate-200{border-color:#22304a!important}
+.dark .text-slate-500{color:#8d9bb5!important}.dark .text-slate-600,.dark .text-slate-700{color:#b9c4d9!important}.dark .text-slate-800{color:#e5ebf5!important}
+.dark .text-blue-700,.dark .text-blue-800{color:#8ab4ff!important}
+.dark .fld{background:#0f1829;border-color:#22304a;color:#e5ebf5}
+.dark .hover\:bg-slate-100:hover{background-color:#1a2438!important}.dark .hover\:bg-blue-50:hover{background-color:#14233f!important}
+.dark .qi{background:#1a2438;color:#c7d2e6}.dark .qa{color:#8d9bb5}.dark .qa:hover .qi{background:#1b305a;color:#8ab4ff}
+.dark .qa.danger .qi{background:#3b1519;color:#ff8a8a}
 .fld{width:100%;min-height:46px;padding:10px 14px;border-radius:12px;border:1px solid #d5dff0;background:#fff;outline:none;font-size:15px}
 .fld:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
 .sec,.pm{animation:fi .22s ease}
@@ -19,19 +37,33 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 </head>
 <body class="min-h-screen" style="visibility:hidden">
 
-<div id="scrim" class="hidden fixed inset-0 bg-slate-900/50 z-30 lg:hidden"></div>
+<div id="scrim" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-30 lg:hidden"></div>
 
-<!-- Sidebar -->
-<aside id="sb" class="sb fixed z-40 top-0 bottom-0 left-0 w-64 -translate-x-full lg:translate-x-0 bg-gradient-to-b from-blue-600 to-blue-800 text-white flex flex-col">
-  <div class="h-16 flex items-center justify-between px-5 font-extrabold text-xl tracking-wide">
-    <span>◆ layal folw</span>
-    <button id="closeSb" class="lg:hidden w-9 h-9 rounded-lg hover:bg-white/10" aria-label="Close"></button>
+<!-- Sidebar / Drawer -->
+<aside id="sb" class="sb fixed z-40 top-0 bottom-0 left-0 w-[86%] max-w-[320px] lg:w-72 -translate-x-full lg:translate-x-0 bg-white border-r border-slate-100 flex flex-col shadow-2xl lg:shadow-none" style="padding-top:env(safe-area-inset-top,0px)" aria-label="Main menu">
+  <button id="closeSb" class="lg:hidden absolute top-3 right-3 w-9 h-9 rounded-full grid place-items-center text-slate-500 hover:bg-slate-100 active:scale-95 transition" aria-label="Close menu"></button>
+
+  <div class="pt-9 pb-4 px-5 text-center">
+    <div class="relative mx-auto w-24 h-24">
+      <div id="sbAv" class="overflow-hidden w-24 h-24 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-3xl font-bold ring-4 ring-blue-50 shadow-lg">G</div>
+      <button id="sbCam" type="button" class="absolute -bottom-0.5 -right-0.5 w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Change photo"></button>
+    </div>
+    <div class="mt-3 text-[17px] font-bold leading-tight truncate" dir="auto">Welcome <span id="sbName">Guest</span></div>
+    <div class="text-xs text-slate-500 mt-0.5">Customer account</div>
+
+    <div class="mt-4 grid grid-cols-4 gap-1 max-w-[280px] mx-auto">
+      <button id="qBal" type="button" class="qa" aria-label="Balance"><span class="qi" id="qiBal"></span><span id="qBalTxt">$0.00</span></button>
+      <button id="qSet" type="button" class="qa" aria-label="Settings"><span class="qi" id="qiSet"></span><span>Settings</span></button>
+      <button id="qTheme" type="button" class="qa" aria-label="Toggle theme"><span class="qi" id="qiTheme"></span><span id="qThemeTxt">Dark</span></button>
+      <button id="logout3" type="button" class="qa danger" aria-label="Logout"><span class="qi" id="qiOut"></span><span>Logout</span></button>
+    </div>
   </div>
-  <nav id="nav" class="px-3 py-2 space-y-1 text-[15px] font-medium overflow-y-auto"></nav>
-  <div class="mt-auto p-4 text-xs text-blue-100/80">© layal folw</div>
+
+  <div class="mx-5 h-px bg-slate-100"></div>
+  <nav id="nav" class="sb-scroll flex-1 overflow-y-auto px-3 py-3 space-y-0.5 text-[15px]"></nav>
 </aside>
 
-<div class="lg:ml-64 pb-24 lg:pb-8">
+<div class="lg:ml-72 pb-24 lg:pb-8">
   <!-- Header -->
   <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-blue-100 px-3 sm:px-4 h-16 flex items-center gap-2 sm:gap-3">
     <button id="burger" class="lg:hidden w-10 h-10 rounded-xl bg-blue-50 text-blue-700 text-xl" aria-label="Menu"></button>
@@ -214,6 +246,45 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
       </dl>
       <button id="logout2" class="mt-4 w-full h-12 rounded-xl border border-red-200 text-red-600 font-bold hover:bg-red-50">Logout</button>
     </section>
+
+    <section id="sec8" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-1 text-blue-800">Child Panel</h2>
+      <p class="text-sm text-slate-500 mb-4">Resell our services under your own domain with your own prices.</p>
+      <div class="space-y-3">
+        <input id="cpDom" class="fld" dir="ltr" placeholder="yourpanel.com">
+        <button id="cpBtn" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold">Request child panel</button>
+      </div>
+    </section>
+
+    <section id="sec9" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-1 text-blue-800">Mass order</h2>
+      <p class="text-sm text-slate-500 mb-3">One order per line: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs" dir="ltr">service_id | link | quantity</code></p>
+      <form id="mf" class="space-y-3" novalidate>
+        <textarea id="mTxt" rows="6" dir="ltr" class="fld font-mono text-sm" placeholder="101 | https://t.me/channel | 1000"></textarea>
+        <p id="mMsg" class="min-h-[20px] text-sm text-red-500"></p>
+        <button class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold">Submit orders</button>
+      </form>
+    </section>
+
+    <section id="sec10" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-3 text-blue-800">FAQ</h2>
+      <div class="divide-y divide-slate-100 text-sm">
+        <details class="py-3"><summary class="font-semibold cursor-pointer">How long until my order starts?</summary><p class="mt-2 text-slate-500">Most services start within minutes to a few hours. See the service description for details.</p></details>
+        <details class="py-3"><summary class="font-semibold cursor-pointer">Can I cancel an order?</summary><p class="mt-2 text-slate-500">Orders cannot be cancelled once processing has started.</p></details>
+        <details class="py-3"><summary class="font-semibold cursor-pointer">Does my account need to be public?</summary><p class="mt-2 text-slate-500">Yes. Private accounts or links cannot be processed.</p></details>
+        <details class="py-3"><summary class="font-semibold cursor-pointer">How do I add funds?</summary><p class="mt-2 text-slate-500">Open Add funds, choose an amount and a payment method.</p></details>
+      </div>
+    </section>
+
+    <section id="sec11" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-3 text-blue-800">Terms</h2>
+      <ul class="list-disc ps-5 space-y-2 text-sm text-slate-600">
+        <li>Results can vary; delivery times are estimates, not guarantees.</li>
+        <li>Do not place multiple orders for the same link until the first is complete.</li>
+        <li>Payments are non-refundable once an order has started.</li>
+        <li>You are responsible for complying with the rules of each platform you use.</li>
+      </ul>
+    </section>
   </main>
 </div>
 
@@ -260,6 +331,15 @@ const LUCIDE={
  menu:'<line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/>',
  x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+ layers:'<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+ checks:'<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>',
+ heart:'<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+ filetext:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+ filecheck:'<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m9 15 2 2 4-4"/>',
+ help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+ gear:'<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+ sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+ moon:'<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
  lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
  coins:'<circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/>',
@@ -272,12 +352,12 @@ const NAV=[["cart","New order"],["grid","Services"],["package","Orders"],["walle
 const money=n=>n.toFixed(2);
 let plat="all", cur=null, toastT;
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.remove("hidden");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add("hidden"),2400)};
-const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=money(balance);$("#cSpent").textContent=money(spent)};
+const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=money(balance);$("#cSpent").textContent=money(spent);$("#qBalTxt")&&($("#qBalTxt").textContent="$"+money(balance))};
 $("#uname").textContent=user;
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function fillAccount(u){                     // يُستدعى من Firebase بعد التحقق من الدخول
   user=u.displayName||u.email||"User"; uid=u.uid; uemail=u.email||"";
-  $("#uname").textContent=user;
+  $("#uname").textContent=user;$("#sbName").textContent=user;
   const w=user.trim().split(/[\s@._-]+/).filter(Boolean);
   ini=(w.length>1?w[0][0]+w[1][0]:user.trim().slice(0,2)).toUpperCase()||"G";
   let saved="";try{saved=localStorage.getItem("lf_avatar_"+u.uid)||""}catch(e){}
@@ -292,7 +372,7 @@ $("#hIc").innerHTML=ic("card",18);$("#pmUser").innerHTML=ic("user",18);$("#pmOut
 const setNav=i=>{
   document.querySelectorAll("[data-n]").forEach(el=>{
     const on=+el.dataset.n===i;
-    if(el.closest("#nav"))el.className=`w-full flex items-center gap-3 h-11 px-3 rounded-xl text-left ${on?"bg-white text-blue-700 font-bold":"text-blue-50 hover:bg-white/10"}`;
+    if(el.closest("#nav"))el.className=`w-full flex items-center gap-3 h-11 px-3 rounded-xl text-left active:scale-[.98] transition ${on?"bg-blue-50 text-blue-700 font-semibold":"text-slate-600 font-medium hover:bg-slate-100"}`;
     else{
       el.className=`flex flex-col items-center justify-center gap-1 h-16 text-[11px] leading-none ${on?"text-blue-700 font-bold":"text-slate-500 font-medium"}`;
       el.firstElementChild.className=`grid place-items-center w-14 h-8 rounded-full transition-colors ${on?"bg-blue-100 text-blue-700":""}`;
@@ -300,11 +380,13 @@ const setNav=i=>{
     }
   });
 };
-$("#nav").innerHTML=NAV.map((x,i)=>`<button data-n="${i}"><span>${ic(x[0],20)}</span><span>${x[1]}</span></button>`).join("");
+/* [section index, icon, label, badge] */
+const MENU=[[0,"cart","New order"],[8,"layers","Child Panel","new"],[9,"checks","Mass order"],[1,"heart","Services"],[2,"package","Orders"],[3,"card","Add funds"],[10,"help","FAQ"],[5,"code","API"],[4,"ticket","Tickets","tk"],[11,"filecheck","Terms"]];
+$("#nav").innerHTML=MENU.map(x=>`<button data-n="${x[0]}"><span class="shrink-0">${ic(x[1],20)}</span><span class="flex-1 text-left">${x[2]}</span>${x[3]==="tk"?'<span id="tkBadge" class="hidden min-w-[22px] h-[22px] px-1.5 rounded-full bg-orange-500 text-white text-xs font-bold place-items-center shadow-sm shadow-orange-500/30">0</span>':x[3]==="new"?'<span class="px-2 h-[22px] rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold grid place-items-center">NEW</span>':""}</button>`).join("");
 $("#bnav").innerHTML=[0,1,2,3].map(i=>`<button data-n="${i}"><span>${ic(NAV[i][0],24)}</span><span>${NAV[i][1]}</span></button>`).join("")+`<button id="more" class="flex flex-col items-center justify-center gap-1 h-16 text-[11px] leading-none text-slate-500 font-medium"><span class="grid place-items-center w-14 h-8 rounded-full">${ic("menu",24)}</span><span>More</span></button>`;
 function showSec(i){
   tab=i;
-  for(let k=0;k<8;k++)$("#sec"+k).classList.toggle("hidden",k!==i);
+  for(let k=0;k<12;k++)$("#sec"+k).classList.toggle("hidden",k!==i);
   $("#platWrap").classList.toggle("hidden",i>1);
   const el=$("#sec"+i);el.classList.remove("sec");void el.offsetWidth;el.classList.add("sec");
   if(i===1)drawServices();if(i===2)drawOrders();
@@ -317,7 +399,7 @@ function setAv(el,url){
   if(url){const i=new Image();i.src=url;i.alt="";i.referrerPolicy="no-referrer";i.className="w-full h-full object-cover";el.appendChild(i)}
   else el.textContent=ini;
 }
-function applyAvatar(url){avUrl=url;["#avInit","#pmAv","#accAv"].forEach(s=>setAv($(s),url))}
+function applyAvatar(url){avUrl=url;["#avInit","#pmAv","#accAv","#sbAv"].forEach(s=>setAv($(s),url))}
 $("#camBtn").innerHTML=ic("camera",18);
 const pickPhoto=()=>$("#avFile").click();
 $("#camBtn").onclick=$("#upBtn").onclick=pickPhoto;
@@ -366,6 +448,40 @@ $("#avSave").onclick=async()=>{
   $("#wFunds").onclick=()=>showSec(3);
   $("#wOrder").onclick=()=>showSec(0);
 }
+/* ---- Drawer quick actions, theme, badges, new sections ---- */
+let tickets=0;
+function tkBadge(){const b=$("#tkBadge");if(!b)return;b.textContent=tickets;b.classList.toggle("hidden",!tickets);b.classList.toggle("grid",!!tickets)}
+$("#qiBal").innerHTML=ic("wallet",20);$("#qiSet").innerHTML=ic("gear",20);$("#qiOut").innerHTML=ic("logout",20);$("#sbCam").innerHTML=ic("camera",15);
+function setTheme(dark){
+  document.documentElement.classList.toggle("dark",dark);
+  $("#qiTheme").innerHTML=ic(dark?"sun":"moon",20);$("#qThemeTxt").textContent=dark?"Light":"Dark";
+  try{localStorage.setItem("lf_theme",dark?"dark":"light")}catch(e){}
+}
+{let t=null;try{t=localStorage.getItem("lf_theme")}catch(e){}
+ setTheme(t?t==="dark":matchMedia("(prefers-color-scheme: dark)").matches)}
+$("#qTheme").onclick=()=>setTheme(!document.documentElement.classList.contains("dark"));
+$("#qBal").onclick=()=>{openSb(false);showSec(3)};
+$("#qSet").onclick=()=>{openSb(false);showSec(7)};
+$("#sbCam").onclick=()=>{openSb(false);showSec(7)};
+$("#cpBtn").onclick=()=>{const v=$("#cpDom").value.trim();toast(/^[\w.-]+\.\w{2,}$/.test(v)?"✓ Request sent (demo)":"Enter a valid domain")};
+$("#mf").onsubmit=e=>{
+  e.preventDefault();
+  const m=$("#mMsg");m.textContent="";
+  const rows=$("#mTxt").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  if(!rows.length)return m.textContent="Add at least one line: service_id | link | quantity";
+  let total=0;const out=[];
+  for(let i=0;i<rows.length;i++){
+    const [id,link,q]=rows[i].split("|").map(x=>x.trim()),s=SERVICES.find(x=>x.id===+id),n=+q;
+    if(!s)return m.textContent=`Line ${i+1}: unknown service ID`;
+    if(!/^https?:\/\/\S+\.\S+/.test(link||""))return m.textContent=`Line ${i+1}: invalid link`;
+    if(!n||n<s.min||n>s.max)return m.textContent=`Line ${i+1}: quantity must be ${s.min}–${s.max}`;
+    const c=n*s.r/1000;total+=c;
+    out.push({id:Date.now().toString().slice(-5)+i,s:s.n,link,n,cost:c,t:new Date().toLocaleString()});
+  }
+  if(total>balance)return m.textContent="Insufficient balance. Please add funds first.";
+  balance-=total;spent+=total;refresh();out.forEach(o=>ORDERS.unshift(o));
+  $("#mTxt").value="";toast(`✓ ${out.length} order(s) created`);
+};
 const pm=$("#pmenu"),ab=$("#avatarBtn");
 const pmOpen=o=>{pm.classList.toggle("hidden",!o);ab.setAttribute("aria-expanded",o)};
 ab.onclick=e=>{e.stopPropagation();pmOpen(pm.classList.contains("hidden"))};
@@ -374,7 +490,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")pmOpen(false)});
 $("#pmProfile").onclick=()=>{pmOpen(false);showSec(7)};
 $("#logout").addEventListener("click",()=>pmOpen(false));
 $("#balChip").onclick=()=>showSec(3);
-const openSb=o=>{$("#sb").classList.toggle("-translate-x-full",!o);$("#scrim").classList.toggle("hidden",!o)};
+const openSb=o=>{$("#sb").classList.toggle("-translate-x-full",!o);$("#scrim").classList.toggle("on",o);document.body.style.overflow=o?"hidden":""};
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-n]"); if(!b)return;
   const i=+b.dataset.n; setNav(i); openSb(false);
@@ -485,7 +601,7 @@ $("#payBtn").onclick=()=>{
 {const p=new URLSearchParams(location.search).get("paid");     // العودة من صفحة الدفع
  if(p==="success")setTimeout(()=>toast("✓ تم الدفع. سيُضاف الرصيد خلال لحظات"),600);
  if(p==="cancel")setTimeout(()=>toast("تم إلغاء الدفع"),600);}
-$("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg").value.trim())return toast("أكمل الموضوع والرسالة");e.target.reset();toast("✓ تم إرسال التذكرة (تجريبي)")};
+$("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg").value.trim())return toast("أكمل الموضوع والرسالة");e.target.reset();tickets++;tkBadge();toast("✓ Ticket sent (demo)")};
 $("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
 drawCats();refresh();
 setTimeout(()=>{if(!window.__authDone)location.replace("index.html")},8000);   // إن تعذّر تحميل Firebase
@@ -527,6 +643,7 @@ window.__getToken = () => auth.currentUser.getIdToken();
 const out = () => signOut(auth).catch(() => {}).finally(() => location.replace("index.html"));
 document.getElementById("logout").onclick = out;
 document.getElementById("logout2").onclick = out;
+document.getElementById("logout3").onclick = out;
 </script>
 </body>
 </html>
