@@ -1,8 +1,8 @@
 {
-  "name": "Amzal API Orders",
-  "short_name": "Amzal API",
-  "description": "منصة إدارة طلبات Amzal API الاحترافية",
-  "start_url": "/dashboard.html",
+  "name": "layal folw",
+  "short_name": "layal folw",
+  "description": "منصة إدارة الخدمات الاجتماعية Layal Folw",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196f3",
