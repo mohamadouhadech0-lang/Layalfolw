@@ -75,6 +75,14 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 @keyframes spin{to{transform:rotate(360deg)}}
 .btnspin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:lfspin .7s linear infinite}
 @keyframes lfspin{to{transform:rotate(360deg)}}
+.stp{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent;white-space:nowrap}
+.stp[data-s=completed]{background:rgba(16,185,129,.15);color:#10b981;border-color:rgba(16,185,129,.35)}
+.stp[data-s=processing],.stp[data-s=inprogress]{background:rgba(59,130,246,.15);color:#3b82f6;border-color:rgba(59,130,246,.35)}
+.stp[data-s=pending]{background:rgba(245,158,11,.15);color:#f59e0b;border-color:rgba(245,158,11,.35)}
+.stp[data-s=canceled],.stp[data-s=failed]{background:rgba(239,68,68,.15);color:#ef4444;border-color:rgba(239,68,68,.35)}
+.stp[data-s=partial]{background:rgba(249,115,22,.15);color:#f97316;border-color:rgba(249,115,22,.35)}
+.stp[data-s=review]{background:rgba(139,92,246,.15);color:#8b5cf6;border-color:rgba(139,92,246,.35)}
+
 @keyframes okpop{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
 @keyframes okdraw{to{stroke-dashoffset:0}}
 .okcard{animation:okpop .28s cubic-bezier(.2,.9,.3,1.2)}
@@ -524,6 +532,7 @@ $("#nav").innerHTML=MENU.map(x=>`<button data-n="${x[0]}"><span class="shrink-0"
 $("#bnav").innerHTML=[0,1,2,3].map(i=>`<button data-n="${i}"><span>${ic(NAV[i][0],24)}</span><span>${NAV[i][1]}</span></button>`).join("");
 function showSec(i){
   tab=i;
+  if(i===2&&window.__getToken)syncOrders();
   for(let k=0;k<12;k++)$("#sec"+k).classList.toggle("hidden",k!==i);
   $("#platWrap").classList.toggle("hidden",i>1);
   $("#balCards").classList.toggle("hidden",i!==0);          // بطاقات الرصيد: الصفحة الرئيسية فقط
@@ -761,10 +770,26 @@ $("#svcList").onclick=e=>{
   const s=SERVICES.find(x=>x.id===+b.dataset.pick);
   plat=s.p;$("#q").value="";drawPlat();drawCats();$("#cat").value=s.c;drawSrv();$("#srv").value=s.id;pick();showSec(0);
 };
-const ST={pending:["Pending","bg-amber-100 text-amber-700"],processing:["Processing","bg-blue-100 text-blue-700"],review:["Under review","bg-violet-100 text-violet-700"],failed:["Failed (refunded)","bg-red-100 text-red-700"]};
+const ST={pending:["Pending","pending"],inprogress:["In progress","inprogress"],processing:["Processing","processing"],completed:["Completed","completed"],partial:["Partial","partial"],canceled:["Canceled","canceled"],review:["Under review","review"],failed:["Failed (refunded)","failed"]};
 function drawOrders(){
-  $("#ordList").innerHTML=ORDERS.map(o=>{const st=ST[o.status]||ST.pending;return `<div class="rounded-xl border border-blue-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="text-xs px-2 py-0.5 rounded-full ${st[1]}">${st[0]}</span></div><div class="mt-1 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div><div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
+  $("#ordList").innerHTML=ORDERS.map(o=>{
+    const st=ST[o.status]||ST.pending;
+    const rem=o.rem!=null&&(o.status==="partial"||o.status==="canceled")?`<div class="text-xs mt-1" style="color:#f97316"><span>Remaining</span> <b dir="ltr">${o.rem}</b></div>`:"";
+    return `<div class="rounded-xl border border-blue-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="stp" data-s="${st[1]}">${st[0]}</span></div><div class="mt-1 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div>${rem}<div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
 }
+/* مزامنة الحالات من المزوّد (JAP) عبر الخادم؛ التحديث يصل للواجهة تلقائياً من Firestore */
+let syncing=false,lastSync=0;
+async function syncOrders(){
+  if(syncing||Date.now()-lastSync<15000)return;
+  syncing=true;lastSync=Date.now();
+  try{
+    const tk=await window.__getToken();
+    const r=await fetch("/api/sync-orders",{method:"POST",headers:{Authorization:"Bearer "+tk}});
+    if(!r.ok)console.warn("sync-orders",r.status,await r.text().catch(()=>""));
+  }catch(e){console.warn("sync-orders",e)}
+  finally{syncing=false}
+}
+setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
 /* ---- Add funds: Card (Stripe Checkout) / Crypto ---- */
 /* ضع هنا رابط الخادم الذي ينشئ جلسة الدفع. يستقبل {amount, method} ويرجع {url} */
 const stripe = typeof Stripe!=="undefined" ? Stripe('pk_live_51SiumcEhUQAuIFHKiDW0umETBNa4rgWlbwg6hzt5OpGx3FXXKgXRfVhzUWg1X4b8UKsgM64j7BXMZ9iN5kwNYN6Q00YVDICxKg') : null;
@@ -809,6 +834,7 @@ $("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg"
 $("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
 /* ================= i18n (AR / EN) ================= */
 const PAIRS=[
+["In progress","قيد التنفيذ"],["Completed","مكتمل"],["Partial","جزئي"],["Canceled","ملغي"],["Remaining","المتبقي"],
 ["🎉 Order created successfully! 🎉","🎉 تم إنشاء الطلب بنجاح! 🎉"],["Order received and under review","تم استلام الطلب وهو قيد المراجعة"],["Order ID","معرّف الطلب"],["Total cost","التكلفة الإجمالية"],["Remaining balance","الرصيد المتبقي"],["View orders","عرض الطلبات"],["Close","إغلاق"],["Sending…","جاري الإرسال…"],
 ["Customer","عميل"],["Customer account","حساب عميل"],["Guest","ضيف"],["Welcome","مرحباً"],["Hello,","مرحباً،"],["Welcome back","أهلاً بعودتك"],
 ["Profile","الملف الشخصي"],["Logout","تسجيل الخروج"],["Settings","الإعدادات"],["Dark","داكن"],["Light","فاتح"],["Language","اللغة"],
@@ -954,11 +980,12 @@ onAuthStateChanged(auth, user => {
         query(collection(db, "orders"), where("uid", "==", user.uid)),
         snap => setOrders(snap.docs.map(d => {
           const x = d.data();
-          return { id: d.id, s: x.serviceName || "", link: x.link || "", n: x.quantity || 0, cost: Number(x.cost) || 0, status: x.status, ts: x.createdAt ? x.createdAt.toMillis() : Date.now() };
+          return { id: d.id, s: x.serviceName || "", link: x.link || "", n: x.quantity || 0, cost: Number(x.cost) || 0, status: x.status, rem: x.remains == null ? null : Number(x.remains), ts: x.createdAt ? x.createdAt.toMillis() : Date.now() };
         }).sort((a, b) => b.ts - a.ts)),
         err => console.error("orders listener:", err)
       );
       loadServices();
+      syncOrders();
     });
   window.__authDone = true;
   bootDone();
