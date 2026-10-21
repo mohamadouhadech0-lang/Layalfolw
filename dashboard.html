@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>layal folw – Dashboard</title>
-  <link rel="manifest" href="manifest.json">
 <script>try{var t=localStorage.getItem("lf_theme");if((t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"))==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -123,6 +122,14 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style>
+<meta name="theme-color" content="#0f172a">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Layal Folw">
+<script>if("serviceWorker"in navigator)addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})</script>
 </head>
 <body class="min-h-screen">
 <div id="boot" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#eef3fb;color:#0f1f3d;font-family:system-ui,Segoe UI,Tahoma,sans-serif;text-align:center;padding:24px">
@@ -772,11 +779,26 @@ $("#svcList").onclick=e=>{
   plat=s.p;$("#q").value="";drawPlat();drawCats();$("#cat").value=s.c;drawSrv();$("#srv").value=s.id;pick();showSec(0);
 };
 const ST={pending:["Pending","pending"],inprogress:["In progress","inprogress"],processing:["Processing","processing"],completed:["Completed","completed"],partial:["Partial","partial"],canceled:["Canceled","canceled"],review:["Under review","review"],failed:["Failed (refunded)","failed"]};
+const curLang=()=>{try{return lang}catch(_){return "en"}};
+/* سبب الإلغاء/الرفض: تحت الحالة مباشرة بلون هادئ */
+function reasonHtml(o){
+  if(!["canceled","partial","failed"].includes(o.status))return "";
+  const txt=(curLang()==="en"&&o.reasonEn)?o.reasonEn:(o.reason||"");
+  if(!txt)return "";
+  const c=o.status==="partial"?"#f97316":"#f87171",bg=o.status==="partial"?"rgba(249,115,22,.08)":"rgba(239,68,68,.08)";
+  return `<div class="mt-2 text-xs leading-5 rounded-lg px-3 py-2" style="background:${bg};border-inline-start:3px solid ${c};color:${c}"><b><span>Reason</span>:</b> <span data-notr>${esc(txt)}</span></div>`;
+}
+/* تأكيد الاسترجاع: يظهر فقط إذا تم فعلاً إرجاع مبلغ للرصيد (refundAmount > 0) */
+function refundHtml(o){
+  if(!(o.refund>0))return "";
+  const full=o.refund>=o.cost*0.9999;
+  return `<div class="mt-1.5 text-xs font-semibold" style="color:#10b981">✓ <span>${full?"Full amount refunded to your balance":"Remaining amount refunded to your balance"}</span> <b dir="ltr">$${o.refund.toFixed(2)}</b></div>`;
+}
 function drawOrders(){
   $("#ordList").innerHTML=ORDERS.map(o=>{
     const st=ST[o.status]||ST.pending;
     const rem=o.rem!=null&&(o.status==="partial"||o.status==="canceled")?`<div class="text-xs mt-1" style="color:#f97316"><span>Remaining</span> <b dir="ltr">${o.rem}</b></div>`:"";
-    return `<div class="rounded-xl border border-blue-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="stp" data-s="${st[1]}">${st[0]}</span></div><div class="mt-1 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div>${rem}<div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
+    return `<div class="rounded-xl border border-blue-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="stp" data-s="${st[1]}">${st[0]}</span></div>${reasonHtml(o)}${refundHtml(o)}<div class="mt-2 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div>${rem}<div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
 }
 /* مزامنة الحالات من المزوّد (JAP) عبر الخادم؛ التحديث يصل للواجهة تلقائياً من Firestore */
 let syncing=false,lastSync=0;
@@ -835,6 +857,7 @@ $("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg"
 $("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
 /* ================= i18n (AR / EN) ================= */
 const PAIRS=[
+["Reason","السبب"],["Full amount refunded to your balance","تم إرجاع المبلغ كاملاً إلى رصيدك"],["Remaining amount refunded to your balance","تم إرجاع المبلغ المتبقي إلى رصيدك"],
 ["In progress","قيد التنفيذ"],["Completed","مكتمل"],["Partial","جزئي"],["Canceled","ملغي"],["Remaining","المتبقي"],
 ["🎉 Order created successfully! 🎉","🎉 تم إنشاء الطلب بنجاح! 🎉"],["Order received and under review","تم استلام الطلب وهو قيد المراجعة"],["Order ID","معرّف الطلب"],["Total cost","التكلفة الإجمالية"],["Remaining balance","الرصيد المتبقي"],["View orders","عرض الطلبات"],["Close","إغلاق"],["Sending…","جاري الإرسال…"],
 ["Customer","عميل"],["Customer account","حساب عميل"],["Guest","ضيف"],["Welcome","مرحباً"],["Hello,","مرحباً،"],["Welcome back","أهلاً بعودتك"],
@@ -906,6 +929,7 @@ function applyLang(l){
   lang=l;const h=document.documentElement;
   h.lang=l;h.dir=l==="ar"?"rtl":"ltr";
   try{localStorage.setItem("lf_lang",l)}catch(e){}
+  try{drawOrders()}catch(_){}
   walk(document.body);
   document.querySelectorAll(".lb").forEach(b=>b.classList.toggle("on",b.dataset.lang===l));
 }
@@ -981,7 +1005,7 @@ onAuthStateChanged(auth, user => {
         query(collection(db, "orders"), where("uid", "==", user.uid)),
         snap => setOrders(snap.docs.map(d => {
           const x = d.data();
-          return { id: d.id, s: x.serviceName || "", link: x.link || "", n: x.quantity || 0, cost: Number(x.cost) || 0, status: x.status, rem: x.remains == null ? null : Number(x.remains), ts: x.createdAt ? x.createdAt.toMillis() : Date.now() };
+          return { id: d.id, s: x.serviceName || "", link: x.link || "", n: x.quantity || 0, cost: Number(x.cost) || 0, status: x.status, rem: x.remains == null ? null : Number(x.remains), reason: x.cancel_reason || "", reasonEn: x.cancel_reason_en || "", refund: Number(x.refundAmount) || 0, ts: x.createdAt ? x.createdAt.toMillis() : Date.now() };
         }).sort((a, b) => b.ts - a.ts)),
         err => console.error("orders listener:", err)
       );
