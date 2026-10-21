@@ -78,6 +78,34 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 @keyframes okpop{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
 @keyframes okdraw{to{stroke-dashoffset:0}}
 .okcard{animation:okpop .28s cubic-bezier(.2,.9,.3,1.2)}
+/* ===== Order success: hologram style ===== */
+.okbg{background:
+ radial-gradient(1.6px 1.6px at 12% 14%,#fff,transparent),radial-gradient(1px 1px at 27% 7%,#cfe8ff,transparent),
+ radial-gradient(1.4px 1.4px at 41% 19%,#fff,transparent),radial-gradient(1px 1px at 58% 9%,#bfe3ff,transparent),
+ radial-gradient(1.6px 1.6px at 73% 16%,#fff,transparent),radial-gradient(1px 1px at 88% 8%,#cfe8ff,transparent),
+ radial-gradient(1.2px 1.2px at 8% 40%,#fff,transparent),radial-gradient(1px 1px at 93% 36%,#fff,transparent),
+ radial-gradient(1.2px 1.2px at 20% 78%,#bfe3ff,transparent),radial-gradient(1px 1px at 82% 84%,#fff,transparent),
+ radial-gradient(120% 60% at 50% 0%,rgba(14,165,233,.25),transparent 62%),
+ linear-gradient(180deg,#040a1c,#0a1a3a 55%,#0b2447)}
+.okcard2{position:relative;border-radius:28px;padding:22px 18px 18px;background:linear-gradient(160deg,rgba(14,40,80,.78),rgba(6,16,40,.88));border:1px solid rgba(56,189,248,.5);box-shadow:0 0 0 1px rgba(56,189,248,.12) inset,0 0 44px rgba(34,211,238,.28),0 30px 80px rgba(0,0,0,.65);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.okorb{position:relative;width:150px;height:150px;margin:2px auto 14px}
+.okglobe{position:absolute;inset:8px;border-radius:50%;background:radial-gradient(circle at 50% 38%,rgba(103,232,249,.38),rgba(14,116,144,.16) 55%,transparent 72%);border:1px solid rgba(103,232,249,.4);box-shadow:0 0 50px rgba(34,211,238,.45),inset 0 0 30px rgba(34,211,238,.25)}
+.okring{position:absolute;inset:0;border-radius:50%;border:1.5px dashed rgba(103,232,249,.55);animation:okspin 18s linear infinite}
+.okchk{position:absolute;inset:36px;border-radius:50%;border:3px solid #67e8f9;display:grid;place-items:center;background:rgba(8,47,73,.55);box-shadow:0 0 22px rgba(103,232,249,.75),inset 0 0 16px rgba(103,232,249,.35)}
+.oknode{position:absolute;width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:50%;display:grid;place-items:center;background:rgba(8,47,73,.9);border:1px solid rgba(103,232,249,.65);color:#67e8f9;box-shadow:0 0 12px rgba(34,211,238,.55);animation:okspin 18s linear infinite reverse}
+@keyframes okspin{to{transform:rotate(360deg)}}
+.okttl{display:block;padding:10px 12px;border-radius:14px;background:rgba(8,30,60,.78);border:1px solid rgba(125,211,252,.42);text-align:center;font-weight:800;font-size:16px;color:#e6f7ff;box-shadow:0 0 18px rgba(34,211,238,.18)}
+.okrows{margin-top:14px;padding:6px 14px;border-radius:16px;background:rgba(6,20,45,.6);border:1px solid rgba(125,211,252,.22)}
+.okrows>div{padding:9px 0}
+.okrows>div+div{border-top:1px solid rgba(125,211,252,.12)}
+.okrows dt{color:#7dd3fc}
+.okbtn1{height:46px;border-radius:14px;background:linear-gradient(180deg,#e6f9ff,#9fe6ff);color:#032a3a;font-weight:800;box-shadow:0 0 22px rgba(125,211,252,.55);transition:transform .15s,filter .2s}
+.okbtn1:hover{filter:brightness(1.05)}
+.okbtn2{height:46px;border-radius:14px;border:1px solid rgba(125,211,252,.5);background:rgba(8,47,73,.55);color:#d6f1ff;font-weight:700;transition:transform .15s,background .2s}
+.okbtn2:hover{background:rgba(14,80,120,.55)}
+.okbtn1:active,.okbtn2:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){.okring,.oknode{animation:none}}
+
 .okck{stroke-dasharray:32;stroke-dashoffset:32;animation:okdraw .45s .15s ease forwards}
 #sendBtn{touch-action:manipulation}
 @media (prefers-reduced-motion:reduce){.okcard,.okck,.btnspin{animation-duration:.01s}}
@@ -365,24 +393,30 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <!-- Bottom nav (mobile) -->
 <nav id="bnav" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-blue-100 safe-b grid grid-cols-4 shadow-[0_-4px_20px_rgba(37,99,235,.08)]"></nav>
 
-<div id="okM" class="hidden fixed inset-0 z-[60] grid place-items-center p-4 bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="okT">
-  <div class="okcard w-full max-w-sm rounded-3xl p-6 text-slate-100" style="background:#0f172a;border:1px solid rgba(255,255,255,.08);box-shadow:0 30px 80px rgba(0,0,0,.6)">
-    <div class="mx-auto mb-4 w-20 h-20 rounded-full grid place-items-center" style="background:rgba(16,185,129,.15);box-shadow:0 0 0 8px rgba(16,185,129,.08),0 0 30px rgba(16,185,129,.35)">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="okck" d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+<div id="okM" class="okbg hidden fixed inset-0 z-[60] grid overflow-y-auto p-4" role="dialog" aria-modal="true" aria-labelledby="okT">
+  <div class="okcard okcard2 w-full max-w-sm m-auto text-slate-100">
+    <div class="okorb">
+      <div class="okglobe"></div>
+      <div class="okring">
+        <span class="oknode" style="top:0;left:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg></span>
+        <span class="oknode" style="top:50%;left:100%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></span>
+        <span class="oknode" style="top:100%;left:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></span>
+        <span class="oknode" style="top:50%;left:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/></svg></span>
+      </div>
+      <div class="okchk"><svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="okck" d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
     </div>
-    <h2 id="okT" class="text-center text-xl font-extrabold">Order created successfully! 🎉</h2>
-    <dl class="mt-5 rounded-2xl p-4 space-y-3 text-sm" style="background:#0b1220;border:1px solid rgba(255,255,255,.06)">
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Order ID</dt><dd id="okId" data-notr class="font-semibold text-white text-end min-w-0 tracking-wide"></dd></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Service</dt><dd id="okSvc" data-notr class="font-semibold text-white text-end min-w-0 "></dd></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Link</dt><dd id="okLink" data-notr class="font-semibold text-white text-end min-w-0 break-all text-xs"></dd></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Quantity</dt><dd id="okQty" data-notr class="font-semibold text-white text-end min-w-0 "></dd></div>
-      <div class="h-px" style="background:rgba(255,255,255,.08)"></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Total cost</dt><dd id="okCost" data-notr class="font-semibold text-white text-end min-w-0 text-amber-300"></dd></div>
-      <div class="flex items-start justify-between gap-4"><dt class="text-slate-400 shrink-0">Remaining balance</dt><dd id="okBal" data-notr class="font-semibold text-white text-end min-w-0 text-emerald-400"></dd></div>
+    <h2 id="okT" class="okttl">🎉 Order created successfully! 🎉</h2>
+    <dl class="okrows text-sm">
+      <div class="flex items-start justify-between gap-4"><dt class="shrink-0">Order ID</dt><dd id="okId" data-notr class="font-semibold text-white text-end min-w-0 tracking-wide"></dd></div>
+      <div class="flex items-start justify-between gap-4"><dt class="shrink-0">Service</dt><dd id="okSvc" data-notr class="font-semibold text-white text-end min-w-0 "></dd></div>
+      <div class="flex items-start justify-between gap-4"><dt class="shrink-0">Link</dt><dd id="okLink" data-notr class="font-semibold text-white text-end min-w-0 break-all text-xs"></dd></div>
+      <div class="flex items-start justify-between gap-4"><dt class="shrink-0">Quantity</dt><dd id="okQty" data-notr class="font-semibold text-white text-end min-w-0 "></dd></div>
+      <div class="flex items-start justify-between gap-4"><dt class="shrink-0">Total cost</dt><dd id="okCost" data-notr class="font-semibold text-white text-end min-w-0 text-amber-300"></dd></div>
+      <div class="flex items-start justify-between gap-4"><dt class="shrink-0">Remaining balance</dt><dd id="okBal" data-notr class="font-semibold text-white text-end min-w-0 text-emerald-300"></dd></div>
     </dl>
-    <div class="mt-5 grid gap-2.5">
-      <button id="okView" type="button" class="h-12 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/30">View orders</button>
-      <button id="okClose" type="button" class="h-11 rounded-xl text-slate-300 hover:bg-white/5 transition font-semibold text-sm">Close</button>
+    <div class="mt-4 grid grid-cols-2 gap-3">
+      <button id="okView" type="button" class="okbtn1">View orders</button>
+      <button id="okClose" type="button" class="okbtn2">Close</button>
     </div>
   </div>
 </div>
@@ -680,7 +714,7 @@ $("#q").oninput=drawCats;$("#cat").onchange=drawSrv;$("#srv").onchange=pick;$("#
 let sending=false;
 const fmtUsd=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4});
 function showOrderOk(o){
-  $("#okT").textContent=o.status==="review"?"Order received and under review":"Order created successfully! 🎉";
+  $("#okT").textContent=o.status==="review"?"Order received and under review":"🎉 Order created successfully! 🎉";
   $("#okId").textContent="#"+String(o.id).slice(0,6).toUpperCase();
   $("#okSvc").textContent=o.svc;$("#okLink").textContent=o.link;$("#okLink").dir="ltr";
   $("#okQty").textContent=Number(o.qty).toLocaleString("en-US");
@@ -775,7 +809,7 @@ $("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg"
 $("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
 /* ================= i18n (AR / EN) ================= */
 const PAIRS=[
-["Order created successfully! 🎉","تم إنشاء الطلب بنجاح! 🎉"],["Order received and under review","تم استلام الطلب وهو قيد المراجعة"],["Order ID","معرّف الطلب"],["Total cost","التكلفة الإجمالية"],["Remaining balance","الرصيد المتبقي"],["View orders","عرض الطلبات"],["Close","إغلاق"],["Sending…","جاري الإرسال…"],
+["🎉 Order created successfully! 🎉","🎉 تم إنشاء الطلب بنجاح! 🎉"],["Order received and under review","تم استلام الطلب وهو قيد المراجعة"],["Order ID","معرّف الطلب"],["Total cost","التكلفة الإجمالية"],["Remaining balance","الرصيد المتبقي"],["View orders","عرض الطلبات"],["Close","إغلاق"],["Sending…","جاري الإرسال…"],
 ["Customer","عميل"],["Customer account","حساب عميل"],["Guest","ضيف"],["Welcome","مرحباً"],["Hello,","مرحباً،"],["Welcome back","أهلاً بعودتك"],
 ["Profile","الملف الشخصي"],["Logout","تسجيل الخروج"],["Settings","الإعدادات"],["Dark","داكن"],["Light","فاتح"],["Language","اللغة"],
 ["New order","طلب جديد"],["Child Panel","لوحة فرعية"],["NEW","جديد"],["Mass order","طلب جماعي"],["Services","الخدمات"],["Orders","الطلبات"],["Add funds","شحن الرصيد"],["FAQ","الأسئلة الشائعة"],["Tickets","التذاكر"],["Terms","الشروط"],["More","المزيد"],["Account","الحساب"],
