@@ -1,6 +1,6 @@
 {
-  "name": "layal folw",
-  "short_name": "layal folw",
+  "name": "Layal Folw",
+  "short_name": "Layal Folw",
   "description": "منصة إدارة الخدمات الاجتماعية Layal Folw",
   "start_url": "/",
   "display": "standalone",
@@ -8,13 +8,13 @@
   "theme_color": "#2196f3",
   "icons": [
     {
-      "src": "https://i.ibb.co/L80yT1s/layalfolw-icon.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3670/3670151.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://i.ibb.co/L80yT1s/layalfolw-icon.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/3670/3670151.png",
       "sizes": "512x512",
       "type": "image/png"
     }
