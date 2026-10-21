@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>لوحة التحكم</title>
-  <link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -21,42 +20,84 @@ html.dark body{background:#0b1120;color:#e2e8f0}
 .busy{opacity:.55;pointer-events:none;transition:opacity .2s}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation-duration:2.4s}}
+
+/* ===== Login: neon dark style ===== */
+html:has(#auth:not(.hidden)) body{background:#070b14}
+.lf-bg{background:
+  radial-gradient(420px 360px at -8% 58%,rgba(34,224,240,.75),rgba(34,224,240,0) 70%),
+  radial-gradient(380px 420px at 108% 62%,rgba(37,99,235,.7),rgba(37,99,235,0) 70%),
+  #070b14}
+.lf-card{background:linear-gradient(180deg,#10172a,#0c1222);border:1px solid rgba(255,255,255,.06);border-radius:28px;box-shadow:0 30px 80px rgba(0,0,0,.65);color:#e5ecff}
+.lf-card .brandtxt{background:linear-gradient(90deg,#22e0f0,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lf-card .spin{border-color:rgba(34,224,240,.2);border-top-color:#22e0f0;border-right-color:#3b82f6}
+.lf-title{font-size:28px;font-weight:800;color:#fff;text-shadow:0 2px 14px rgba(255,255,255,.25);margin-top:6px}
+.lf-sub{font-size:14px;color:#8a97b4;margin-top:6px}
+.lf-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:16px;background:#080d19;box-shadow:inset 3px 3px 8px rgba(0,0,0,.6),inset -2px -2px 6px rgba(255,255,255,.03);margin-bottom:22px}
+.lf-tab{height:40px;border-radius:12px;font-size:14px;font-weight:700;color:#7b8aa6;transition:.2s}
+.lf-tab.on{background:#16213a;color:#22e0f0;box-shadow:0 0 14px rgba(34,224,240,.18)}
+.lf-field{position:relative;margin-bottom:18px}
+.lf-field.hidden{display:none}
+.lf-field input{width:100%;height:58px;padding:0 18px;border-radius:18px;border:2px solid transparent;background:#0a0f1d;color:#e5ecff;font-size:15px;outline:none;box-shadow:inset 4px 4px 10px rgba(0,0,0,.55),inset -3px -3px 8px rgba(255,255,255,.025);transition:border-color .2s,box-shadow .2s}
+.lf-field input.pw{padding-left:50px}
+.lf-field input:focus{border-color:#22e0f0;background:#0b1120;box-shadow:0 0 0 3px rgba(34,224,240,.14),0 0 18px rgba(34,224,240,.35)}
+.lf-field label{position:absolute;inset-inline-start:18px;top:50%;transform:translateY(-50%);transform-origin:right center;color:#6b7a99;font-size:15px;pointer-events:none;transition:.18s;padding:0 6px;border-radius:6px}
+.lf-field input:focus+label,.lf-field input:not(:placeholder-shown)+label{top:0;transform:translateY(-50%) scale(.85);background:#0c1222;color:#8a97b4}
+.lf-field input:focus+label{color:#22e0f0}
+.lf-field input:-webkit-autofill{-webkit-box-shadow:0 0 0 100px #0a0f1d inset;-webkit-text-fill-color:#e5ecff}
+.lf-eye{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:34px;height:34px;display:grid;place-items:center;color:#22e0f0;opacity:.8;border-radius:50%}
+.lf-link{font-size:13px;color:#22e0f0;white-space:nowrap}
+.lf-link:hover{text-decoration:underline}
+.lf-btn{width:100%;height:58px;border-radius:18px;background:linear-gradient(90deg,#22e0f0,#8ff3ff);color:#04202a;font-weight:800;font-size:16px;letter-spacing:.06em;box-shadow:0 10px 28px rgba(34,224,240,.35);transition:transform .15s,box-shadow .2s,filter .2s}
+.lf-btn:hover{filter:brightness(1.06);box-shadow:0 12px 34px rgba(34,224,240,.5)}
+.lf-btn:active{transform:scale(.98)}
+.lf-btn:disabled,.lf-social:disabled{opacity:.6;cursor:not-allowed}
+.lf-or{display:flex;align-items:center;gap:12px;margin:26px 0 18px;font-size:12px;letter-spacing:.08em;color:#6b7a99}
+.lf-or i{flex:1;height:1px;background:rgba(255,255,255,.08)}
+.lf-social{display:flex;align-items:center;justify-content:center;gap:10px;height:52px;border-radius:16px;background:#0a0f1d;border:1px solid rgba(255,255,255,.08);color:#e5ecff;font-weight:700;font-size:14px;box-shadow:4px 4px 10px rgba(0,0,0,.45),-2px -2px 8px rgba(255,255,255,.02);transition:transform .15s,border-color .2s,box-shadow .2s}
+.lf-social:hover{transform:translateY(-2px);border-color:rgba(34,224,240,.5);box-shadow:0 0 16px rgba(34,224,240,.2)}
 </style>
+<meta name="theme-color" content="#070b14">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Layal Folw">
+<script>if("serviceWorker"in navigator)addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})</script>
 </head>
 <body class="min-h-screen">
 
 <!-- ========== AUTH ========== -->
-<section id="auth" class="min-h-screen grid place-items-center p-4 bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 dark:from-slate-900 dark:via-indigo-950 dark:to-slate-900">
-  <div class="w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur rounded-2xl shadow-2xl p-7">
+<section id="auth" class="lf-bg min-h-screen grid place-items-center p-4">
+  <div class="lf-card w-full max-w-md p-7">
     <div id="cardLoader" class="hidden mb-5" role="status" aria-live="polite">
-      <div class="flex items-center justify-center gap-3"><span class="spin"></span><span class="brandtxt">Amzallife</span></div>
+      <div class="flex items-center justify-center gap-3"><span class="spin"></span><span class="brandtxt">layal folw</span></div>
     </div>
     <div id="authBody">
-    <div class="flex items-center justify-between mb-5">
-      <div class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">amzal</div>
-      <button class="themeBtn rounded-full w-9 h-9 grid place-items-center bg-slate-100 dark:bg-slate-800" aria-label="تبديل الوضع">🌓</button>
+    <div class="text-center mb-6">
+      <span class="brandtxt">layal folw</span>
+      <h1 id="hTitle" class="lf-title">أهلاً بعودتك</h1>
+      <p id="hSub" class="lf-sub">سجّل الدخول للوصول إلى حسابك</p>
     </div>
-    <div class="grid grid-cols-2 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 mb-5 text-sm font-semibold">
-      <button id="tabIn" class="py-2 rounded-lg bg-white dark:bg-slate-700 shadow">تسجيل الدخول</button>
-      <button id="tabUp" class="py-2 rounded-lg text-slate-500">إنشاء حساب</button>
+    <div class="lf-tabs">
+      <button type="button" id="tabIn" class="lf-tab on">تسجيل الدخول</button>
+      <button type="button" id="tabUp" class="lf-tab">إنشاء حساب</button>
     </div>
-    <form id="authForm" class="space-y-3" novalidate>
-      <input id="name" class="hidden w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="الاسم الكامل">
-      <input id="email" type="email" class="w-full h-11 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="البريد الإلكتروني">
-      <div class="relative">
-        <input id="pass" type="password" class="w-full h-11 px-3 pl-10 rounded-lg border border-slate-300 dark:border-slate-700 bg-transparent focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="كلمة المرور">
-        <button type="button" id="eye" class="absolute left-2 top-2 w-8 h-8 opacity-70" aria-label="إظهار">👁</button>
-      </div>
-      <div class="flex items-center justify-between"><p id="err" class="text-sm text-red-500 min-h-[20px]"></p><button type="button" id="forgot" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline whitespace-nowrap">نسيت كلمة المرور؟</button></div>
-      <button id="authBtn" class="w-full h-11 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-[.98] transition text-white font-bold">دخول</button>
+    <form id="authForm" novalidate>
+      <div id="nameField" class="lf-field hidden"><input id="name" placeholder=" " autocomplete="name"><label for="name">الاسم الكامل</label></div>
+      <div class="lf-field"><input id="email" type="email" placeholder=" " autocomplete="email"><label for="email">البريد الإلكتروني</label></div>
+      <div class="lf-field"><input id="pass" type="password" class="pw" placeholder=" " autocomplete="current-password"><label for="pass">كلمة المرور</label>
+        <button type="button" id="eye" class="lf-eye" aria-label="إظهار"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+      <div class="flex items-center justify-between gap-3 mb-5"><p id="err" class="text-sm text-red-500 min-h-[20px]"></p><button type="button" id="forgot" class="lf-link">نسيت كلمة المرور؟</button></div>
+      <button id="authBtn" class="lf-btn">دخول</button>
     </form>
-    <div class="flex items-center gap-3 my-5 text-xs text-slate-400"><span class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></span>أو تابع عبر<span class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></span></div>
+    <div class="lf-or"><i></i>أو تابع عبر<i></i></div>
     <div class="grid grid-cols-2 gap-3">
-      <button type="button" id="gBtn" class="social flex items-center justify-center gap-2 h-11 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 hover:-translate-y-0.5 hover:shadow transition font-semibold text-sm">
+      <button type="button" id="gBtn" class="social lf-social">
         <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.5l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.5 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.8-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.4 0-11.7-4-13.6-9.8l-7.8 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
         Google</button>
-      <button type="button" id="fbBtn" class="social flex items-center justify-center gap-2 h-11 rounded-lg bg-[#1877F2] text-white hover:brightness-110 hover:-translate-y-0.5 hover:shadow transition font-semibold text-sm">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>
+      <button type="button" id="fbBtn" class="social lf-social">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg>
         Facebook</button>
     </div>
     </div><!-- /authBody -->
@@ -127,11 +168,12 @@ $$(".themeBtn").forEach(b=>b.onclick=()=>setDark(!root.classList.contains("dark"
 /* ---- Auth ---- */
 let mode="in";
 const setMode=m=>{mode=m;
-  $("#name").classList.toggle("hidden",m==="in");
+  $("#nameField").classList.toggle("hidden",m==="in");
   $("#authBtn").textContent=m==="in"?"دخول":"إنشاء حساب";
-  const on="bg-white dark:bg-slate-700 shadow",off="text-slate-500";
-  $("#tabIn").className="py-2 rounded-lg "+(m==="in"?on:off);
-  $("#tabUp").className="py-2 rounded-lg "+(m==="up"?on:off);
+  $("#hTitle").textContent=m==="in"?"أهلاً بعودتك":"إنشاء حساب جديد";
+  $("#hSub").textContent=m==="in"?"سجّل الدخول للوصول إلى حسابك":"أنشئ حسابك وابدأ الآن";
+  $("#tabIn").className="lf-tab"+(m==="in"?" on":"");
+  $("#tabUp").className="lf-tab"+(m==="up"?" on":"");
   $("#err").textContent="";};
 $("#tabIn").onclick=()=>setMode("in");$("#tabUp").onclick=()=>setMode("up");
 $("#eye").onclick=()=>{const p=$("#pass");p.type=p.type==="password"?"text":"password"};
