@@ -1,34 +1,28 @@
-// POST /api/sync-orders
+// POST /api/create-order   body: { service, link, quantity }
 // Header: Authorization: Bearer <Firebase ID token>
-// يجلب حالة طلبات المستخدم غير المنتهية من JAP ويحدّثها في Firestore.
-// الواجهة تقرأ orders عبر onSnapshot، فيظهر التغيير فوراً بعد الكتابة.
+// الخصم والتحقق والسعر كلها في الخادم؛ المتصفح لا يحدد السعر أبداً.
+//
+// وضع التشخيص: كل رد خطأ يحتوي { error: "<رمز>", detail: "<السبب الحقيقي>" }.
+// بعد حل المشكلة يُفضّل حذف حقل detail من الردود لأسباب أمنية.
 
 const errText = (e) => String((e && (e.message || e.code)) || e).slice(0, 300);
 
-// حالات الطلب التي ما زالت تحتاج متابعة من المزوّد
-const ACTIVE = new Set(["pending", "processing", "inprogress"]);
-const norm = (t) => {
-  const k = String(t || "").toLowerCase().replace(/[^a-z]/g, "");
-  return k === "cancelled" ? "canceled" : k;   // Canceled/Cancelled → canceled
-};
-
-const lastRun = new Map();                      // حماية بسيطة من كثرة الطلبات لكل مستخدم
-const MIN_GAP_MS = 10 * 1000;
-
 async function handle(req, res) {
-  if (req.method !== "POST" && req.method !== "GET")
-    return res.status(405).json({ error: "method_not_allowed", detail: "Use POST" });
+  if (req.method !== "POST") return res.status(405).json({ error: "method_not_allowed", detail: "Use POST" });
 
-  let admin, db, auth, jap;
+  // تحميل الاعتمادات هنا (وليس أعلى الملف) كي يظهر أي خطأ تهيئة داخل الرد
+  // مثل: Cannot find module / FIREBASE_SERVICE_ACCOUNT غير صالح / JAP_API_KEY ناقص
+  let admin, db, auth, jap, getServices;
   try {
     if (!process.env.FIREBASE_SERVICE_ACCOUNT) throw new Error("Missing env FIREBASE_SERVICE_ACCOUNT");
     if (!process.env.JAP_API_KEY) throw new Error("Missing env JAP_API_KEY");
     ({ admin, db, auth } = require("../lib/firebase"));
-    ({ jap } = require("../lib/jap"));
+    ({ jap, getServices } = require("../lib/jap"));
   } catch (e) {
     console.error("init_failed", e);
     return res.status(500).json({ error: "init_failed", detail: errText(e) });
   }
+  const FV = admin.firestore.FieldValue;
 
   // 1) المستخدم
   let uid;
@@ -37,71 +31,106 @@ async function handle(req, res) {
     if (!token) return res.status(401).json({ error: "unauthorized", detail: "Missing Authorization header" });
     uid = (await auth.verifyIdToken(token)).uid;
   } catch (e) {
+    console.error("auth failed", e);
     return res.status(401).json({ error: "unauthorized", detail: errText(e) });
   }
 
-  const now = Date.now();
-  if (now - (lastRun.get(uid) || 0) < MIN_GAP_MS) return res.status(200).json({ skipped: true, checked: 0, updated: 0 });
-  lastRun.set(uid, now);
+  // 2) التحقق من المدخلات + السعر من قائمة المزوّد
+  const body = req.body || {};
+  const serviceId = Number(body.service);
+  const quantity = Number(body.quantity);
+  const link = String(body.link || "").trim();
 
-  // 2) طلبات المستخدم التي لها رقم عند المزوّد وحالتها غير نهائية
-  let docs;
   try {
-    const snap = await db.collection("orders").where("uid", "==", uid).get();
-    docs = snap.docs.filter((d) => {
-      const x = d.data();
-      return x.japOrder && ACTIVE.has(norm(x.status));
-    }).slice(0, 100);                            // JAP يقبل حتى 100 رقم في الطلب الواحد
+    const u = new URL(link);
+    if (!/^https?:$/.test(u.protocol) || link.length > 500) throw new Error("bad protocol or too long");
   } catch (e) {
-    console.error("orders query failed", e);
+    return res.status(400).json({ error: "invalid_link", detail: errText(e) });
+  }
+
+  let svc;
+  try {
+    svc = (await getServices()).map.get(serviceId);
+  } catch (e) {
+    console.error("services failed", e);
+    return res.status(502).json({ error: "services_unavailable", detail: errText(e) });
+  }
+  if (!svc) return res.status(400).json({ error: "unknown_service", detail: "Service id " + serviceId + " not found in provider list" });
+  if (!Number.isInteger(quantity) || quantity < svc.min || quantity > svc.max)
+    return res.status(400).json({ error: "invalid_quantity", detail: `Allowed ${svc.min}–${svc.max}`, min: svc.min, max: svc.max });
+
+  const cost = Math.round(((quantity * svc.rate) / 1000) * 10000) / 10000;
+  if (!(cost > 0)) return res.status(400).json({ error: "invalid_quantity", detail: "Computed cost is 0" });
+
+  // 3) خصم الرصيد وإنشاء الطلب (pending) في معاملة واحدة
+  const userRef = db.collection("users").doc(uid);
+  const orderRef = db.collection("orders").doc();
+  let newBalance = 0;
+  let seenBalance = 0;
+  try {
+    await db.runTransaction(async (tx) => {
+      const u = await tx.get(userRef);
+      if (!u.exists) throw new Error("user_not_found");
+      const bal = Number(u.data().balance) || 0;
+      seenBalance = bal;
+      if (bal < cost) throw new Error("insufficient_balance");
+      newBalance = Math.round((bal - cost) * 10000) / 10000;
+      tx.update(userRef, { balance: FV.increment(-cost), spent: FV.increment(cost) });
+      tx.set(orderRef, {
+        uid, service: serviceId, serviceName: svc.name, link, quantity, cost,
+        status: "pending", createdAt: FV.serverTimestamp(),
+      });
+    });
+  } catch (e) {
+    if (e.message === "insufficient_balance")
+      return res.status(402).json({ error: "insufficient_balance", detail: `Balance $${seenBalance} < cost $${cost}` });
+    if (e.message === "user_not_found")
+      return res.status(404).json({ error: "user_not_found", detail: "Document users/" + uid + " does not exist" });
+    console.error("transaction failed", e);
     return res.status(500).json({ error: "server_error", detail: "Firestore: " + errText(e) });
   }
-  if (!docs.length) return res.status(200).json({ checked: 0, updated: 0, changes: [] });
 
-  // 3) حالات حديثة من JAP:  action=status & orders=1,2,3
-  const byJap = new Map(docs.map((d) => [String(d.data().japOrder), d]));
-  let result;
+  // 4) إرسال الطلب للمزوّد
+  let r;
   try {
-    result = await jap({ action: "status", orders: [...byJap.keys()].join(",") });
+    r = await jap({ action: "add", service: serviceId, link, quantity });
   } catch (e) {
-    console.error("jap status failed", e);
-    return res.status(502).json({ error: "provider_error", detail: "JAP status: " + errText(e) });
-  }
-  if (!result || typeof result !== "object" || result.error) {
-    return res.status(502).json({ error: "provider_error", detail: "JAP: " + String((result && result.error) || "bad response").slice(0, 300) });
+    // مهلة/رد غير مفهوم: قد يكون الطلب وصل للمزوّد، فلا نُرجع الرصيد تلقائياً — يُراجع يدوياً
+    console.error("jap add unknown result", orderRef.id, e);
+    await orderRef.update({ status: "review" }).catch(() => {});
+    return res.status(202).json({
+      id: orderRef.id, status: "review", cost, balance: newBalance,
+      detail: "Provider response unclear: " + errText(e),
+    });
   }
 
-  // 4) تحديث Firestore عند تغيّر الحالة أو المتبقي
-  const batch = db.batch();
-  const changes = [];
-  const problems = [];
-  for (const [japId, doc] of byJap) {
-    const r = result[japId];
-    if (!r || r.error) { problems.push({ id: doc.id, detail: r ? String(r.error) : "missing in response" }); continue; }
-    const status = norm(r.status);
-    if (!status) continue;
-    const old = doc.data();
-    const remains = r.remains != null && r.remains !== "" ? Number(r.remains) : null;
-    if (norm(old.status) === status && (old.remains ?? null) === remains) continue;
-    const upd = { status, updatedAt: admin.firestore.FieldValue.serverTimestamp() };
-    if (remains !== null && !Number.isNaN(remains)) upd.remains = remains;
-    if (r.start_count != null && r.start_count !== "" && !Number.isNaN(Number(r.start_count))) upd.startCount = Number(r.start_count);
-    batch.update(doc.ref, upd);
-    changes.push({ id: doc.id, from: norm(old.status), to: status });
+  if (r && r.order) {
+    await orderRef.update({ status: "processing", japOrder: String(r.order) }).catch((e) => console.error(e));
+    return res.status(200).json({ id: orderRef.id, status: "processing", cost, balance: newBalance });
   }
-  if (changes.length) {
-    try { await batch.commit(); }
-    catch (e) {
-      console.error("batch commit failed", e);
-      return res.status(500).json({ error: "server_error", detail: "Firestore write: " + errText(e) });
-    }
+
+  // 5) رفض صريح من المزوّد: نُرجع الرصيد ونُعلّم الطلب failed
+  const providerMsg = String((r && (r.error || JSON.stringify(r))) || "empty response").slice(0, 300);
+  console.error("jap add rejected", orderRef.id, r);
+  try {
+    await db.runTransaction(async (tx) => {
+      tx.update(userRef, { balance: FV.increment(cost), spent: FV.increment(-cost) });
+      tx.update(orderRef, { status: "failed", error: providerMsg });
+    });
+  } catch (e) {
+    console.error("REFUND FAILED", orderRef.id, uid, cost, e);
+    return res.status(502).json({
+      error: "provider_error", id: orderRef.id,
+      detail: "Provider: " + providerMsg + " | REFUND FAILED: " + errText(e),
+    });
   }
-  return res.status(200).json({ checked: docs.length, updated: changes.length, changes, problems });
+  return res.status(502).json({ error: "provider_error", id: orderRef.id, detail: "Provider: " + providerMsg });
 }
 
 module.exports = async (req, res) => {
-  try { return await handle(req, res); }
-  catch (e) {
+  try {
+    return await handle(req, res);
+  } catch (e) {
     console.error("unhandled", e);
     if (!res.headersSent) return res.status(500).json({ error: "server_error", detail: errText(e) });
   }
