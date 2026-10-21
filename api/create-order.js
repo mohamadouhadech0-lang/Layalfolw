@@ -12,12 +12,13 @@ async function handle(req, res) {
 
   // تحميل الاعتمادات هنا (وليس أعلى الملف) كي يظهر أي خطأ تهيئة داخل الرد
   // مثل: Cannot find module / FIREBASE_SERVICE_ACCOUNT غير صالح / JAP_API_KEY ناقص
-  let admin, db, auth, jap, getServices;
+  let admin, db, auth, jap, getServices, translate;
   try {
     if (!process.env.FIREBASE_SERVICE_ACCOUNT) throw new Error("Missing env FIREBASE_SERVICE_ACCOUNT");
     if (!process.env.JAP_API_KEY) throw new Error("Missing env JAP_API_KEY");
     ({ admin, db, auth } = require("../lib/firebase"));
     ({ jap, getServices } = require("../lib/jap"));
+    ({ translate } = require("../lib/reasons"));
   } catch (e) {
     console.error("init_failed", e);
     return res.status(500).json({ error: "init_failed", detail: errText(e) });
@@ -115,7 +116,12 @@ async function handle(req, res) {
   try {
     await db.runTransaction(async (tx) => {
       tx.update(userRef, { balance: FV.increment(cost), spent: FV.increment(-cost) });
-      tx.update(orderRef, { status: "failed", error: providerMsg });
+      const t = translate(providerMsg, "failed");
+      tx.update(orderRef, {
+        status: "failed", error: providerMsg,
+        cancel_reason: t.ar, cancel_reason_en: t.en, cancel_reason_raw: providerMsg,
+        refunded: true, refundAmount: cost, refundedAt: FV.serverTimestamp(),
+      });
     });
   } catch (e) {
     console.error("REFUND FAILED", orderRef.id, uid, cost, e);
