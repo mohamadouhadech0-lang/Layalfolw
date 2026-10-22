@@ -1,7 +1,0 @@
-"relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "app.vercel.layalfolw.twa",
-        "sha256_cert_fingerprints": ["13:21:BC:42:FD:A9:9F:BB:20:EE:AF:65:B6:B5:02:A2:A1:86:72:FD:D3:3F:09:0C:1D:7C:0F:D3:B5:54:A1:47"]
-      }
-    }]
