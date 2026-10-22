@@ -2,36 +2,34 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '20'
 
-      - name: Install PWA to APK Tool
-        run: npm install -g pwa-to-apk
+      - name: Install Bubblewrap CLI
+        run: npm install -g @bubblewrap/cli
 
-      - name: Generate APK File
+      - name: Build TWA APK
         run: |
-          npx pwa-to-apk --url https://layalfolw.vercel.app --name LayalFolw --out ./LayalFolw.apk || true
+          if [ -f "twa-manifest.json" ]; then
+            bubblewrap build
+          else
+            echo "No twa-manifest.json found, skipping automatic build."
+          fi
 
-      - name: Create Zip Package
-        run: |
-          mkdir -p output
-          zip -r output/LayalFolw-App.zip . -x ".git/*" ".github/*"
-
-      - name: Upload APK Package
-        uses: actions/upload-artifact@v3
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: LayalFolw-APK-File
-          path: output/LayalFolw-App.zip
+          name: app-release
+          path: '*.apk'
