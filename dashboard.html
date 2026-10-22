@@ -1039,4 +1039,14 @@ const out = () => { stopBal(); return signOut(auth).catch(() => {}).finally(() =
 document.getElementById("logout").onclick = out;
 document.getElementById("logout2").onclick = out;
 document.getElementById("logout3").onclick = out;
+  document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+});
+document.addEventListener('selectstart', function(e) {
+  if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+  }
+});
+</script>
+
 </script>
