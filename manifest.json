@@ -3,7 +3,8 @@
   "name": "Layal Folw",
   "short_name": "Layal Folw",
   "description": "Layal Folw — social media growth services panel.",
-  "start_url": "/?source=pwa",
+  "start_url": "/",
+
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
