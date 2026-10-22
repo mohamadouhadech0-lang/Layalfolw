@@ -13,11 +13,15 @@
 input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
 body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;background:#eef3fb;color:#0f1f3d}
 /* زر نسخ الرابط */
-.cpb{flex:none;width:48px;min-height:46px;border-radius:12px;border:1px solid #d5dff0;background:#fff;font-size:20px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:transform .12s,border-color .15s,box-shadow .15s}
-.cpb:hover{border-color:#2563eb}
-.cpb:active{transform:scale(.94)}
-.cpb:focus-visible{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
-.dark .cpb{background:#0f1829;border-color:#22304a}
+.cpb{flex:none;width:50px;min-height:46px;border-radius:12px;border:0;color:#fff;background:linear-gradient(135deg,#3b82f6,#1d4ed8);box-shadow:0 6px 16px rgba(37,99,235,.28),inset 0 1px 0 rgba(255,255,255,.25);display:grid;place-items:center;cursor:pointer;transition:transform .12s,filter .15s,box-shadow .2s,background .25s}
+.cpb svg{width:20px;height:20px}
+.cpb .i-ck{display:none}
+.cpb:hover{filter:brightness(1.08)}
+.cpb:active{transform:scale(.93)}
+.cpb:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(37,99,235,.35)}
+.cpb.ok{background:linear-gradient(135deg,#34d399,#059669);box-shadow:0 6px 16px rgba(16,185,129,.32),inset 0 1px 0 rgba(255,255,255,.25)}
+.cpb.ok .i-cp{display:none}
+.cpb.ok .i-ck{display:block}
 .noscroll::-webkit-scrollbar{display:none}.noscroll{scrollbar-width:none}
 .sb{transition:transform .32s cubic-bezier(.32,.72,0,1)}
 #scrim{opacity:0;pointer-events:none;transition:opacity .3s}
@@ -271,9 +275,12 @@ html.dark body{background:#0b1220;color:#e5ebf5}
           </ul>
         </div>
 
-        <div><label class="block text-sm font-semibold mb-1.5" for="link">Link</label><div class="flex items-stretch gap-2">
+        <div><label class="block text-sm font-semibold mb-1.5" for="link">Link</label><div class="flex items-stretch gap-2" dir="ltr">
             <input id="link" class="fld flex-1 min-w-0" dir="ltr" inputmode="url" placeholder="https://">
-            <button id="copyLink" type="button" class="cpb" title="Copy link" aria-label="Copy link">💾</button>
+            <button id="copyLink" type="button" class="cpb" title="Copy link" aria-label="Copy link">
+              <svg class="i-cp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <svg class="i-ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+            </button>
           </div></div>
         <div>
           <label class="block text-sm font-semibold mb-1.5" for="qty">Quantity <span id="range" class="text-slate-400 font-normal text-xs"></span></label>
@@ -755,6 +762,7 @@ async function copyInputText(id){
       el.setSelectionRange(text.length,text.length);
     }catch(e){toast("Copy failed — long-press the field to copy");return false}
   }
+  const b=$("#copyLink");b.classList.add("ok");clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove("ok"),1600);
   toast("Link copied ✓");
   return true;
 }
