@@ -11,7 +11,10 @@
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,sans-serif;background:#f1f5f9;color:#0f172a}
+  body{font-family:'Segoe UI', 'Note Sans Arabic', Tahoma, sans-serif;background:#0f172a;color:#0f172a;-webkit-user-select:none;user-select:none;}
+
+input, textarea{-webkit-user-select:text;user-select:text;}
+
 html.dark body{background:#0b1120;color:#e2e8f0}
 .sb{transition:width .25s,transform .25s}
 .hide-t .lbl{display:none}
