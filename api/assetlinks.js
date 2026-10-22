@@ -1,0 +1,15 @@
+export default function handler(req, res) {
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).json([
+    {
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.layalfolw.twa",
+        "sha256_cert_fingerprints": [
+          "13:21:BC:42:FD:A9:9F:8B:20:EE:AF:65:B6:85:02:A2:A1:86:72:FD:03:3F:09:0C:1D:7C:0F:7D"
+        ]
+      }
+    }
+  ]);
+}
