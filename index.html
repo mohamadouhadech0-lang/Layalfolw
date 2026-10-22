@@ -11,25 +11,10 @@
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-  * {
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-  user-select: none !important;
-  -webkit-touch-callout: none !important;
-  -webkit-tap-highlight-color: transparent !important;
-}
-
-input, textarea, [contenteditable="true"] {
-  -webkit-user-select: text !important;
-  -moz-user-select: text !important;
-  -ms-user-select: text !important;
-  user-select: text !important;
-}
-
-
-
-input, textarea{-webkit-user-select:text;user-select:text;}
+/* حماية: منع التحديد والنسخ، مع السماح داخل خانات الإدخال فقط */
+*{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent!important}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,sans-serif;background:#f1f5f9;color:#0f172a}
 
 html.dark body{background:#0b1120;color:#e2e8f0}
 .sb{transition:width .25s,transform .25s}
@@ -242,14 +227,14 @@ ${v.map((n,i)=>`<circle cx="${x(i)}" cy="${y(n)}" r="4.5" fill="#6366f1"/><text 
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { initializeAuth, browserSessionPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider,
+import { initializeAuth, browserSessionPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInWithRedirect, getRedirectResult, GoogleAuthProvider, FacebookAuthProvider,
   signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 /* 1) التهيئة: انسخ القيم من Firebase Console > Project settings > Your apps */
 const firebaseConfig = {
   apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
-  authDomain: "layal-follow.firebaseapp.com",
+  authDomain: "layalfolw.vercel.app",   // نطاق موقعك؛ يُمرَّر /__/auth إلى Firebase عبر vercel.json (ضروري لعمل redirect على الجوال)
   projectId: "layal-follow",
   storageBucket: "layal-follow.firebasestorage.app",
   messagingSenderId: "850647879566",
@@ -284,6 +269,8 @@ const ERRORS = {
   "auth/cancelled-popup-request": "تم إلغاء الطلب السابق. حاول مرة أخرى.",
   "auth/account-exists-with-different-credential": "يوجد حساب بنفس البريد بطريقة دخول أخرى (مثل Google أو البريد). سجّل بها أولاً.",
   "auth/operation-not-allowed": "طريقة الدخول هذه غير مفعّلة في Firebase Console.",
+  "auth/web-storage-unsupported": "المتصفح يمنع التخزين اللازم لتسجيل الدخول. فعّل التخزين/ملفات الارتباط ثم حاول مجدداً.",
+  "auth/operation-not-supported-in-this-environment": "بيئة التشغيل لا تدعم تسجيل الدخول بهذه الطريقة.",
   "auth/unauthorized-domain": "هذا النطاق غير مضاف في Authorized domains داخل Firebase."
 };
 const msg = e => ERRORS[e?.code] || "حدث خطأ غير متوقع (" + (e?.code || e?.message || "unknown") + ").";
@@ -299,6 +286,7 @@ const allBtns = () => [$("#authBtn"), $("#gBtn"), $("#fbBtn")];
 
 /* مهلة 5 ثوانٍ مع رسالة حالة بعد نجاح التحقق من Firebase */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const POST_LOGIN_DELAY = 5000;   // مدة عرض الدائرة بعد نجاح الدخول (مللي ثانية)
 const info = m => { const e = $("#err"); e.className = "text-sm text-emerald-500 min-h-[20px]"; e.textContent = m; };
 let busy = false;   // يمنع onAuthStateChanged من فتح اللوحة قبل انتهاء المهلة
 const cardLoader=on=>{
@@ -310,22 +298,27 @@ async function flow(label, doAuth) {
   try {
     const user = await doAuth();         // نجاح التحقق من Firebase
     cardLoader(true);                    // الدائرة + الاسم أعلى البطاقة
-    await sleep(5000);                   // 5 ثوانٍ كاملة
+    await sleep(POST_LOGIN_DELAY);        // مدة العرض قبل الانتقال
     location.href = "dashboard.html";    // الانتقال للوحة
   } finally { busy = false; cardLoader(false); }
 }
 
-/* 3) Google */
-$("#gBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول...", async () => {
+/* 3+4) Google و Facebook: إعادة توجيه داخل نفس الصفحة (بدون نافذة منبثقة) */
+const REDIR_KEY = "lf_oauth_redirect";
+async function startRedirect(provider) {
+  sessionStorage.setItem(REDIR_KEY, "1");   // علامة: عند العودة نُظهر الدائرة فوراً
+  cardLoader(true);
+  try { await signInWithRedirect(auth, provider); }   // تنتقل الصفحة كلها إلى Google ثم تعود
+  catch (e) { sessionStorage.removeItem(REDIR_KEY); cardLoader(false); throw e; }
+}
+$("#gBtn").onclick = () => run(allBtns(), () => {
   const p = new GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" });
-  return (await signInWithPopup(auth, p)).user;
-}));
-
-/* 4) Facebook */
-$("#fbBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول...", async () => {
+  return startRedirect(p);
+});
+$("#fbBtn").onclick = () => run(allBtns(), () => {
   const p = new FacebookAuthProvider(); p.addScope("email"); p.addScope("public_profile");
-  return (await signInWithPopup(auth, p)).user;
-}));
+  return startRedirect(p);
+});
 
 /* 5) البريد وكلمة المرور (دخول / إنشاء حساب) */
 $("#authForm").addEventListener("submit", e => {
@@ -376,6 +369,28 @@ onAuthStateChanged(auth, user => {
   else { $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); }
 });
 
+/* معالجة العودة من Google/Facebook بعد إعادة التوجيه */
+(async () => {
+  const returning = sessionStorage.getItem(REDIR_KEY) === "1";
+  if (returning) { busy = true; cardLoader(true); }   // يمنع ظهور النموذج أو التحويل المبكر
+  try {
+    const res = await getRedirectResult(auth);
+    sessionStorage.removeItem(REDIR_KEY);
+    if (res && res.user) {
+      cardLoader(true);
+      await sleep(POST_LOGIN_DELAY);
+      location.href = "dashboard.html";
+      return;                                          // busy يبقى true حتى الانتقال
+    }
+  } catch (e) {
+    console.error(e);
+    sessionStorage.removeItem(REDIR_KEY);
+    showErr(msg(e));
+  }
+  busy = false; cardLoader(false);
+  if (auth.currentUser) location.replace("dashboard.html");   // جلسة قائمة: المتابعة المعتادة
+})();
+
 window.__fbReady = true;
 
 /* 7) تسجيل الخروج */
@@ -383,15 +398,12 @@ $("#logout").onclick = () => signOut(auth).then(() => { $("#pass").value = ""; s
 </script>
 </body>
 <script>
-  document.addEventListener('contextmenu', function(e) {
-    e.preventDefault();
-  });
-
-  document.addEventListener('selectstart', function(e) {
-    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-      e.preventDefault();
-    }
-  });
+  (function(){
+    var ed=function(e){return /^(INPUT|TEXTAREA)$/.test((e.target&&e.target.tagName)||"")};
+    ["contextmenu","selectstart","copy","cut","dragstart"].forEach(function(t){
+      document.addEventListener(t,function(e){if(!ed(e))e.preventDefault()});
+    });
+  })();
 </script>
 
 
