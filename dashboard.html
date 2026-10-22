@@ -8,24 +8,16 @@
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <style>
-* {
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-  user-select: none !important;
-  -webkit-touch-callout: none !important;
-  -webkit-tap-highlight-color: transparent !important;
-}
-
-input, textarea, [contenteditable="true"] {
-  -webkit-user-select: text !important;
-  -moz-user-select: text !important;
-  -ms-user-select: text !important;
-  user-select: text !important;
-}
-
-
-  highlight-color:transparent}
+/* حماية: منع التحديد والنسخ في التطبيق، مع السماح داخل خانات الإدخال فقط */
+*{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent!important}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
+body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;background:#eef3fb;color:#0f1f3d}
+/* زر نسخ الرابط */
+.cpb{flex:none;width:48px;min-height:46px;border-radius:12px;border:1px solid #d5dff0;background:#fff;font-size:20px;line-height:1;display:grid;place-items:center;cursor:pointer;transition:transform .12s,border-color .15s,box-shadow .15s}
+.cpb:hover{border-color:#2563eb}
+.cpb:active{transform:scale(.94)}
+.cpb:focus-visible{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+.dark .cpb{background:#0f1829;border-color:#22304a}
 .noscroll::-webkit-scrollbar{display:none}.noscroll{scrollbar-width:none}
 .sb{transition:transform .32s cubic-bezier(.32,.72,0,1)}
 #scrim{opacity:0;pointer-events:none;transition:opacity .3s}
@@ -279,7 +271,10 @@ html.dark body{background:#0b1220;color:#e5ebf5}
           </ul>
         </div>
 
-        <div><label class="block text-sm font-semibold mb-1.5" for="link">Link</label><input id="link" class="fld" dir="ltr" inputmode="url" placeholder="https://"></div>
+        <div><label class="block text-sm font-semibold mb-1.5" for="link">Link</label><div class="flex items-stretch gap-2">
+            <input id="link" class="fld flex-1 min-w-0" dir="ltr" inputmode="url" placeholder="https://">
+            <button id="copyLink" type="button" class="cpb" title="Copy link" aria-label="Copy link">💾</button>
+          </div></div>
         <div>
           <label class="block text-sm font-semibold mb-1.5" for="qty">Quantity <span id="range" class="text-slate-400 font-normal text-xs"></span></label>
           <input id="qty" class="fld" type="number" inputmode="numeric" placeholder="1000">
@@ -745,6 +740,25 @@ function calc(){
 }
 $("#q").oninput=drawCats;$("#cat").onchange=drawSrv;$("#srv").onchange=pick;$("#qty").oninput=calc;
 
+/* نسخ الرابط: الزر الوحيد المسموح له بالنسخ (إضافة إلى النسخ اليدوي داخل الخانة نفسها) */
+async function copyInputText(id){
+  const el=document.getElementById(id||"link");
+  const text=((el&&el.value)||"").trim();
+  if(!text){toast("Nothing to copy");return false}
+  try{
+    if(!(navigator.clipboard&&window.isSecureContext))throw 0;
+    await navigator.clipboard.writeText(text);
+  }catch(_){
+    try{                                   // بديل للمتصفحات القديمة / WebView
+      el.focus();el.select();el.setSelectionRange(0,text.length);
+      if(!document.execCommand("copy"))throw 0;
+      el.setSelectionRange(text.length,text.length);
+    }catch(e){toast("Copy failed — long-press the field to copy");return false}
+  }
+  toast("Link copied ✓");
+  return true;
+}
+$("#copyLink").onclick=()=>copyInputText("link");
 let sending=false;
 const fmtUsd=n=>"$"+Number(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:4});
 function showOrderOk(o){
@@ -874,6 +888,7 @@ $("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg"
 $("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
 /* ================= i18n (AR / EN) ================= */
 const PAIRS=[
+["Nothing to copy","لا يوجد رابط لنسخه"],["Link copied ✓","تم نسخ الرابط ✓"],["Copy failed — long-press the field to copy","تعذّر النسخ — اضغط مطولاً على الخانة لنسخ الرابط"],
 ["Reason","السبب"],["Full amount refunded to your balance","تم إرجاع المبلغ كاملاً إلى رصيدك"],["Remaining amount refunded to your balance","تم إرجاع المبلغ المتبقي إلى رصيدك"],
 ["In progress","قيد التنفيذ"],["Completed","مكتمل"],["Partial","جزئي"],["Canceled","ملغي"],["Remaining","المتبقي"],
 ["🎉 Order created successfully! 🎉","🎉 تم إنشاء الطلب بنجاح! 🎉"],["Order received and under review","تم استلام الطلب وهو قيد المراجعة"],["Order ID","معرّف الطلب"],["Total cost","التكلفة الإجمالية"],["Remaining balance","الرصيد المتبقي"],["View orders","عرض الطلبات"],["Close","إغلاق"],["Sending…","جاري الإرسال…"],
@@ -1039,14 +1054,10 @@ const out = () => { stopBal(); return signOut(auth).catch(() => {}).finally(() =
 document.getElementById("logout").onclick = out;
 document.getElementById("logout2").onclick = out;
 document.getElementById("logout3").onclick = out;
-  document.addEventListener('contextmenu', function(e) {
-  e.preventDefault();
-});
-document.addEventListener('selectstart', function(e) {
-  if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-    e.preventDefault();
-  }
-});
-</script>
-
+const _editable=e=>/^(INPUT|TEXTAREA)$/.test((e.target&&e.target.tagName)||"");
+document.addEventListener('contextmenu',e=>{if(!_editable(e))e.preventDefault()});
+document.addEventListener('selectstart',e=>{if(!_editable(e))e.preventDefault()});
+document.addEventListener('copy',e=>{if(!_editable(e))e.preventDefault()});
+document.addEventListener('cut',e=>{if(!_editable(e))e.preventDefault()});
+document.addEventListener('dragstart',e=>{if(!_editable(e))e.preventDefault()});
 </script>
