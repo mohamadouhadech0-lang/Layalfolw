@@ -382,4 +382,18 @@ window.__fbReady = true;
 $("#logout").onclick = () => signOut(auth).then(() => { $("#pass").value = ""; showErr(""); }).catch(e => alert(msg(e)));
 </script>
 </body>
+<script>
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  });
+
+  document.addEventListener('selectstart', function(e) {
+    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+    }
+  });
+</script>
+
+
 </html>
+
