@@ -9,9 +9,6 @@
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script>tailwind.config={darkMode:'class'}</script>
 
-<!-- مكتبة Google الرسمية لمنع الشريط العلوي -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -163,7 +160,13 @@ html:has(#auth:not(.hidden)) body{background:#070b14}
 </div>
 
 <script>
-const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s); const root=document.documentElement;  let saved=null; try{saved=localStorage.getItem("theme")}catch(e){} const setDark=d=>{root.classList.toggle("dark",d);try{localStorage.setItem("theme",d?"dark":"light")}catch(e){}}; setDark(saved?saved==="dark":matchMedia("(prefers-color-scheme: dark)").matches); $$(".themeBtn").forEach(b=>b.onclick=()=>setDark(!root.classList.contains("dark")));
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const root=document.documentElement;
+
+let saved=null; try{saved=localStorage.getItem("theme")}catch(e){}
+const setDark=d=>{root.classList.toggle("dark",d);try{localStorage.setItem("theme",d?"dark":"light")}catch(e){}};
+setDark(saved?saved==="dark":matchMedia("(prefers-color-scheme: dark)").matches);
+$$(".themeBtn").forEach(b=>b.onclick=()=>setDark(!root.classList.contains("dark")));
 
 let mode="in";
 const setMode=m=>{mode=m;
@@ -194,8 +197,6 @@ $("#cards").innerHTML=cards.map(c=>`<div class="bg-white dark:bg-slate-900 round
 <div><div class="text-sm text-slate-500">${c[0]}</div><div class="text-2xl font-extrabold mt-1">${c[1]}</div><div class="text-xs mt-1 ${c[3]?"text-emerald-500":"text-rose-500"}" dir="ltr">${c[2]} هذا الأسبوع</div></div>
 <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${c[5]} grid place-items-center text-xl">${c[4]}</div></div>`).join("");
 
-$("#orders").innerHTML=[["أحمد علي","$120","#1042"],["سارة محمد","$86","#1041"],["يوسف خالد","$240","#1039"]].map(o=>`<li class="py-3 flex items-center justify-between"><div><div class="font-semibold">${o[0]}</div><div class="text-xs text-slate-500">${o[2]}</div></div><span class="font-bold" dir="ltr">${o[1]}</span></li>`).join("");
-
 const days=["س","ح","ن","ث","ر","خ","ج"],v=[32,45,38,60,52,74,68];
 const W=600,H=220,pad=30,max=80,x=i=>W-pad-i*(W-2*pad)/6,y=n=>H-pad-n/max*(H-2*pad);
 const pts=v.map((n,i)=>`${x(i)},${y(n)}`).join(" ");
@@ -208,7 +209,7 @@ ${v.map((n,i)=>`<circle cx="${x(i)}" cy="${y(n)}" r="4.5" fill="#6366f1"/><text 
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { initializeAuth, browserSessionPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInWithCredential, GoogleAuthProvider, FacebookAuthProvider,
+import { initializeAuth, browserSessionPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider,
   signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
@@ -270,23 +271,58 @@ async function flow(label, doAuth) {
   } finally { busy = false; cardLoader(false); }
 }
 
-/* === تفعيل Google One Tap (النافذة المنسدلة من الأسفل وبدون فتح صفحة جديدة) === */
-function setupGoogleOneTap() {
-  if (window.google && google.accounts && google.accounts.id) {
-    google.accounts.id.initialize({
-      client_id: "850647879566-54e2e67a395f5d56101edf.apps.googleusercontent.com", // المعرف الدقيق لـ Firebase
-      callback: async (response) => {
-        run(allBtns(), () => flow("جاري الدخول...", async () => {
-          const credential = GoogleAuthProvider.credential(response.credential);
-          const result = await signInWithCredential(auth, credential);
-          return result.user;
-        }));
-      },
-      auto_select: true
-    });
-    // إظهار النافذة السفلية فوراً
-    google.accounts.id.prompt();
-  }
-}
+/* === تفعيل نافذة اختيار الحسابات المنبثقة لجوجل مثل الصورة تماماً === */
+$("#gBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول بـ Google...", async () => {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  const result = await signInWithPopup(auth, provider);
+  return result.user;
+}));
 
-// تشغيل الخدمة فور فتح الصفحة
+$("#fbBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول بـ Facebook...", async () => {
+  const provider = new FacebookAuthProvider();
+  provider.addScope("email");
+  provider.addScope("public_profile");
+  const result = await signInWithPopup(auth, provider);
+  return result.user;
+}));
+
+/* تسجيل الدخول بالبريد وكلمة المرور */
+$("#authForm").addEventListener("submit", e => {
+  e.preventDefault();
+  const email = $("#email").value.trim(), pass = $("#pass").value, name = $("#name").value.trim();
+  const signup = typeof mode !== "undefined" && mode === "up";
+  if (signup && name.length < 2) return showErr("أدخل اسمك الكامل.");
+  if (!/^\S+@\S+\.\S+$/.test(email)) return showErr(ERRORS["auth/invalid-email"]);
+  if (pass.length < 6) return showErr(ERRORS["auth/weak-password"]);
+  run(allBtns(), () => signup
+    ? flow("جاري التسجيل...", async () => {
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(cred.user, { displayName: name });
+        return cred.user;
+      })
+    : flow("جاري الدخول...", async () => (await signInWithEmailAndPassword(auth, email, pass)).user));
+});
+
+/* إعادة تعيين كلمة المرور */
+$("#forgot").onclick = () => {
+  const email = $("#email").value.trim();
+  if (!email) return showErr("أدخل بريدك الإلكتروني أولاً.");
+  run(allBtns(), async () => {
+    await sendPasswordResetEmail(auth, email);
+    showErr("");
+    $("#err").className = "text-sm text-emerald-500 min-h-[20px]";
+    $("#err").textContent = "أُرسل رابط إعادة التعيين إلى بريدك.";
+  });
+};
+
+onAuthStateChanged(auth, user => {
+  if (busy) return;
+  if (user) location.replace("dashboard.html");
+  else { $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); }
+});
+
+$("#logout").onclick = () => signOut(auth).then(() => { $("#pass").value = ""; showErr(""); }).catch(e => alert(msg(e)));
+</script>
+</body>
+</html>
