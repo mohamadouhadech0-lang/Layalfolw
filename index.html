@@ -299,10 +299,33 @@ async function flow(label, doAuth) {
   } finally { busy = false; cardLoader(false); }
 }
 
+/* فك رمز Google (JWT) لاستخراج sub والبريد وحفظهما في localStorage.
+   مهم: فك ترميز فقط (لا يتحقق من التوقيع) — للعرض/الراحة فقط، ولا تعتمد عليه في أي صلاحيات.
+   التحقق الحقيقي يتم عبر Firebase. */
+function decodeJwt(token) {
+  const part = String(token).split(".")[1];
+  if (!part) throw new Error("bad jwt");
+  const b64 = part.replace(/-/g, "+").replace(/_/g, "/");
+  const bin = atob(b64.padEnd(b64.length + (4 - (b64.length % 4)) % 4, "="));
+  return JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, c => c.charCodeAt(0))));  // يدعم الأسماء العربية
+}
+function saveGoogleProfile(credential) {          // credential = response.credential (JWT)
+  try {
+    const { sub, email, email_verified } = decodeJwt(credential);
+    if (!sub || !email) return null;
+    const profile = { sub, email, verified: !!email_verified };
+    localStorage.setItem("lf_google_profile", JSON.stringify(profile));
+    return profile;
+  } catch (e) { console.warn("JWT decode failed", e); return null; }
+}
+
 /* 3) Google */
 $("#gBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول...", async () => {
   const p = new GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" });
-  return (await signInWithPopup(auth, p)).user;
+  const result = await signInWithPopup(auth, p);
+  const gc = GoogleAuthProvider.credentialFromResult(result);     // يحتوي idToken (JWT) من Google
+  if (gc && gc.idToken) saveGoogleProfile(gc.idToken);            // حفظ sub والبريد بعد نجاح التحقق
+  return result.user;
 }));
 
 /* 4) Facebook */
