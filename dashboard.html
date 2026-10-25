@@ -813,7 +813,7 @@ setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
 let uemail="";
 $("#icLock").innerHTML=ic("lock",16);
 
-// شعارات البنوك الأصلية تماماً كما أرسلتها في الصور
+// الشعارات الأصلية والملونة للبنوك داخل واجهة الدفع
 const PAY_METHODS=[
   {
     id:"cashplus", 
@@ -840,7 +840,7 @@ function drawMethods(){
 }
 drawMethods();
 
-// الضغط المباشر على شعار البنك لتحويل المستخدم للواتساب مع ذكر البنك المختار
+// الضغط المباشر على الشعار لتحويل المستخدم للواتساب مع تفاصيل التحويل والبنك المختار
 $("#methods").onclick = e => {
   const b = e.target.closest("[data-bank]");
   if(!b) return;
