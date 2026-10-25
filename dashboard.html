@@ -290,7 +290,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
     <section id="sec2" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-blue-800">Orders</h2><div id="ordList" class="space-y-3"></div></section>
 
-    <!-- شحن الرصيد المباشر عبر الشعارات الرسمية للبنوك -->
+    <!-- شحن الرصيد المباشر عبر الشعارات الحقيقية المرفوعة -->
     <section id="sec3" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
       <h2 class="text-lg font-extrabold mb-2 text-blue-800 text-center">الدفع عبر</h2>
       <p class="text-sm text-slate-500 mb-6 text-center">اختر البنك للتحويل الفوري للواتساب مع الرسالة الجاهزة</p>
@@ -813,19 +813,19 @@ setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
 let uemail="";
 $("#icLock").innerHTML=ic("lock",16);
 
-// الشعارات الأصلية والملونة للبنوك داخل واجهة الدفع
+// ربط الشعارات الحقيقية عبر ملفات الصور المرفوعة (images (1).png و images (21).jpeg)
 const PAY_METHODS=[
   {
     id:"cashplus", 
     label:"Cash Plus", 
     sub:"تحويل فوري عبر وكالة كاش بلوس", 
-    logo:`<div class="w-14 h-14 rounded-full flex items-center justify-center bg-white shadow-md border border-slate-100 p-2"><svg viewBox="0 0 500 500" class="w-full h-full"><circle cx="250" cy="250" r="230" fill="#008080"/><path d="M120 280 C150 180, 280 120, 360 160 C320 200, 200 240, 160 380 Z" fill="#ffffff"/><circle cx="340" cy="180" r="25" fill="#ffd700"/></svg></div>`
+    logo:`<div class="w-14 h-14 rounded-full flex items-center justify-center bg-white shadow-md border border-slate-100 p-1.5 overflow-hidden"><img src="images (21).jpeg" alt="Cash Plus" class="w-full h-full object-contain"></div>`
   },
   {
     id:"cih",      
     label:"CIH Bank",  
     sub:"تحويل مباشر عبر بنك CIH",        
-    logo:`<div class="px-3 py-2 rounded-xl flex items-center gap-1.5 bg-black shadow-md border border-slate-800"><span class="text-white font-black text-sm tracking-tighter">CIH</span><div class="flex flex-col"><span class="text-[#ff5500] text-[10px] font-bold leading-none">▶</span><span class="text-[#00bfff] text-[10px] font-bold leading-none">▶</span></div><span class="text-white font-black text-sm tracking-tighter">BANK</span></div>`
+    logo:`<div class="w-14 h-14 rounded-xl flex items-center justify-center bg-white shadow-md border border-slate-100 p-1.5 overflow-hidden"><img src="images (1).png" alt="CIH Bank" class="w-full h-full object-contain"></div>`
   }
 ];
 
@@ -937,7 +937,7 @@ function applyLang(l){
 }
 document.querySelectorAll(".lb").forEach(b=>b.onclick=()=>applyLang(b.dataset.lang));
 {let l=null;try{l=localStorage.getItem("lf_lang")}catch(e){}
- applyLang(l||((navigator.language||"").toLowerCase().startsWith("ar")?"ar":"en"))}
+ applyLang(l||((navigator.language||"").toLowerCase().startsWith("ar"?"ar":"en")))}
 
 drawCats();refresh();
 setTimeout(()=>bootFail(),9000);   
