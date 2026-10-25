@@ -290,12 +290,12 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
     <section id="sec2" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-blue-800">Orders</h2><div id="ordList" class="space-y-3"></div></section>
 
-    <!-- شحن الرصيد المباشر عبر الضغط على البنك -->
+    <!-- شحن الرصيد المباشر عبر الشعارات الرسمية للبنوك -->
     <section id="sec3" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
       <h2 class="text-lg font-extrabold mb-2 text-blue-800 text-center">الدفع عبر</h2>
-      <p class="text-sm text-slate-500 mb-6 text-center">اختر البنك أو طريقة التحويل للتحويل الفوري للواتساب مع الرسالة الجاهزة</p>
+      <p class="text-sm text-slate-500 mb-6 text-center">اختر البنك للتحويل الفوري للواتساب مع الرسالة الجاهزة</p>
 
-      <div class="text-sm font-semibold mb-2">اختر طريقة الدفع (اضغط على البنك للتحويل الفوري)</div>
+      <div class="text-sm font-semibold mb-2 text-center">اختر طريقة الدفع (اضغط على الشعار للتحويل الفوري)</div>
       <div id="methods" class="grid grid-cols-2 gap-4 mb-6"></div>
 
       <div class="text-sm font-semibold mb-2">المبلغ المطلوب (USD)</div>
@@ -306,7 +306,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
       <div class="mt-4 flex items-start gap-2.5 rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs leading-5 text-emerald-800">
         <span id="icLock" class="mt-0.5 shrink-0"></span>
-        <span>حدد المبلغ أولاً، ثم اضغط على أيقونة البنك (Cash Plus أو CIH Bank) ليتم نقلك مباشرة إلى الواتساب مع كافة تفاصيل طلبك.</span>
+        <span>حدد المبلغ أولاً، ثم اضغط على شعار البنك (Cash Plus أو CIH Bank) ليتم نقلك مباشرة إلى الواتساب مع كافة تفاصيل طلبك.</span>
       </div>
     </section>
 
@@ -811,18 +811,28 @@ async function syncOrders(){
 setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
 
 let uemail="";
-let selectedBank="Cash Plus";
 $("#icLock").innerHTML=ic("lock",16);
 
+// شعارات البنوك الأصلية تماماً كما أرسلتها في الصور
 const PAY_METHODS=[
-  {id:"cashplus", label:"Cash Plus", sub:"تحويل فوري عبر وكالة كاش بلوس", icon:"wallet", color:"from-green-500 to-emerald-700"},
-  {id:"cih",      label:"CIH Bank",  sub:"تحويل مباشر عبر بنك CIH",        icon:"card",   color:"from-blue-600 to-sky-700"}
+  {
+    id:"cashplus", 
+    label:"Cash Plus", 
+    sub:"تحويل فوري عبر وكالة كاش بلوس", 
+    logo:`<div class="w-14 h-14 rounded-full flex items-center justify-center bg-white shadow-md border border-slate-100 p-2"><svg viewBox="0 0 500 500" class="w-full h-full"><circle cx="250" cy="250" r="230" fill="#008080"/><path d="M120 280 C150 180, 280 120, 360 160 C320 200, 200 240, 160 380 Z" fill="#ffffff"/><circle cx="340" cy="180" r="25" fill="#ffd700"/></svg></div>`
+  },
+  {
+    id:"cih",      
+    label:"CIH Bank",  
+    sub:"تحويل مباشر عبر بنك CIH",        
+    logo:`<div class="px-3 py-2 rounded-xl flex items-center gap-1.5 bg-black shadow-md border border-slate-800"><span class="text-white font-black text-sm tracking-tighter">CIH</span><div class="flex flex-col"><span class="text-[#ff5500] text-[10px] font-bold leading-none">▶</span><span class="text-[#00bfff] text-[10px] font-bold leading-none">▶</span></div><span class="text-white font-black text-sm tracking-tighter">BANK</span></div>`
+  }
 ];
 
 function drawMethods(){
   $("#methods").innerHTML=PAY_METHODS.map(m=>{
-    return `<button type="button" data-bank="${m.label}" class="mth flex flex-col items-center text-center rounded-2xl border-2 p-5 transition-all border-slate-200 bg-white hover:border-blue-600 active:scale-95 shadow-sm">
-      <div class="w-12 h-12 rounded-full grid place-items-center text-white font-bold text-lg mb-2 bg-gradient-to-br ${m.color} shadow">${m.id==="cashplus"?"CP":"CIH"}</div>
+    return `<button type="button" data-bank="${m.label}" class="mth flex flex-col items-center text-center rounded-2xl border-2 p-4 transition-all border-slate-200 bg-white hover:border-blue-600 active:scale-95 shadow-sm">
+      <div class="mb-2 flex items-center justify-center">${m.logo}</div>
       <div class="font-bold text-base text-slate-800">${m.label}</div>
       <div class="text-xs text-slate-500 mt-1">${m.sub}</div>
     </button>`;
@@ -830,7 +840,7 @@ function drawMethods(){
 }
 drawMethods();
 
-// الضغط المباشر على بطاقة البنك لتحويل المستخدم للواتساب مع ذكر البنك المختار
+// الضغط المباشر على شعار البنك لتحويل المستخدم للواتساب مع ذكر البنك المختار
 $("#methods").onclick = e => {
   const b = e.target.closest("[data-bank]");
   if(!b) return;
