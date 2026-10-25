@@ -17,7 +17,7 @@ const METHODS = {
   usdt: { env: "PAY_USDT_INFO", name: "Crypto USDT" },
   morocco: { env: "PAY_MOROCCO_INFO", name: "CIH Bank / Cash Plus" },
 };
-const MAX_PENDING = 5;
+const MAX_PENDING = 20;
 
 async function handle(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "method_not_allowed", detail: "Use POST" });
