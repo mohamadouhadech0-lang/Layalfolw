@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>layal folw - شحن الرصيد</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Cairo Font for Arabic -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e3a8a',
+                        },
+                        cashplus: '#e31b23',
+                        cih: '#005b94',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f4f6f9;
+        }
+        .file-dropzone {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .file-dropzone:hover, .file-dropzone.dragover {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+        }
+        .active-card {
+            border-color: #2563eb !important;
+            box-shadow: 0 4px 20px -2px rgba(37, 99, 235, 0.2) !important;
+            background-color: #ffffff !important;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen pb-24 md:pb-10">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+            <!-- Right: Brand Logo -->
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <span class="text-2xl font-black text-brand-600 tracking-tight">layal folw</span>
+            </div>
+
+            <!-- Left: Balance & Profile -->
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="flex items-center bg-brand-50 text-brand-700 px-3 py-1.5 rounded-full border border-brand-100 font-bold text-sm">
+                    <i class="fa-solid font-bold fa-wallet text-brand-500 ml-2"></i>
+                    <span>$0.98</span>
+                </div>
+                <div class="w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
+                    مح
+                </div>
+                <button class="text-slate-500 hover:text-slate-800 text-xl p-1 md:hidden">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-2xl mx-auto px-4 py-6">
+
+        <!-- Title Header -->
+        <div class="mb-6 text-center">
+            <h1 class="text-2xl font-extrabold text-slate-900 mb-1">شحن الرصيد الحساب</h1>
+            <p class="text-sm text-slate-500">اختر طريقة الدفع المناسبة وحدد المبلغ لإكمال التحويل</p>
+        </div>
+
+        <!-- Step 1: Payment Method Selection -->
+        <div class="mb-6">
+            <label class="block text-sm font-bold text-slate-700 mb-3">طريقة الدفع</label>
+            <div class="grid grid-cols-2 gap-3">
+                
+                <!-- CIH Bank / Cash Plus Card -->
+                <div id="method-cih" onclick="selectPaymentMethod('cih')" class="payment-card active-card cursor-pointer bg-white border-2 border-slate-200 rounded-2xl p-4 transition-all relative">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                            <i class="fa-solid fa-wallet text-lg"></i>
+                        </div>
+                        <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded-full">محلي</span>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm md:text-base leading-snug">CIH Bank / كاش بلوس</h3>
+                    <p class="text-xs text-slate-500 mt-1">حوالة بنكية • وكالة كاش بلوس</p>
+                    <div class="flex items-center space-x-1.5 space-x-reverse mt-3">
+                        <span class="text-[10px] font-extrabold text-white bg-[#e31b23] px-2 py-0.5 rounded">Cash Plus</span>
+                        <span class="text-[10px] font-extrabold text-white bg-[#005b94] px-2 py-0.5 rounded">CIH</span>
+                    </div>
+                </div>
+
+                <!-- Binance Pay Card -->
+                <div id="method-binance" onclick="selectPaymentMethod('binance')" class="payment-card cursor-pointer bg-white border-2 border-slate-200 rounded-2xl p-4 transition-all hover:border-slate-300">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="p-2 bg-amber-50 text-amber-500 rounded-xl">
+                            <i class="fa-solid fa-coins text-lg"></i>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm md:text-base leading-snug">Binance Pay</h3>
+                    <p class="text-xs text-slate-500 mt-1">الدفع المباشر عبر Binance</p>
+                    <div class="mt-3">
+                        <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">Binance</span>
+                    </div>
+                </div>
+
+                <!-- Crypto USDT Card -->
+                <div id="method-usdt" onclick="selectPaymentMethod('usdt')" class="payment-card cursor-pointer bg-white border-2 border-slate-200 rounded-2xl p-4 transition-all hover:border-slate-300">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                            <i class="fa-solid fa-network-wired text-lg"></i>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm md:text-base leading-snug">عملات رقمية USDT</h3>
+                    <p class="text-xs text-slate-500 mt-1">تحويل مشفر (TRC20 / BEP20)</p>
+                    <div class="mt-3">
+                        <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">USDT</span>
+                    </div>
+                </div>
+
+                <!-- Credit Card -->
+                <div id="method-card" onclick="selectPaymentMethod('card')" class="payment-card cursor-pointer bg-white border-2 border-slate-200 rounded-2xl p-4 transition-all hover:border-slate-300">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                            <i class="fa-solid fa-credit-card text-lg"></i>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-sm md:text-base leading-snug">بطاقة ائتمان / خصم</h3>
+                    <p class="text-xs text-slate-500 mt-1">Visa • Mastercard</p>
+                    <div class="flex space-x-1 space-x-reverse mt-3">
+                        <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">VISA</span>
+                        <span class="text-[10px] font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">MasterCard</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Step 2: Amount Selection -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm mb-6">
+            <label class="block text-sm font-bold text-slate-800 mb-3">المبلغ (بالدولار USD)</label>
+            
+            <!-- Quick Chips -->
+            <div class="grid grid-cols-4 gap-2 mb-4">
+                <button type="button" onclick="setAmount(5)" class="amount-btn active-amount border-2 border-brand-500 bg-brand-50 text-brand-600 font-bold py-2 rounded-xl text-center text-sm transition-all shadow-sm">$5</button>
+                <button type="button" onclick="setAmount(10)" class="amount-btn border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold py-2 rounded-xl text-center text-sm transition-all">$10</button>
+                <button type="button" onclick="setAmount(25)" class="amount-btn border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold py-2 rounded-xl text-center text-sm transition-all">$25</button>
+                <button type="button" onclick="setAmount(50)" class="amount-btn border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-bold py-2 rounded-xl text-center text-sm transition-all">$50</button>
+            </div>
+
+            <!-- Custom Input -->
+            <div class="relative">
+                <input type="number" id="custom-amount" value="5" min="1" step="0.5" oninput="updateAmount(this.value)" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-800 text-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 font-bold">
+                    $
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Payment Instructions & Details Card (Dedicated Step) -->
+        <div class="bg-gradient-to-b from-blue-50/70 to-white rounded-2xl p-5 border border-blue-200 shadow-md mb-6 relative overflow-hidden">
+            <!-- Top Branding Badge -->
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-blue-100">
+                <div class="flex items-center space-x-2 space-x-reverse">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <h2 class="font-extrabold text-blue-900 text-base" id="instruction-title">تعليمات الدفع — CIH Bank / Cash Plus</h2>
+                </div>
+                <div id="method-badge-logo" class="flex items-center space-x-1 space-x-reverse">
+                    <span class="text-xs font-black text-white bg-[#e31b23] px-2 py-1 rounded-md shadow-sm">Cash Plus</span>
+                    <span class="text-xs font-black text-white bg-[#005b94] px-2 py-1 rounded-md shadow-sm">CIH</span>
+                </div>
+            </div>
+
+            <!-- Information Details -->
+            <div class="space-y-3 mb-5">
+                <div class="flex justify-between items-center text-sm py-1 border-b border-slate-100">
+                    <span class="text-slate-500 font-medium">معرّف الحساب / الرقم:</span>
+                    <span class="font-extrabold text-slate-900 text-base" id="account-id-display">0675521479</span>
+                </div>
+                <div class="flex justify-between items-center text-sm py-1 border-b border-slate-100">
+                    <span class="text-slate-500 font-medium">المبلغ المطلوب:</span>
+                    <span class="font-extrabold text-brand-600 text-lg" id="display-amount-target">$5.00</span>
+                </div>
+                
+                <!-- Reference Code Box with Copy Button -->
+                <div class="pt-2">
+                    <label class="block text-xs font-bold text-slate-600 mb-1.5">الرمز المرجعي للطلب (الرجاء تضمينه في الرسالة):</label>
+                    <div class="flex items-center space-x-2 space-x-reverse">
+                        <input type="text" id="ref-code" value="LFE5MOB-R9BQ" readonly class="w-full bg-white border border-blue-300 rounded-xl py-2.5 px-3 text-center font-black text-slate-800 tracking-wider text-base focus:outline-none shadow-inner">
+                        <button type="button" onclick="copyReferenceCode()" class="bg-brand-600 hover:bg-brand-700 active:scale-95 text-white px-4 py-2.5 rounded-xl font-bold flex items-center justify-center transition-all shadow-md">
+                            <i class="fa-regular fa-copy text-lg ml-1"></i>
+                            <span class="text-xs hidden sm:inline">نسخ</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instruction Box -->
+            <div class="bg-white border border-blue-200 rounded-xl p-3.5 text-center text-sm text-slate-700 font-medium shadow-sm mb-2">
+                <i class="fa-solid fa-circle-info text-brand-500 mb-1 block text-lg"></i>
+                <p id="instruction-text">قم بالدفع عبر وكالة <strong>كاش بلوس</strong> أو تطبيق <strong>CIH Bank</strong> إلى الحساب رقم <strong class="text-slate-900">0675521479</strong> ثم اكتب الرمز المرجعي أصل الدفع.</p>
+            </div>
+            <p class="text-[11px] text-slate-400 text-center">يُضاف الرصيد تلقائياً إلى حسابك فور مراجعة وتأكيد استلام الدفعة من الإدارة.</p>
+        </div>
+
+        <!-- Step 4: Receipt Upload Section (قسم رفع إيصال الدفع الاحترافي) -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-md mb-6">
+            <div class="flex items-center space-x-2 space-x-reverse mb-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-file-invoice"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-slate-800 text-base">إرفاق وصل / إيصال الدفع</h3>
+                    <p class="text-xs text-slate-500">قم برفع صورة أو لقطة شاشة لإثبات التحويل للإسراع في شحن رصيدك</p>
+                </div>
+            </div>
+
+            <form id="receipt-form" onsubmit="handleReceiptSubmit(event)">
+                <!-- Dropzone File Upload -->
+                <div id="dropzone" class="file-dropzone rounded-2xl p-6 text-center cursor-pointer bg-slate-50 hover:bg-blue-50/50 transition-all mb-4 relative">
+                    <input type="file" id="receipt-file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewReceiptFile(event)">
+                    
+                    <!-- Default UI -->
+                    <div id="dropzone-prompt" class="space-y-2">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 text-brand-600 flex items-center justify-center mx-auto text-xl mb-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                        </div>
+                        <p class="font-bold text-slate-700 text-sm">اضغط هنا لرفع إيصال الدفع أو قم بسحبه هنا</p>
+                        <p class="text-xs text-slate-400">يدعم الصور فقط (PNG, JPG, JPEG) بحجم أقصى 5 ميجابايت</p>
+                    </div>
+
+                    <!-- File Preview UI (Hidden Initially) -->
+                    <div id="file-preview-container" class="hidden flex-col items-center justify-center">
+                        <div class="relative group mb-3">
+                            <img id="file-preview-img" src="" alt="وصل الدفع" class="max-h-48 rounded-xl border-2 border-brand-500 shadow-md object-contain">
+                            <button type="button" onclick="removeReceiptFile(event)" class="absolute -top-2 -right-2 bg-red-500 text-white w-7 h-7 rounded-full shadow-lg flex items-center justify-center text-xs hover:bg-red-600 transition-all">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <span id="file-name" class="text-xs font-bold text-slate-700 bg-white px-3 py-1 rounded-full border border-slate-200">filename.jpg</span>
+                    </div>
+                </div>
+
+                <!-- Optional Note Input -->
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-600 mb-1">اسم المرسل أو ملاحظات إضافية (اختياري):</label>
+                    <input type="text" id="user-note" placeholder="مثال: تم الإرسال من حساب محمد أحمد" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                </div>
+
+                <!-- Action Submit Button -->
+                <button type="submit" id="submit-btn" class="w-full bg-brand-600 hover:bg-brand-700 active:scale-[0.99] text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg shadow-brand-500/30 flex items-center justify-center space-x-2 space-x-reverse transition-all text-base">
+                    <i class="fa-solid fa-paper-plane text-lg ml-2"></i>
+                    <span>تأكيد وإرسال إيصال الدفع</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Security Banner -->
+        <div class="bg-emerald-50/80 border border-emerald-200 rounded-2xl p-4 flex items-center space-x-3 space-x-reverse text-emerald-800 text-xs leading-relaxed mb-6 shadow-sm">
+            <i class="fa-solid fa-shield-halved text-emerald-600 text-2xl flex-shrink-0 ml-1"></i>
+            <div>
+                <p class="font-bold text-emerald-900 mb-0.5">الدفع يتم عبر صفحة آمنة ومشفّرة (SSL/TLS)</p>
+                <p class="text-emerald-700">بياناتك ومعاملاتك المالية محمية بالكامل ولن يتم مشاركتها مع أي طرف ثالث.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (Mobile Optimized) -->
+    <nav class="fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 py-2 px-3 z-40 md:hidden shadow-lg">
+        <div class="grid grid-cols-4 text-center">
+            <a href="#" class="flex flex-col items-center text-brand-600 font-bold">
+                <i class="fa-solid fa-wallet text-lg mb-0.5"></i>
+                <span class="text-[10px]">شحن الرصيد</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-slate-400 hover:text-slate-600 font-medium">
+                <i class="fa-solid fa-box text-lg mb-0.5"></i>
+                <span class="text-[10px]">الطلبات</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-slate-400 hover:text-slate-600 font-medium">
+                <i class="fa-solid fa-cubes text-lg mb-0.5"></i>
+                <span class="text-[10px]">الخدمات</span>
+            </a>
+            <a href="#" class="flex flex-col items-center text-slate-400 hover:text-slate-600 font-medium">
+                <i class="fa-solid fa-cart-plus text-lg mb-0.5"></i>
+                <span class="text-[10px]">طلب جديد</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Success Modal Notification -->
+    <div id="success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl transform transition-all scale-95 opacity-0 duration-300" id="modal-card">
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto text-3xl mb-4 shadow-inner">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-slate-900 mb-2">تم استلام إيصالك بنجاح!</h3>
+            <p class="text-xs text-slate-500 mb-6 leading-relaxed">شكراً لك. يقوم فريق الدعم حالياً بمراجعة عملية الدفع والرمز المرجعي، وسيتم إضافة الرصيد لحسابك في أسرع وقت.</p>
+            <button onclick="closeModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl shadow-md transition-all">
+                متابعة الحساب
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-4 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center space-x-2 space-x-reverse opacity-0 transition-all pointer-events-none z-50">
+        <i class="fa-solid fa-check text-emerald-400 ml-1"></i>
+        <span id="toast-message">تم النسخ بنجاح</span>
+    </div>
+
+    <!-- Interactive JavaScript -->
+    <script>
+        let selectedAmount = 5;
+        let selectedMethod = 'cih';
+
+        // Payment Methods Data
+        const paymentDetails = {
+            cih: {
+                title: 'تعليمات الدفع — CIH Bank / Cash Plus',
+                accountId: '0675521479',
+                badges: '<span class="text-xs font-black text-white bg-[#e31b23] px-2 py-1 rounded-md shadow-sm">Cash Plus</span> <span class="text-xs font-black text-white bg-[#005b94] px-2 py-1 rounded-md shadow-sm">CIH</span>',
+                text: 'قم بالدفع عبر وكالة <strong>كاش بلوس</strong> أو تطبيق <strong>CIH Bank</strong> إلى الحساب رقم <strong class="text-slate-900">0675521479</strong> ثم قم بإرفاق وصل التحويل أدناه.'
+            },
+            binance: {
+                title: 'تعليمات الدفع — Binance Pay',
+                accountId: 'PAY-ID: 284910381',
+                badges: '<span class="text-xs font-black text-amber-900 bg-amber-400 px-2 py-1 rounded-md shadow-sm">Binance Pay</span>',
+                text: 'قم بإرسال المبلغ عبر <strong>Binance Pay ID</strong> الموضح أعلاه ثم أرفق صورة لتأكيد المعاملة.'
+            },
+            usdt: {
+                title: 'تعليمات الدفع — USDT (TRC20)',
+                accountId: 'TYx9bM...284P1Nkq8',
+                badges: '<span class="text-xs font-black text-white bg-emerald-600 px-2 py-1 rounded-md shadow-sm">USDT TRC20</span>',
+                text: 'قم بتحويل المبلغ برمز الشبكة <strong>TRC20</strong> إلى المحفظة أعلاه وارفع إثبات المعاملة.'
+            },
+            card: {
+                title: 'الدفع ببطاقة البنك',
+                accountId: 'بوابة شحن آمنة',
+                badges: '<span class="text-xs font-black text-indigo-900 bg-indigo-100 px-2 py-1 rounded-md shadow-sm">VISA / MasterCard</span>',
+                text: 'سيتم تحويلك إلى بوابة الدفع المشفرة المباشرة لإكمال المعاملة ببطاقتك.'
+            }
+        };
+
+        // Select Payment Method
+        function selectPaymentMethod(method) {
+            selectedMethod = method;
+            document.querySelectorAll('.payment-card').forEach(card => {
+                card.classList.remove('active-card');
+            });
+            document.getElementById(`method-${method}`).classList.add('active-card');
+
+            // Update Instructions
+            const details = paymentDetails[method];
+            document.getElementById('instruction-title').innerText = details.title;
+            document.getElementById('account-id-display').innerText = details.accountId;
+            document.getElementById('method-badge-logo').innerHTML = details.badges;
+            document.getElementById('instruction-text').innerHTML = details.text;
+        }
+
+        // Set Amount from quick chips
+        function setAmount(amount) {
+            selectedAmount = amount;
+            document.getElementById('custom-amount').value = amount;
+            updateAmountDisplay();
+
+            document.querySelectorAll('.amount-btn').forEach(btn => {
+                btn.classList.remove('active-amount', 'border-brand-500', 'bg-brand-50', 'text-brand-600');
+                btn.classList.add('border-slate-200', 'text-slate-700');
+            });
+
+            event.target.classList.add('active-amount', 'border-brand-500', 'bg-brand-50', 'text-brand-600');
+            event.target.classList.remove('border-slate-200', 'text-slate-700');
+        }
+
+        // Update Amount from Custom Input
+        function updateAmount(val) {
+            selectedAmount = parseFloat(val) || 0;
+            updateAmountDisplay();
+        }
+
+        function updateAmountDisplay() {
+            document.getElementById('display-amount-target').innerText = `$${selectedAmount.toFixed(2)}`;
+        }
+
+        // Copy Reference Code
+        function copyReferenceCode() {
+            const copyText = document.getElementById("ref-code");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+
+            showToast("تم نسخ الرمز المرجعي بنجاح!");
+        }
+
+        // Preview Receipt Image File
+        function previewReceiptFile(event) {
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('file-preview-img').src = e.target.result;
+                    document.getElementById('file-name').innerText = input.files[0].name;
+                    document.getElementById('dropzone-prompt').classList.add('hidden');
+                    document.getElementById('file-preview-container').classList.remove('hidden');
+                    document.getElementById('file-preview-container').classList.add('flex');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Remove Selected File
+        function removeReceiptFile(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            document.getElementById('receipt-file').value = '';
+            document.getElementById('dropzone-prompt').classList.remove('hidden');
+            document.getElementById('file-preview-container').classList.add('hidden');
+            document.getElementById('file-preview-container').classList.remove('flex');
+        }
+
+        // Handle Form Submission (Simulation)
+        function handleReceiptSubmit(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('receipt-file');
+
+            if (!fileInput.files.length) {
+                showToast("الرجاء اختيار صورة الإيصال أولاً");
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin ml-2"></i> جارٍ رفع الإيصال والإرسال...';
+
+            // Simulate Upload & Firestore Save Delay
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane text-lg ml-2"></i> <span>تأكيد وإرسال إيصال الدفع</span>';
+                openModal();
+            }, 1500);
+        }
+
+        // Notification Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        // Success Modal Controls
+        function openModal() {
+            const modal = document.getElementById('success-modal');
+            const card = document.getElementById('modal-card');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                card.classList.remove('scale-95', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('success-modal');
+            const card = document.getElementById('modal-card');
+            card.classList.remove('scale-100', 'opacity-100');
+            card.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                // Reset File Form
+                removeReceiptFile(new Event('click'));
+                document.getElementById('user-note').value = '';
+            }, 200);
+        }
+    </script>
+</body>
+                  </html>
