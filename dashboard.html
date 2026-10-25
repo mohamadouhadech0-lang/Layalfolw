@@ -99,7 +99,6 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 @keyframes okpop{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
 @keyframes okdraw{to{stroke-dashoffset:0}}
 .okcard{animation:okpop .28s cubic-bezier(.2,.9,.3,1.2)}
-/* ===== Order success: hologram style ===== */
 .okbg{background:
  radial-gradient(1.6px 1.6px at 12% 14%,#fff,transparent),radial-gradient(1px 1px at 27% 7%,#cfe8ff,transparent),
  radial-gradient(1.4px 1.4px at 41% 19%,#fff,transparent),radial-gradient(1px 1px at 58% 9%,#bfe3ff,transparent),
@@ -126,11 +125,9 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 .okbtn2:hover{background:rgba(14,80,120,.55)}
 .okbtn1:active,.okbtn2:active{transform:scale(.97)}
 @media (prefers-reduced-motion:reduce){.okring,.oknode{animation:none}}
-
 .okck{stroke-dasharray:32;stroke-dashoffset:32;animation:okdraw .45s .15s ease forwards}
 #sendBtn{touch-action:manipulation}
 @media (prefers-reduced-motion:reduce){.okcard,.okck,.btnspin{animation-duration:.01s}}
-
 .sec,.pm{animation:fi .22s ease}
 @keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -188,17 +185,14 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 </aside>
 
 <div class="lg:ml-72 pb-24 lg:pb-8">
-  <!-- Header -->
   <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-blue-100 px-3 sm:px-4 h-16 flex items-center gap-2 sm:gap-3">
     <button id="burger" class="lg:hidden w-10 h-10 rounded-xl bg-blue-50 text-blue-700 text-xl" aria-label="Menu"></button>
     <div class="min-w-0 flex-1 font-extrabold text-blue-700 text-lg tracking-tight truncate">layal folw</div>
 
-    <!-- Balance chip (يفتح Add funds) -->
     <button id="balChip" class="shrink-0 flex items-center gap-1.5 h-10 pl-2.5 pr-3 rounded-full bg-blue-50 text-blue-800 text-sm font-bold hover:bg-blue-100 active:scale-95 transition" dir="ltr" aria-label="Account balance">
       <span id="hIc"></span><span>$<span id="hBal">0.00</span></span>
     </button>
 
-    <!-- Profile -->
     <div class="relative shrink-0">
       <button id="avatarBtn" class="flex items-center gap-2 rounded-full p-0.5 pr-0.5 md:pr-3 hover:bg-slate-100 active:scale-95 transition" aria-haspopup="menu" aria-expanded="false" aria-label="Profile menu">
         <span id="avInit" class="overflow-hidden w-10 h-10 rounded-full grid place-items-center bg-gradient-to-br from-blue-600 to-sky-400 text-white text-sm font-bold ring-2 ring-white shadow">G</span>
@@ -218,7 +212,6 @@ html.dark body{background:#0b1220;color:#e5ebf5}
   </header>
 
   <main class="p-4 md:p-6 max-w-5xl mx-auto flex flex-col gap-5">
-    <!-- Top cards -->
     <section id="welcome" class="relative overflow-hidden rounded-3xl text-white bg-gradient-to-br from-blue-700 via-blue-600 to-sky-500 shadow-xl shadow-blue-600/20 p-5 sm:p-6">
       <span class="pointer-events-none absolute -right-10 -top-12 w-44 h-44 rounded-full bg-white/10"></span>
       <span class="pointer-events-none absolute right-16 -bottom-16 w-40 h-40 rounded-full bg-white/10"></span>
@@ -251,12 +244,10 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       </div>
     </section>
 
-    <!-- Platform filter -->
     <section id="platWrap">
       <div id="plat"></div>
     </section>
 
-    <!-- New order -->
     <section id="sec0" class="sec bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
       <h1 class="text-lg font-extrabold mb-4 text-blue-800">New order</h1>
       <form id="of" class="space-y-4" novalidate>
@@ -299,23 +290,27 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
     <section id="sec2" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-blue-800">Orders</h2><div id="ordList" class="space-y-3"></div></section>
 
+    <!-- شحن الرصيد المخصص (طريقة الدفع المغربية: Cash Plus أو CIH Bank) -->
     <section id="sec3" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-4 text-blue-800">Add funds</h2>
+      <h2 class="text-lg font-extrabold mb-2 text-blue-800 text-center">الدفع عبر</h2>
+      <p class="text-sm text-slate-500 mb-6 text-center">اختر البنك أو طريقة التحويل المفضلة لديك للإرسال الفوري عبر الواتساب</p>
 
-      <div class="text-sm font-semibold mb-2">Payment method</div>
-      <div id="methods" class="grid grid-cols-2 gap-3 mb-5" role="radiogroup" aria-label="Payment method"></div>
+      <div class="text-sm font-semibold mb-2">اختر طريقة الدفع</div>
+      <div id="methods" class="grid grid-cols-2 gap-4 mb-6"></div>
 
-      <div class="text-sm font-semibold mb-2">Amount (USD)</div>
+      <div class="text-sm font-semibold mb-2">المبلغ المطلوب (USD)</div>
       <div class="grid grid-cols-4 gap-2 mb-3" id="presets"></div>
-      <input id="fund" class="fld mb-4" type="number" inputmode="decimal" min="1" placeholder="Custom amount">
+      <input id="fund" class="fld mb-4" type="number" inputmode="decimal" min="1" placeholder="مبلغ مخصص">
 
       <p id="payMsg" class="min-h-[20px] text-sm text-amber-600 mb-2"></p>
-      <button id="payBtn" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">Continue to payment</button>
-      <div id="depBox" class="hidden mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm"></div>
+      <button id="payBtn" class="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.98] transition text-white font-bold text-lg shadow-xl shadow-emerald-600/25 flex items-center justify-center gap-3">
+        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        <span>إتمام الشحن عبر الواتساب</span>
+      </button>
 
       <div class="mt-4 flex items-start gap-2.5 rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs leading-5 text-emerald-800">
         <span id="icLock" class="mt-0.5 shrink-0"></span>
-        <span>الدفع يتم عبر صفحة آمنة ومشفّرة (SSL/TLS) لدى بوابة الدفع. لا نرى بيانات بطاقتك ولا نخزّنها على خوادمنا.</span>
+        <span>اختر البنك أو طريقة التحويل، حدد المبلغ، ثم اضغط زر الواتساب لإرسال طلب الشحن والرمز المرجعي فوراً.</span>
       </div>
     </section>
 
@@ -404,7 +399,6 @@ html.dark body{background:#0b1220;color:#e5ebf5}
   </main>
 </div>
 
-<!-- Bottom nav (mobile) -->
 <nav id="bnav" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-blue-100 safe-b grid grid-cols-4 shadow-[0_-4px_20px_rgba(37,99,235,.08)]"></nav>
 
 <div id="okM" class="okbg hidden fixed inset-0 z-[60] grid overflow-y-auto p-4" role="dialog" aria-modal="true" aria-labelledby="okT">
@@ -819,119 +813,59 @@ async function syncOrders(){
   finally{syncing=false}
 }
 setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
-const stripe = typeof Stripe!=="undefined" ? Stripe('pk_live_51SiumcEhUQAuIFHKiDW0umETBNa4rgWlbwg6hzt5OpGx3FXXKgXRfVhzUWg1X4b8UKsgM64j7BXMZ9iN5kwNYN6Q00YVDICxKg') : null;
-const PAYMENT_LINKS = {
-  5:  "",
-  10: "",
-  25: "",
-  50: ""
-};
+
 let uemail="";
-let method="card";
+let method="cashplus";
 $("#icLock").innerHTML=ic("lock",16);
 
 const PAY_METHODS=[
-  {id:"card",    label:"Credit / Debit Card",   sub:"Visa · Mastercard",          kind:"stripe", icon:"card",
-    badges:'<svg width="36" height="22" viewBox="0 0 40 26" aria-label="Visa"><rect width="40" height="26" rx="4" fill="#1a1f71"/><text x="20" y="18" text-anchor="middle" font-family="Arial" font-style="italic" font-weight="800" font-size="12" fill="#fff">VISA</text></svg>'+'<svg width="36" height="22" viewBox="0 0 40 26" aria-label="Mastercard"><rect width="40" height="26" rx="4" fill="#fff" stroke="#e2e8f0"/><circle cx="16" cy="13" r="7" fill="#eb001b"/><circle cx="24" cy="13" r="7" fill="#f79e1b" fill-opacity=".9"/></svg>'},
-  {id:"binance", label:"Binance Pay",          sub:"Pay with Binance",           kind:"manual", icon:"coins",
-    badges:'<span class="px-2 h-[22px] grid place-items-center rounded text-[10px] font-bold text-white bg-amber-500">Binance Pay</span>'},
-  {id:"usdt",    label:"Crypto USDT",          sub:"Crypto transfer",            kind:"manual", icon:"coins",
-    badges:'<span class="px-2 h-[22px] grid place-items-center rounded text-[10px] font-bold text-white bg-emerald-500">USDT</span>'},
-  {id:"morocco", label:"CIH Bank / Cash Plus", sub:"Bank transfer · Cash agent", kind:"manual", icon:"wallet",
-    badges:'<span class="px-2 h-[22px] grid place-items-center rounded text-[10px] font-bold text-white bg-blue-700">CIH</span>'+'<span class="px-2 h-[22px] grid place-items-center rounded text-[10px] font-bold text-white bg-green-600">Cash Plus</span>'}
+  {id:"cashplus", label:"Cash Plus", sub:"تحويل فوري عبر وكالة كاش بلوس", icon:"wallet", color:"from-green-500 to-emerald-700"},
+  {id:"cih",      label:"CIH Bank",  sub:"تحويل مباشر عبر بنك CIH",        icon:"card",   color:"from-blue-600 to-sky-700"}
 ];
+
 function drawMethods(){
   $("#methods").innerHTML=PAY_METHODS.map(m=>{
     const on=m.id===method;
-    return `<button type="button" data-m="${m.id}" role="radio" aria-checked="${on}" class="mth flex flex-col items-stretch justify-start text-left rounded-xl border-2 p-3.5 transition ${on?"border-blue-600 bg-blue-50":"border-slate-200 hover:border-blue-300"}"><div class="flex items-center gap-2 font-bold text-sm"><span class="shrink-0">${ic(m.icon,20)}</span><span>${m.label}</span></div><div class="text-xs text-slate-500 mt-1">${m.sub}</div><div class="flex flex-wrap items-center gap-1.5 mt-2.5">${m.badges||""}</div></button>`;
+    return `<button type="button" data-m="${m.id}" role="radio" aria-checked="${on}" class="mth flex flex-col items-center text-center rounded-2xl border-2 p-5 transition-all ${on?"border-blue-600 bg-blue-50/80 shadow-md":"border-slate-200 bg-white hover:border-blue-300"}">
+      <div class="w-12 h-12 rounded-full grid place-items-center text-white font-bold text-lg mb-2 bg-gradient-to-br ${m.color} shadow">${m.id==="cashplus"?"CP":"CIH"}</div>
+      <div class="font-bold text-base text-slate-800">${m.label}</div>
+      <div class="text-xs text-slate-500 mt-1">${m.sub}</div>
+    </button>`;
   }).join("");
 }
-$("#methods").onclick=e=>{const b=e.target.closest("[data-m]");if(b){method=b.dataset.m;drawMethods();$("#depBox").classList.add("hidden");$("#payMsg").textContent=""}};
+$("#methods").onclick=e=>{const b=e.target.closest("[data-m]");if(b){method=b.dataset.m;drawMethods();$("#payMsg").textContent=""}};
 drawMethods();
-$("#presets").innerHTML=[5,10,25,50].map(v=>`<button type="button" data-v="${v}" class="h-11 rounded-xl border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">$${v}</button>`).join("");
+
+$("#presets").innerHTML=[5,10,25,50].map(v=>`<button type="button" data-v="${v}" class="h-12 rounded-xl border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">$${v}</button>`).join("");
 $("#presets").onclick=e=>{const b=e.target.closest("[data-v]");if(b){$("#fund").value=b.dataset.v;$("#payMsg").textContent=""}};
 
 const USER_ID_KEY="lf_user_id";
 const getStoredUserId=()=>{try{return localStorage.getItem(USER_ID_KEY)||""}catch(_){return ""}};
 
-function preparePaymentData(methodId,amount){
-  const m=PAY_METHODS.find(x=>x.id===methodId);
-  if(!m)throw new Error("unknown_method");
-  const amt=Math.round(Number(amount)*100)/100;
-  if(!(amt>=1&&amt<=500))throw new Error("invalid_amount");
-  return{
-    method:m.id,
-    kind:m.kind,                                   
-    amount:amt,
-    currency:"USD",
-    userId:getStoredUserId()||(numId!=null?String(numId):""),   
-    clientRef:(window.crypto&&crypto.randomUUID)?crypto.randomUUID():(Date.now().toString(36)+Math.random().toString(36).slice(2,10)),  
-    createdAt:new Date().toISOString()
-  };
-}
+// عند الضغط على زر الدفع: يتم توليد رمز مرجعي وتحويل المستخدم فوراً للواتساب
+$("#payBtn").onclick = () => {
+  const amountVal = $("#fund").value.trim();
+  const msg = $("#payMsg");
+  msg.textContent = "";
 
-const PAY_ERR={invalid_amount:"المبلغ يجب أن يكون بين $1 و $500.",unknown_method:"طريقة الدفع غير معروفة.",method_unavailable:"طريقة الدفع هذه غير متاحة حالياً.",too_many_pending:"لديك طلبات دفع معلّقة كثيرة. انتظر تأكيدها أو تواصل مع الدعم.",unauthorized:"انتهت الجلسة. أعد تسجيل الدخول.",conflict:"تعذّر إنشاء الطلب. حاول مرة أخرى."};
-let paying=false;
-async function submitPayment(){
-  if(paying)return;
-  const msg=$("#payMsg"),btn=$("#payBtn");
-  msg.textContent="";$("#depBox").classList.add("hidden");
-  let data;
-  try{data=preparePaymentData(method,$("#fund").value)}
-  catch(e){return msg.textContent=e.message==="invalid_amount"?(PAY_ERR.invalid_amount):"اختر طريقة الدفع."}
-  if(data.kind==="stripe"&&PAYMENT_LINKS[data.amount]){
-    const u=new URL(PAYMENT_LINKS[data.amount]);
-    if(uid)u.searchParams.set("client_reference_id",uid);
-    if(uemail)u.searchParams.set("prefilled_email",uemail);
-    return location.href=u.toString();
+  if(!amountVal || isNaN(amountVal) || Number(amountVal) <= 0){
+    msg.textContent = "المرجو إدخال مبلغ صحيح لشحن الرصيد.";
+    return;
   }
-  paying=true;
-  const html=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="btnspin"></span><span>Sending…</span>';
-  try{
-    const tk=await window.__getToken();
-    const r=await fetch(data.kind==="stripe"?"/api/create-checkout-session":"/api/create-deposit",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+tk},body:JSON.stringify(data)});
-    const txt=await r.text();let d;try{d=JSON.parse(txt)}catch(_){d={error:"http_"+r.status,detail:txt.replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim().slice(0,160)}}
-    if(!r.ok){console.error("payment failed",r.status,d);return msg.textContent=`${PAY_ERR[d.error]||"تعذّر بدء الدفع."} [${r.status}${d.error?" · "+d.error:""}]${d.detail?" — "+d.detail:""}`}
-    if(d.url)return location.href=d.url;           
-    showDeposit(d,data);                            
-  }catch(e){console.error(e);msg.textContent="تعذّر الاتصال بالخادم. حاول مرة أخرى."}
-  finally{paying=false;btn.disabled=false;btn.innerHTML=html}
-}
-function showDeposit(d,data){
-  const m=PAY_METHODS.find(x=>x.id===data.method),box=$("#depBox");
 
+  const amount = Number(amountVal).toFixed(2);
   const userName = document.getElementById("hName") ? document.getElementById("hName").innerText : "Guest";
-  const userId = data.userId || (numId != null ? String(numId) : "غير محدد");
-  
-  const whatsappMessage = `مرحباً، أريد شحن رصيدي في منصة Layal Folw.\n- الاسم: ${userName}\n- الـ ID: ${userId}\n- المبلغ: $${data.amount.toFixed(2)}\n- الرمز المرجعي: ${d.reference}`;
+  const userId = getStoredUserId() || (numId != null ? String(numId) : "غير محدد");
+  const bankName = method === "cashplus" ? "Cash Plus" : "CIH Bank";
+  const refCode = "LF-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  const whatsappMessage = `مرحباً، أريد شحن رصيدي في منصة Layal Folw عبر (${bankName}).\n- الاسم: ${userName}\n- الـ ID: ${userId}\n- المبلغ: $${amount}\n- الرمز المرجعي: ${refCode}`;
   const whatsappUrl = `https://wa.me/212616964100?text=${encodeURIComponent(whatsappMessage)}`;
 
-  box.innerHTML=`
-    <div class="font-bold text-blue-800 mb-3 flex items-center justify-between">
-      <span>تعليمات الدفع — CIH Bank / Cash Plus</span>
-      <div class="flex items-center space-x-1 space-x-reverse">
-        <span class="text-[10px] font-black text-white bg-blue-700 px-2.5 py-1 rounded shadow-sm">CIH Bank</span>
-        <span class="text-[10px] font-black text-white bg-green-600 px-2.5 py-1 rounded shadow-sm">Cash Plus</span>
-      </div>
-    </div>
-    <div class="flex justify-between gap-3 mb-2"><span class="text-slate-500">المبلغ المطلوب</span><b dir="ltr">$${data.amount.toFixed(2)}</b></div>
-    <div class="text-slate-500 mb-1">الرمز المرجعي</div>
-    <div class="flex items-stretch gap-2 mb-3" dir="ltr"><input id="depRef" class="fld flex-1 min-w-0 font-bold" readonly value="${esc(d.reference)}"><button type="button" class="cpb" data-copy="depRef" title="Copy" aria-label="Copy"><svg class="i-cp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><svg class="i-ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button></div>
-    
-    <div class="bg-blue-100/60 p-3 rounded-xl mb-3 text-xs text-slate-700 leading-relaxed">
-      قم بإتمام التحويل عبر <b>CIH Bank</b> أو وكالة <b>Cash Plus</b> باستخدام الرمز المرجعي أعلاه، ثم اضغط على الأيقونة أدناه لإرسال الإيصال عبر الواتساب.
-    </div>
+  // فتح الواتساب مباشرة
+  window.open(whatsappUrl, "_blank");
+};
 
-    <div class="flex items-center justify-center gap-3">
-      <a href="${whatsappUrl}" target="_blank" class="w-12 h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 transition text-white shadow-lg shadow-emerald-600/30 grid place-items-center" title="إرسال عبر الواتساب">
-        <svg width="26" height="26" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-      </a>
-    </div>`;
-  box.classList.remove("hidden");
-  box.scrollIntoView({behavior:"smooth",block:"nearest"});
-}
-$("#depBox").onclick=e=>{const b=e.target.closest("[data-copy]");if(b){copyInputText(b.dataset.copy,"Copied ✓").then(ok=>{if(ok){b.classList.add("ok");setTimeout(()=>b.classList.remove("ok"),1400)}})}};
-$("#payBtn").onclick=submitPayment;
 {const p=new URLSearchParams(location.search).get("paid");     
  if(p==="success")setTimeout(()=>toast("✓ تم الدفع. سيُضاف الرصيد خلال لحظات"),600);
  if(p==="cancel")setTimeout(()=>toast("تم إلغاء الدفع"),600);}
@@ -939,45 +873,22 @@ $("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg"
 $("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
 
 const PAIRS=[
-["Crypto USDT","عملات رقمية USDT"],["Crypto transfer","تحويل رقمي"],["Pay with Binance","الدفع عبر Binance"],["CIH Bank / Cash Plus","CIH Bank / كاش بلوس"],["Bank transfer · Cash agent","حوالة بنكية · وكالة كاش"],["Account ID","معرّف الحساب"],
-["Local payment","الدفع المحلي"],["Bank transfer / local wallet","حوالة بنكية / محفظة محلية"],["Instant · via Stripe","فوري · عبر Stripe"],["Payment instructions","تعليمات الدفع"],["Amount","المبلغ"],["Reference","الرمز المرجعي"],["Copied ✓","تم النسخ ✓"],["Include the reference in the payment note. Your balance is credited after we confirm the payment.","اكتب الرمز المرجعي في ملاحظة الدفع. يُضاف الرصيد بعد تأكيدنا استلام الدفعة."],
-["Nothing to copy","لا يوجد رابط لنسخه"],["Link copied ✓","تم نسخ الرابط ✓"],["Copy failed — long-press the field to copy","تعذّر النسخ — اضغط مطولاً على الخانة لنسخ الرابط"],
-["Reason","السبب"],["Full amount refunded to your balance","تم إرجاع المبلغ كاملاً إلى رصيدك"],["Remaining amount refunded to your balance","تم إرجاع المبلغ المتبقي إلى رصيدك"],
-["In progress","قيد التنفيذ"],["Completed","مكتمل"],["Partial","جزئي"],["Canceled","ملغي"],["Remaining","المتبقي"],
-["🎉 Order created successfully! 🎉","🎉 تم إنشاء الطلب بنجاح! 🎉"],["Order received and under review","تم استلام الطلب وهو قيد المراجعة"],["Order ID","معرّف الطلب"],["Total cost","التكلفة الإجمالية"],["Remaining balance","الرصيد المتبقي"],["View orders","عرض الطلبات"],["Close","إغلاق"],["Sending…","جاري الإرسال…"],
+["Account ID","معرّف الحساب"],["Local payment","الدفع المحلي"],["Amount","المبلغ"],["Reference","الرمز المرجعي"],["Copied ✓","تم النسخ ✓"],
 ["Customer","عميل"],["Customer account","حساب عميل"],["Guest","ضيف"],["Welcome","مرحباً"],["Hello,","مرحباً،"],["Welcome back","أهلاً بعودتك"],
 ["Profile","الملف الشخصي"],["Logout","تسجيل الخروج"],["Settings","الإعدادات"],["Dark","داكن"],["Light","فاتح"],["Language","اللغة"],
 ["New order","طلب جديد"],["Child Panel","لوحة فرعية"],["NEW","جديد"],["Mass order","طلب جماعي"],["Services","الخدمات"],["Orders","الطلبات"],["Add funds","شحن الرصيد"],["FAQ","الأسئلة الشائعة"],["Tickets","التذاكر"],["Terms","الشروط"],["More","المزيد"],["Account","الحساب"],
 ["Top up your balance and place your first order in seconds.","اشحن رصيدك وابدأ طلبك الأول في ثوانٍ."],
 ["Account balance","رصيد الحساب"],["Spent balance","الرصيد المنفق"],["All","الكل"],
 ["Search services…","ابحث في الخدمات…"],["Category","الفئة"],["Service","الخدمة"],["Description","الوصف"],["Link","الرابط"],["Quantity","الكمية"],["Charge","التكلفة"],["Submit order","إرسال الطلب"],
-["Make sure the account or link is public, not private.","تأكد أن الحساب أو الرابط عام وليس خاصاً."],
-["Do not place more than one order for the same link before the first completes.","لا ترسل أكثر من طلب لنفس الرابط قبل اكتمال الأول."],
-["Orders cannot be cancelled once processing has started.","لا يمكن إلغاء الطلب بعد بدء التنفيذ."],
-["No results","لا توجد نتائج"],["Select a service to see its description.","اختر خدمة لعرض الوصف."],["No services.","لا توجد خدمات."],["No orders yet.","لا توجد طلبات بعد."],
-["Order","اطلب"],["Pending","قيد الانتظار"],
-["Payment method","طريقة الدفع"],["Credit / Debit Card","بطاقة ائتمان / خصم"],["Cryptocurrency","عملات رقمية"],["Amount (USD)","المبلغ (بالدولار)"],["Custom amount","مبلغ مخصص"],["Continue to payment","المتابعة إلى الدفع"],
-["Payments are processed on a secure, encrypted (SSL/TLS) page by the payment provider. We never see or store your card details.","الدفع يتم عبر صفحة آمنة ومشفّرة (SSL/TLS) لدى بوابة الدفع. لا نرى بيانات بطاقتك ولا نخزّنها على خوادمنا."],
 ["Subject","الموضوع"],["Message","الرسالة"],["Send ticket","إرسال التذكرة"],
-["API URL","رابط الـAPI"],["API keys are generated per user by the server.","يتم توليد مفتاح الـAPI من الخادم لكل مستخدم."],
-["Profile photo","الصورة الشخصية"],["JPG or PNG up to 5MB. The photo is cropped to a square automatically.","JPG أو PNG حتى 5MB. تُقصّ الصورة إلى مربع تلقائياً."],
-["Upload photo","رفع صورة"],["Save","حفظ"],["Cancel","إلغاء"],["Name","الاسم"],["Email","البريد الإلكتروني"],["User ID","معرّف المستخدم"],
+["API URL","رابط الـAPI"],["Profile photo","الصورة الشخصية"],["Upload photo","رفع صورة"],["Save","حفظ"],["Cancel","إلغاء"],["Name","الاسم"],["Email","البريد الإلكتروني"],["User ID","معرّف المستخدم"],
 ["Resell our services under your own domain with your own prices.","أعد بيع خدماتنا تحت نطاقك الخاص وبأسعارك."],["Request child panel","طلب لوحة فرعية"],
 ["One order per line:","طلب واحد في كل سطر:"],["Submit orders","إرسال الطلبات"],
-["How long until my order starts?","كم يستغرق بدء الطلب؟"],["Most services start within minutes to a few hours. See the service description for details.","تبدأ معظم الخدمات خلال دقائق إلى ساعات قليلة. راجع وصف الخدمة للتفاصيل."],
-["Can I cancel an order?","هل يمكنني إلغاء الطلب؟"],["Does my account need to be public?","هل يجب أن يكون حسابي عاماً؟"],["Yes. Private accounts or links cannot be processed.","نعم. لا يمكن تنفيذ الطلبات على حسابات أو روابط خاصة."],
-["How do I add funds?","كيف أشحن رصيدي؟"],["Open Add funds, choose an amount and a payment method.","افتح «شحن الرصيد» ثم اختر المبلغ وطريقة الدفع."],
-["Results can vary; delivery times are estimates, not guarantees.","قد تختلف النتائج؛ أوقات التنفيذ تقديرية وليست مضمونة."],
-["Do not place multiple orders for the same link until the first is complete.","لا تُرسل عدة طلبات لنفس الرابط قبل اكتمال الأول."],
-["Payments are non-refundable once an order has started.","لا يمكن استرداد المبلغ بعد بدء تنفيذ الطلب."],
-["You are responsible for complying with the rules of each platform you use.","أنت مسؤول عن الالتزام بقواعد كل منصة تستخدمها."],
+["How long until my order starts?","كم يستغرق بدء الطلب؟"],["Can I cancel an order?","هل يمكنني إلغاء الطلب؟"],["Does my account need to be public?","هل يجب أن يكون حسابي عاماً؟"],["How do I add funds?","كيف أشحن رصيدي؟"],
 ["Search…","بحث…"],["Menu","القائمة"],["Close menu","إغلاق القائمة"],["Profile menu","قائمة الملف الشخصي"],["Change photo","تغيير الصورة"],["Dismiss","إغلاق"],["Balance","الرصيد"],["Toggle theme","تبديل المظهر"],
 ["Please select a service first.","اختر خدمة أولاً."],["Enter a valid link starting with https://","أدخل رابطاً صحيحاً يبدأ بـ https://"],
 ["Insufficient balance. Please add funds first.","رصيدك غير كافٍ. اشحن رصيدك أولاً."],["✓ Order created successfully","✓ تم إنشاء الطلب بنجاح"],
-["Crypto payments are coming soon. Please use Card or Google Pay.","الدفع بالعملات الرقمية سيتوفر قريباً. اختر البطاقة أو Google Pay."],
-["Choose an amount: $5, $10, $25 or $50.","اختر مبلغاً: $5 أو $10 أو $25 أو $50."],["Choose one of the preset amounts ($5, $10, $25, $50).","اختر أحد المبالغ الجاهزة ($5, $10, $25, $50)."],
-["✓ Payment received. Your balance will be updated shortly","✓ تم الدفع. سيُضاف الرصيد خلال لحظات"],["Payment cancelled","تم إلغاء الدفع"],
-["Please choose an image file","اختر ملف صورة فقط"],["Image is larger than 5MB","الصورة أكبر من 5MB"],["Could not read the image","تعذّر قراءة الصورة"],["✓ Photo saved","✓ تم حفظ الصورة"],["Saved on this device only","تم الحفظ على هذا الجهاز فقط"],["Could not save the photo","تعذّر حفظ الصورة"],
+["Please choose an image file","اختر ملف صورة فقط"],["Image is larger than 5MB","الصورة أكبر من 5MB"],["Could not read the image","تعذّر قراءة الصورة"],["✓ Photo saved","✓ تم حفظ الصورة"],["Could not save the photo","تعذّر حفظ الصورة"],
 ["Please fill in the subject and message","أكمل الموضوع والرسالة"],["✓ Ticket sent (demo)","✓ تم إرسال التذكرة (تجريبي)"],["✓ Request sent (demo)","✓ تم إرسال الطلب (تجريبي)"],["Enter a valid domain","أدخل نطاقاً صحيحاً"],
 ["Could not load balance","تعذّر تحميل الرصيد"],["Could not set up your account ID","تعذّر إعداد معرّف حسابك"],["Copied","تم النسخ"],["Copy the link manually","انسخ الرابط يدوياً"],
 ["Add at least one line: service_id | link | quantity","أضف سطراً واحداً على الأقل: service_id | link | quantity"],["unknown service ID","رقم الخدمة غير معروف"],["invalid link","رابط غير صالح"]
@@ -1035,7 +946,6 @@ const app = initializeApp({
   authDomain: "layal-follow.firebaseapp.com",
   projectId: "layal-follow",
   storageBucket: "layal-follow.firebasestorage.app",
-
   messagingSenderId: "850647879566",
   appId: "1:850647879566:web:54e2e67a395f5d56101edf",
   measurementId: "G-KVN372FDCR"
@@ -1044,7 +954,6 @@ const app = initializeApp({
 const auth = initializeAuth(app, { persistence: browserSessionPersistence });
 const db = getFirestore(app);
 
-/* ---------- دالة إنشاء مستند المستخدم المحمية تماماً ضد التعليق ---------- */
 async function ensureUserDoc(user) {
   const ref = doc(db, "users", user.uid);
   try {
