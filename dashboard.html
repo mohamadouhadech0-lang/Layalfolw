@@ -290,27 +290,23 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
     <section id="sec2" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-blue-800">Orders</h2><div id="ordList" class="space-y-3"></div></section>
 
-    <!-- شحن الرصيد المخصص (طريقة الدفع المغربية: Cash Plus أو CIH Bank) -->
+    <!-- شحن الرصيد المباشر عبر الضغط على البنك -->
     <section id="sec3" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
       <h2 class="text-lg font-extrabold mb-2 text-blue-800 text-center">الدفع عبر</h2>
-      <p class="text-sm text-slate-500 mb-6 text-center">اختر البنك أو طريقة التحويل المفضلة لديك للإرسال الفوري عبر الواتساب</p>
+      <p class="text-sm text-slate-500 mb-6 text-center">اختر البنك أو طريقة التحويل للتحويل الفوري للواتساب مع الرسالة الجاهزة</p>
 
-      <div class="text-sm font-semibold mb-2">اختر طريقة الدفع</div>
+      <div class="text-sm font-semibold mb-2">اختر طريقة الدفع (اضغط على البنك للتحويل الفوري)</div>
       <div id="methods" class="grid grid-cols-2 gap-4 mb-6"></div>
 
       <div class="text-sm font-semibold mb-2">المبلغ المطلوب (USD)</div>
       <div class="grid grid-cols-4 gap-2 mb-3" id="presets"></div>
       <input id="fund" class="fld mb-4" type="number" inputmode="decimal" min="1" placeholder="مبلغ مخصص">
 
-      <p id="payMsg" class="min-h-[20px] text-sm text-amber-600 mb-2"></p>
-      <button id="payBtn" class="w-full h-14 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.98] transition text-white font-bold text-lg shadow-xl shadow-emerald-600/25 flex items-center justify-center gap-3">
-        <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-        <span>إتمام الشحن عبر الواتساب</span>
-      </button>
+      <p id="payMsg" class="min-h-[20px] text-sm text-amber-600 mb-2 text-center"></p>
 
       <div class="mt-4 flex items-start gap-2.5 rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs leading-5 text-emerald-800">
         <span id="icLock" class="mt-0.5 shrink-0"></span>
-        <span>اختر البنك أو طريقة التحويل، حدد المبلغ، ثم اضغط زر الواتساب لإرسال طلب الشحن والرمز المرجعي فوراً.</span>
+        <span>حدد المبلغ أولاً، ثم اضغط على أيقونة البنك (Cash Plus أو CIH Bank) ليتم نقلك مباشرة إلى الواتساب مع كافة تفاصيل طلبك.</span>
       </div>
     </section>
 
@@ -799,7 +795,7 @@ function drawOrders(){
   $("#ordList").innerHTML=ORDERS.map(o=>{
     const st=ST[o.status]||ST.pending;
     const rem=o.rem!=null&&(o.status==="partial"||o.status==="canceled")?`<div class="text-xs mt-1" style="color:#f97316"><span>Remaining</span> <b dir="ltr">${o.rem}</b></div>`:"";
-    return `<div class="rounded-xl border border-blue-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="stp" data-s="${st[1]}">${st[0]}</span></div>${reasonHtml(o)}${refundHtml(o)}<div class="mt-2 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div>${rem}<div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
+    return `<div class="rounded-xl border border-blue-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="stp" data-s="${st[1]}">${st[0]}</span></div>${reasonHtml(o)}${refundHtml(o)}(<div class="mt-2 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div>${rem}<div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
 }
 let syncing=false,lastSync=0;
 async function syncOrders(){
@@ -815,7 +811,7 @@ async function syncOrders(){
 setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
 
 let uemail="";
-let method="cashplus";
+let selectedBank="Cash Plus";
 $("#icLock").innerHTML=ic("lock",16);
 
 const PAY_METHODS=[
@@ -825,46 +821,46 @@ const PAY_METHODS=[
 
 function drawMethods(){
   $("#methods").innerHTML=PAY_METHODS.map(m=>{
-    const on=m.id===method;
-    return `<button type="button" data-m="${m.id}" role="radio" aria-checked="${on}" class="mth flex flex-col items-center text-center rounded-2xl border-2 p-5 transition-all ${on?"border-blue-600 bg-blue-50/80 shadow-md":"border-slate-200 bg-white hover:border-blue-300"}">
+    return `<button type="button" data-bank="${m.label}" class="mth flex flex-col items-center text-center rounded-2xl border-2 p-5 transition-all border-slate-200 bg-white hover:border-blue-600 active:scale-95 shadow-sm">
       <div class="w-12 h-12 rounded-full grid place-items-center text-white font-bold text-lg mb-2 bg-gradient-to-br ${m.color} shadow">${m.id==="cashplus"?"CP":"CIH"}</div>
       <div class="font-bold text-base text-slate-800">${m.label}</div>
       <div class="text-xs text-slate-500 mt-1">${m.sub}</div>
     </button>`;
   }).join("");
 }
-$("#methods").onclick=e=>{const b=e.target.closest("[data-m]");if(b){method=b.dataset.m;drawMethods();$("#payMsg").textContent=""}};
 drawMethods();
 
-$("#presets").innerHTML=[5,10,25,50].map(v=>`<button type="button" data-v="${v}" class="h-12 rounded-xl border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">$${v}</button>`).join("");
-$("#presets").onclick=e=>{const b=e.target.closest("[data-v]");if(b){$("#fund").value=b.dataset.v;$("#payMsg").textContent=""}};
+// الضغط المباشر على بطاقة البنك لتحويل المستخدم للواتساب مع ذكر البنك المختار
+$("#methods").onclick = e => {
+  const b = e.target.closest("[data-bank]");
+  if(!b) return;
 
-const USER_ID_KEY="lf_user_id";
-const getStoredUserId=()=>{try{return localStorage.getItem(USER_ID_KEY)||""}catch(_){return ""}};
-
-// عند الضغط على زر الدفع: يتم توليد رمز مرجعي وتحويل المستخدم فوراً للواتساب
-$("#payBtn").onclick = () => {
+  const bankName = b.dataset.bank;
   const amountVal = $("#fund").value.trim();
   const msg = $("#payMsg");
   msg.textContent = "";
 
   if(!amountVal || isNaN(amountVal) || Number(amountVal) <= 0){
-    msg.textContent = "المرجو إدخال مبلغ صحيح لشحن الرصيد.";
+    msg.textContent = "المرجو إدخال المبلغ المراد شحنه أولاً.";
     return;
   }
 
   const amount = Number(amountVal).toFixed(2);
   const userName = document.getElementById("hName") ? document.getElementById("hName").innerText : "Guest";
   const userId = getStoredUserId() || (numId != null ? String(numId) : "غير محدد");
-  const bankName = method === "cashplus" ? "Cash Plus" : "CIH Bank";
   const refCode = "LF-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-  const whatsappMessage = `مرحباً، أريد شحن رصيدي في منصة Layal Folw عبر (${bankName}).\n- الاسم: ${userName}\n- الـ ID: ${userId}\n- المبلغ: $${amount}\n- الرمز المرجعي: ${refCode}`;
+  const whatsappMessage = `مرحباً، أريد شحن رصيدي في منصة Layal Folw عبر البنك التالي: (${bankName}).\n- الاسم: ${userName}\n- الـ ID: ${userId}\n- المبلغ: $${amount}\n- الرمز المرجعي: ${refCode}`;
   const whatsappUrl = `https://wa.me/212616964100?text=${encodeURIComponent(whatsappMessage)}`;
 
-  // فتح الواتساب مباشرة
   window.open(whatsappUrl, "_blank");
 };
+
+$("#presets").innerHTML=[5,10,25,50].map(v=>`<button type="button" data-v="${v}" class="h-12 rounded-xl border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">$${v}</button>`).join("");
+$("#presets").onclick=e=>{const b=e.target.closest("[data-v]");if(b){$("#fund").value=b.dataset.v;$("#payMsg").textContent=""}};
+
+const USER_ID_KEY="lf_user_id";
+const getStoredUserId=()=>{try{return localStorage.getItem(USER_ID_KEY)||""}catch(_){return ""}};
 
 {const p=new URLSearchParams(location.search).get("paid");     
  if(p==="success")setTimeout(()=>toast("✓ تم الدفع. سيُضاف الرصيد خلال لحظات"),600);
