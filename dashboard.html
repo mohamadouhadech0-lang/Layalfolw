@@ -832,20 +832,20 @@ setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
 let uemail="";
 $("#icLock").innerHTML=ic("lock",16);
 
-// طرق الدفع المصغرة والمتناسقة
+// طرق الدفع مع استدعاء الصور الجديدة (Unnamed.png للـ Binance و images (23).jpeg للـ Card)
 let selectedMethod = "card";
 const PAY_METHODS=[
   {
     id:"card",
     label:"Card",
     sub:"الدفع بالبطاقة البنكية عبر Stripe",
-    icon:ic("card",22)
+    icon:`<img src="images (23).jpeg" alt="Card">`
   },
   {
     id:"binance",
     label:"Binance",
     sub:"الدفع عبر عملات رقمية / Binance Pay",
-    icon:ic("coins",22)
+    icon:`<img src="Unnamed.png" alt="Binance">`
   },
   {
     id:"cashplus", 
@@ -1117,7 +1117,7 @@ onAuthStateChanged(auth, user => {
       syncOrders();
     });
   window.__authDone = true;
-  bootDone();
+  bootDo
 });
 addEventListener("pagehide", stopBal);                     
 
