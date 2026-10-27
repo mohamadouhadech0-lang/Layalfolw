@@ -153,6 +153,8 @@ html.dark body{background:#0b1220;color:#e5ebf5}
   </div>
 </div>
 
+<script>/* شبكة أمان: إن لم يكتمل تحميل الصفحة (ملف ناقص/مقطوع أو خطأ) تظهر أزرار إعادة المحاولة بدل دائرة تحميل أبدية */
+setTimeout(function(){var e=document.getElementById("boot");if(!e||window.__authDone)return;var m=document.getElementById("bootMsg"),b=document.getElementById("bootBtns"),s=document.getElementById("bootSpin");if(s)s.style.display="none";if(b)b.style.display="flex";if(m)m.textContent="تعذّر تحميل الصفحة. حدّث الصفحة أو أعد المحاولة. / The page failed to load. Reload and try again."},12000);</script>
 <div id="scrim" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-30 lg:hidden"></div>
 
 <!-- Sidebar / Drawer -->
@@ -1230,12 +1232,4 @@ onAuthStateChanged(auth, user => {
 addEventListener("pagehide", stopBal);                     // إغلاق الصفحة
 
 window.__getToken = () => auth.currentUser.getIdToken();
-const out = () => { stopBal(); try { localStorage.removeItem("lf_user_id"); } catch (_) {} return signOut(auth).catch(() => {}).finally(() => location.replace("index.html")); };
-document.getElementById("logout").onclick = out;
-document.getElementById("logout2").onclick = out;
-document.getElementById("logout3").onclick = out;
-const _editable=e=>/^(INPUT|TEXTAREA)$/.test((e.target&&e.target.tagName)||"");
-document.addEventListener('contextmenu',e=>{if(!_editable(e))e.preventDefault()});
-document.addEventListener('selectstart',e=>{if(!_editable(e))e.preventDefault()});
-document.addEventListener('copy',e=>{if(!_editable(e))e.preventDefault()});
-document.addEventList
+const out = () => { stopBal(); try { localStorage.removeItem("lf_user_id"); } catch (_) {} return signOut(auth).catch(() => {}).finally(() => loca
