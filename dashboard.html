@@ -7,10 +7,7 @@
 <script>try{var t=localStorage.getItem("lf_theme");if((t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"))==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.tailwindcss.com/3.4.17"></script>
- 
 <style>
-
-
 /* حماية: منع التحديد والنسخ في التطبيق، مع السماح داخل خانات الإدخال فقط */
 *{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent!important}
 input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
@@ -207,7 +204,15 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <div class="lg:ml-72 pb-24 lg:pb-8">
   <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-blue-100 px-3 sm:px-4 h-16 flex items-center gap-2 sm:gap-3">
     <button id="burger" class="lg:hidden w-10 h-10 rounded-xl bg-blue-50 text-blue-700 text-xl" aria-label="Menu"></button>
-    <div class="min-w-0 flex-1 font-extrabold text-blue-700 text-lg tracking-tight truncate">layal folw</div>
+    
+    <!-- تم استبدال الاسم بالشعار والصيغة الجديدة -->
+    <div class="min-w-0 flex-1 flex flex-col justify-center">
+      <div class="flex items-center gap-2">
+        <img src="InShot_20261027_203617849.png" alt="Logo" class="h-7 w-auto object-contain">
+        <span class="font-extrabold text-pink-500 text-lg leading-tight truncate">layal folw</span>
+      </div>
+      <span class="text-[10px] text-slate-400 font-medium leading-none mt-0.5">ثقتكم.. سر نجاحنا</span>
+    </div>
 
     <button id="balChip" class="shrink-0 flex items-center gap-1.5 h-10 pl-2.5 pr-3 rounded-full bg-blue-50 text-blue-800 text-sm font-bold hover:bg-blue-100 active:scale-95 transition" dir="ltr" aria-label="Account balance">
       <span id="hIc"></span><span>$<span id="hBal">0.00</span></span>
@@ -324,7 +329,6 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
       <p id="payMsg" class="min-h-[20px] text-sm text-amber-600 mb-2 text-center"></p>
 
-      <!-- تم تعديل الزر ليكون ظاهراً ودائماً في جميع طرق الدفع -->
       <button id="payBtn" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2">متابعة الدفع الإلكتروني</button>
 
       <div class="mt-4 flex items-start gap-2.5 rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs leading-5 text-emerald-800">
@@ -879,7 +883,6 @@ function drawMethods(){
 }
 drawMethods();
 
-// التفاعل مع زر اختيار طريقة الدفع (الزر يظل ظاهراً دائماً لجميع الطرق)
 $("#methods").onclick = e => {
   const b = e.target.closest("[data-mid]");
   if(!b) return;
@@ -891,7 +894,6 @@ $("#methods").onclick = e => {
   $("#payMsg").textContent = "";
 };
 
-// النقر على زر الدفع الإلكتروني / المتابعة
 $("#payBtn").onclick = async () => {
   const amountVal = $("#fund").value.trim();
   const msg = $("#payMsg");
