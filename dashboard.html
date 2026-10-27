@@ -321,11 +321,12 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
       <p id="payMsg" class="min-h-[20px] text-sm text-amber-600 mb-2 text-center"></p>
 
-      <button id="payBtn" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25 hidden items-center justify-center gap-2">متابعة الدفع الإلكتروني</button>
+      <!-- تم تعديل الزر ليكون ظاهراً ودائماً في جميع طرق الدفع -->
+      <button id="payBtn" class="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2">متابعة الدفع الإلكتروني</button>
 
       <div class="mt-4 flex items-start gap-2.5 rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs leading-5 text-emerald-800">
         <span id="icLock" class="mt-0.5 shrink-0"></span>
-        <span>اختر طريقة الدفع (البطاقة، بينانس، أو اضغط على شعار كاش بلوس / CIH للتحويل المباشر عبر الواتساب).</span>
+        <span>اختر طريقة الدفع (البطاقة، بينانس، كاش بلوس، أو CIH) ثم اضغط على متابعة الدفع.</span>
       </div>
     </section>
 
@@ -454,7 +455,6 @@ function bootFail(msg){
 }
 function bootDone(){const e=document.getElementById("boot");if(e)e.remove()}
 
-// حماية زمنية إضافية: إزالة شاشة التحميل قسرياً بعد 3 ثوانٍ لمنع التعليق
 setTimeout(()=>{ if(document.getElementById("boot")) bootDone(); }, 3000);
 
 const $=s=>document.querySelector(s);
@@ -836,7 +836,7 @@ setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
 let uemail="";
 $("#icLock").innerHTML=ic("lock",16);
 
-// طرق الدفع مع استدعاء الصور الجديدة (Unnamed.png للـ Binance و images (23).jpeg للـ Card)
+// طرق الدفع
 let selectedMethod = "card";
 const PAY_METHODS=[
   {
@@ -876,24 +876,19 @@ function drawMethods(){
 }
 drawMethods();
 
-// التفاعل مع زر اختيار طريقة الدفع
+// التفاعل مع زر اختيار طريقة الدفع (الزر يظل ظاهراً دائماً لجميع الطرق)
 $("#methods").onclick = e => {
   const b = e.target.closest("[data-mid]");
   if(!b) return;
   selectedMethod = b.dataset.mid;
   drawMethods();
   const payBtn = $("#payBtn");
-  if(selectedMethod === "card" || selectedMethod === "binance"){
-    payBtn.classList.remove("hidden");
-    payBtn.classList.add("flex");
-  } else {
-    payBtn.classList.add("hidden");
-    payBtn.classList.remove("flex");
-  }
+  payBtn.classList.remove("hidden");
+  payBtn.classList.add("flex");
   $("#payMsg").textContent = "";
 };
 
-// النقر على زر الدفع الإلكتروني
+// النقر على زر الدفع الإلكتروني / المتابعة
 $("#payBtn").onclick = async () => {
   const amountVal = $("#fund").value.trim();
   const msg = $("#payMsg");
@@ -925,35 +920,19 @@ $("#payBtn").onclick = async () => {
     }
   } else if(selectedMethod === "binance"){
     toast("جاري تحويلك لبوابة Binance Pay...");
+  } else if(selectedMethod === "cashplus" || selectedMethod === "cih"){
+    const bankName = selectedMethod === "cashplus" ? "Cash Plus" : "CIH Bank";
+    const amountStr = amount.toFixed(2);
+    const userName = document.getElementById("hName") ? document.getElementById("hName").innerText : "Guest";
+    const userId = getStoredUserId() || (numId != null ? String(numId) : "غير محدد");
+    const refCode = "LF-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    const whatsappMessage = `مرحباً، أريد شحن رصيدي في منصة Layal Folw عبر البنك التالي: (${bankName}).\n- الاسم: ${userName}\n- الـ ID: ${userId}\n- المبلغ: $${amountStr}\n- الرمز المرجعي: ${refCode}`;
+    const whatsappUrl = `https://wa.me/212616964100?text=${encodeURIComponent(whatsappMessage)}`;
+
+    window.open(whatsappUrl, "_blank");
   }
 };
-
-// التعامل مع الضغط على شعارات البنوك المحلية للتحويل الفوري للواتساب
-document.getElementById("methods").addEventListener("click", e => {
-  const b = e.target.closest("[data-bank]");
-  if(!b) return;
-  const bankName = b.dataset.bank;
-  if(bankName !== "Cash Plus" && bankName !== "CIH Bank") return;
-
-  const amountVal = $("#fund").value.trim();
-  const msg = $("#payMsg");
-  msg.textContent = "";
-
-  if(!amountVal || isNaN(amountVal) || Number(amountVal) <= 0){
-    msg.textContent = "المرجو إدخال المبلغ المراد شحنه أولاً.";
-    return;
-  }
-
-  const amount = Number(amountVal).toFixed(2);
-  const userName = document.getElementById("hName") ? document.getElementById("hName").innerText : "Guest";
-  const userId = getStoredUserId() || (numId != null ? String(numId) : "غير محدد");
-  const refCode = "LF-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-  const whatsappMessage = `مرحباً، أريد شحن رصيدي في منصة Layal Folw عبر البنك التالي: (${bankName}).\n- الاسم: ${userName}\n- الـ ID: ${userId}\n- المبلغ: $${amount}\n- الرمز المرجعي: ${refCode}`;
-  const whatsappUrl = `https://wa.me/212616964100?text=${encodeURIComponent(whatsappMessage)}`;
-
-  window.open(whatsappUrl, "_blank");
-});
 
 $("#presets").innerHTML=[5,10,25,50].map(v=>`<button type="button" data-v="${v}" class="h-12 rounded-xl border border-blue-200 text-blue-700 font-bold hover:bg-blue-50">$${v}</button>`).join("");
 $("#presets").onclick=e=>{const b=e.target.closest("[data-v]");if(b){$("#fund").value=b.dataset.v;$("#payMsg").textContent=""}};
