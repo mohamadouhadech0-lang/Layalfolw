@@ -47,6 +47,23 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 .dark .neo-well{background:#0e1627;color:#8ab4ff;box-shadow:inset 3px 3px 6px rgba(2,6,15,.75),inset -3px -3px 6px rgba(36,52,86,.32)}
 .dark .neo-plus{box-shadow:3px 3px 7px rgba(2,6,15,.7),-3px -3px 7px rgba(36,52,86,.3)}
 .dark .neo-lbl{color:#8d9bb5}.dark .neo-amt{color:#8ab4ff}.dark .neo-amt.sp{color:#e5ebf5}
+
+/* ---- Compact payment methods ---- */
+.pay{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;padding:8px 6px;border-radius:14px;background:#fff;border:1px solid #d5dff0;cursor:pointer;transition:all .15s}
+.pay:hover{border-color:#93c5fd;box-shadow:0 2px 6px rgba(37,99,235,.1)}
+.pay:active{transform:scale(.95)}
+.pay:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(37,99,235,.3)}
+.pay.on{border-color:#2563eb;background:#eff6ff;box-shadow:0 2px 8px rgba(37,99,235,.18)}
+.pay-ic{width:38px;height:38px;border-radius:10px;border:1px solid #e2e8f0;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.pay-ic img{width:100%;height:100%;object-fit:contain}
+.pay-ic svg{width:20px;height:20px}
+.pay-lb{max-width:100%;font-size:11px;font-weight:700;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dark .pay{background:#111a2e;border-color:#22304a}
+.dark .pay:hover{border-color:#3b5b99}
+.dark .pay.on{background:#14233f;border-color:#3b82f6}
+.dark .pay-ic{border-color:#22304a;background:#0f1829}
+.dark .pay-lb{color:#e5ebf5}
+
 /* ---- Platform filter: single centered row, no scroll ---- */
 #plat{display:flex;justify-content:center;gap:6px;overflow:hidden;padding:2px 2px 8px}
 .pchip{flex:1 1 0;min-width:0;max-width:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:8px 2px;border-radius:14px;background:#eef3fb;color:#475569;font-size:10px;font-weight:600;line-height:1;border:1px solid rgba(255,255,255,.7);
@@ -290,13 +307,13 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
     <section id="sec2" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-blue-800">Orders</h2><div id="ordList" class="space-y-3"></div></section>
 
-    <!-- شحن الرصيد الشامل: (البطاقة، بينانس، وكاش بلوس، و CIH) -->
+    <!-- شحن الرصيد الشامل (أزرار صغيرة ومدمجة) -->
     <section id="sec3" class="hidden bg-white rounded-2xl border border-blue-100 shadow-sm p-4 md:p-6">
       <h2 class="text-lg font-extrabold mb-2 text-blue-800 text-center">شحن الرصيد</h2>
       <p class="text-sm text-slate-500 mb-6 text-center">اختر طريقة الدفع المناسبة لك</p>
 
-      <div class="text-sm font-semibold mb-2 text-center">طرق الدفع المتوفرة</div>
-      <div id="methods" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6"></div>
+      <div class="text-sm font-semibold mb-2">طرق الدفع المتوفرة</div>
+      <div id="methods" class="grid grid-cols-4 gap-2 mb-6"></div>
 
       <div class="text-sm font-semibold mb-2">المبلغ المطلوب (USD)</div>
       <div class="grid grid-cols-4 gap-2 mb-3" id="presets"></div>
@@ -308,7 +325,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
       <div class="mt-4 flex items-start gap-2.5 rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs leading-5 text-emerald-800">
         <span id="icLock" class="mt-0.5 shrink-0"></span>
-        <span>اختر طريقة الدفع (البطاقة البنكية، بينانس، أو اضغط على شعار كاش بلوس / CIH للتحويل المباشر عبر الواتساب).</span>
+        <span>اختر طريقة الدفع (البطاقة، بينانس، أو اضغط على شعار كاش بلوس / CIH للتحويل المباشر عبر الواتساب).</span>
       </div>
     </section>
 
@@ -815,42 +832,41 @@ setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
 let uemail="";
 $("#icLock").innerHTML=ic("lock",16);
 
-// طرق الدفع الشاملة (البطاقة البنكية، بينانس، وكاش بلوس وسياش بنك المرفوعة)
+// طرق الدفع المصغرة والمتناسقة
 let selectedMethod = "card";
 const PAY_METHODS=[
   {
     id:"card",
     label:"Card",
     sub:"الدفع بالبطاقة البنكية عبر Stripe",
-    logo:`<div class="w-14 h-14 rounded-full flex items-center justify-center bg-blue-50 text-blue-600 shadow-md border border-blue-100">${ic("card",24)}</div>`
+    icon:ic("card",22)
   },
   {
     id:"binance",
     label:"Binance",
     sub:"الدفع عبر عملات رقمية / Binance Pay",
-    logo:`<div class="w-14 h-14 rounded-full flex items-center justify-center bg-amber-50 text-amber-600 shadow-md border border-amber-100">${ic("coins",24)}</div>`
+    icon:ic("coins",22)
   },
   {
     id:"cashplus", 
     label:"Cash Plus", 
     sub:"تحويل فوري عبر وكالة كاش بلوس", 
-    logo:`<div class="w-14 h-14 rounded-full flex items-center justify-center bg-white shadow-md border border-slate-100 p-1.5 overflow-hidden"><img src="images (21).jpeg" alt="Cash Plus" class="w-full h-full object-contain"></div>`
+    icon:`<img src="images (21).jpeg" alt="Cash Plus">`
   },
   {
     id:"cih",      
     label:"CIH Bank",  
     sub:"تحويل مباشر عبر بنك CIH",        
-    logo:`<div class="w-14 h-14 rounded-xl flex items-center justify-center bg-white shadow-md border border-slate-100 p-1.5 overflow-hidden"><img src="images (1).png" alt="CIH Bank" class="w-full h-full object-contain"></div>`
+    icon:`<img src="images (1).png" alt="CIH Bank">`
   }
 ];
 
 function drawMethods(){
   $("#methods").innerHTML=PAY_METHODS.map(m=>{
     const sel = selectedMethod === m.id;
-    return `<button type="button" data-mid="${m.id}" data-bank="${m.label}" class="mth flex flex-col items-center text-center rounded-2xl border-2 p-3 transition-all ${sel?"border-blue-600 bg-blue-50/50 shadow-md":"border-slate-200 bg-white hover:border-blue-300"} active:scale-95 shadow-sm">
-      <div class="mb-2 flex items-center justify-center">${m.logo}</div>
-      <div class="font-bold text-sm text-slate-800">${m.label}</div>
-      <div class="text-[11px] text-slate-500 mt-0.5 leading-tight">${m.sub}</div>
+    return `<button type="button" data-mid="${m.id}" data-bank="${m.label}" class="pay ${sel?"on":""}" title="${m.sub}" aria-pressed="${sel}">
+      <div class="pay-ic">${m.icon}</div>
+      <div class="pay-lb">${m.label}</div>
     </button>`;
   }).join("");
 }
@@ -873,7 +889,7 @@ $("#methods").onclick = e => {
   $("#payMsg").textContent = "";
 };
 
-// النقر على زر الدفع الإلكتروني أو توجيه الواتساب للبنوك المحلية
+// النقر على زر الدفع الإلكتروني
 $("#payBtn").onclick = async () => {
   const amountVal = $("#fund").value.trim();
   const msg = $("#payMsg");
@@ -887,6 +903,7 @@ $("#payBtn").onclick = async () => {
 
   if(selectedMethod === "card"){
     try{
+      const payBtn = $("#payBtn");
       payBtn.disabled = true;
       const tk = await window.__getToken();
       const r = await fetch("/api/create-checkout-session", {
@@ -900,7 +917,7 @@ $("#payBtn").onclick = async () => {
     }catch(err){
       msg.textContent = "حدث خطأ في الاتصال ببوابة الدفع.";
     } finally {
-      payBtn.disabled = false;
+      $("#payBtn").disabled = false;
     }
   } else if(selectedMethod === "binance"){
     toast("جاري تحويلك لبوابة Binance Pay...");
