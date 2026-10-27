@@ -453,6 +453,10 @@ function bootFail(msg){
   m.textContent=msg||"تعذّر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة. / Could not connect. Check your connection and try again.";
 }
 function bootDone(){const e=document.getElementById("boot");if(e)e.remove()}
+
+// حماية زمنية إضافية: إزالة شاشة التحميل قسرياً بعد 3 ثوانٍ لمنع التعليق
+setTimeout(()=>{ if(document.getElementById("boot")) bootDone(); }, 3000);
+
 const $=s=>document.querySelector(s);
 let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
 let SERVICES=[]; 
