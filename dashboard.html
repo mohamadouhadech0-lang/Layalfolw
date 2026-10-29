@@ -43,10 +43,12 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 .neo-amt{font-weight:800;line-height:1.1;font-size:clamp(1.05rem,4.8vw,1.4rem);color:#059669;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .neo-amt.sp{color:#0f1f3d}
 @media (min-width:640px){.neo{padding:12px 16px}.neo-lbl{font-size:12px}.neo-amt{font-size:1.5rem}}
-.dark .neo{background:#0e1627;border-color:rgba(255,255,255,.04);box-shadow:6px 6px 13px rgba(2,6,15,.7),-5px -5px 12px rgba(36,52,86,.3)}
-.dark .neo-well{background:#0e1627;color:#34d399;box-shadow:inset 3px 3px 6px rgba(2,6,15,.75),inset -3px -3px 6px rgba(36,52,86,.32)}
-.dark .neo-plus{box-shadow:3px 3px 7px rgba(2,6,15,.7),-3px -3px 7px rgba(36,52,86,.3)}
-.dark .neo-lbl{color:#8d9bb5}.dark .neo-amt{color:#34d399}.dark .neo-amt.sp{color:#e5ebf5}
+
+/* تحسينات الوضع الداكن المتوازنة */
+.dark .neo{background:#111827;border-color:rgba(255,255,255,.06);box-shadow:6px 6px 13px rgba(2,6,15,.7),-5px -5px 12px rgba(31,41,55,.3)}
+.dark .neo-well{background:#1f2937;color:#34d399;box-shadow:inset 3px 3px 6px rgba(2,6,15,.75),inset -3px -3px 6px rgba(31,41,55,.32)}
+.dark .neo-plus{box-shadow:3px 3px 7px rgba(2,6,15,.7),-3px -3px 7px rgba(31,41,55,.3)}
+.dark .neo-lbl{color:#9ca3af}.dark .neo-amt{color:#34d399}.dark .neo-amt.sp{color:#f3f4f6}
 
 /* ---- Compact payment methods ---- */
 .pay{display:flex;flex-direction:column;align-items:center;text-align:center;gap:5px;padding:8px 6px;border-radius:14px;background:#fff;border:1px solid #d5dff0;cursor:pointer;transition:all .15s}
@@ -58,11 +60,11 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 .pay-ic img{width:100%;height:100%;object-fit:contain}
 .pay-ic svg{width:20px;height:20px}
 .pay-lb{max-width:100%;font-size:11px;font-weight:700;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dark .pay{background:#111a2e;border-color:#22304a}
-.dark .pay:hover{border-color:#059669}
-.dark .pay.on{background:#064e3b;border-color:#10b981}
-.dark .pay-ic{border-color:#22304a;background:#0f1829}
-.dark .pay-lb{color:#e5ebf5}
+.dark .pay{background:#1f2937;border-color:#374151}
+.dark .pay:hover{border-color:#10b981}
+.dark .pay.on{background:#064e3b;border-color:#34d399}
+.dark .pay-ic{border-color:#374151;background:#111827}
+.dark .pay-lb{color:#f3f4f6}
 
 /* ---- Platform filter: single centered row, no scroll ---- */
 #plat{display:flex;justify-content:center;gap:6px;overflow:hidden;padding:2px 2px 8px}
@@ -73,8 +75,8 @@ body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;backg
 .pchip:active{transform:scale(.95)}
 .pchip.on{color:#059669;box-shadow:inset 3px 3px 7px rgba(163,177,198,.65),inset -3px -3px 7px rgba(255,255,255,.95)}
 @media (min-width:640px){.pchip{flex-direction:row;gap:6px;padding:10px 12px;font-size:12px;max-width:none}.pchip svg{width:15px;height:15px}}
-.dark .pchip{background:#0e1627;color:#8d9bb5;border-color:rgba(255,255,255,.04);box-shadow:4px 4px 9px rgba(2,6,15,.7),-3px -3px 8px rgba(36,52,86,.3)}
-.dark .pchip.on{color:#34d399;box-shadow:inset 3px 3px 7px rgba(2,6,15,.75),inset -3px -3px 7px rgba(36,52,86,.32)}
+.dark .pchip{background:#111827;color:#9ca3af;border-color:rgba(255,255,255,.06);box-shadow:4px 4px 9px rgba(2,6,15,.7),-3px -3px 8px rgba(31,41,55,.3)}
+.dark .pchip.on{color:#34d399;box-shadow:inset 3px 3px 7px rgba(2,6,15,.75),inset -3px -3px 7px rgba(31,41,55,.32)}
 html[dir=rtl] .sb{left:auto;right:0;border-right:0;border-left:1px solid #f1f5f9}
 html[dir=rtl] aside.sb.-translate-x-full{--tw-translate-x:100%}
 html[dir=rtl] #closeSb,html[dir=rtl] #wClose{right:auto;left:.75rem}
@@ -87,19 +89,22 @@ html[dir=rtl] #welcome>div.relative{padding-right:0;padding-left:2.25rem}
 @media (min-width:1024px){html[dir=rtl] aside.sb{--tw-translate-x:0!important}html[dir=rtl] .lg\:ml-72{margin-left:0;margin-right:18rem}}
 .lb{height:36px;border-radius:10px;font-size:13px;font-weight:600;color:#64748b;transition:all .15s}
 .lb.on{background:#fff;color:#059669;box-shadow:0 1px 3px rgba(15,31,61,.12)}
-.dark .lb.on{background:#22304a;color:#34d399}
-html.dark #boot{background:#0b1220!important;color:#e5ebf5!important}
-html.dark body{background:#0b1220;color:#e5ebf5}
-.dark .bg-white,.dark .bg-white\/90,.dark .bg-white\/95{background-color:#111a2e!important}
-.dark .bg-blue-50{background-color:#064e3b !important}.dark .bg-blue-100{background-color:#065f46 !important}
-.dark .bg-slate-50{background-color:#0f1829!important}.dark .bg-slate-100{background-color:#1a2438!important}
-.dark .border-blue-100,.dark .border-blue-200,.dark .border-slate-100,.dark .border-slate-200{border-color:#22304a!important}
-.dark .text-slate-500{color:#8d9bb5!important}.dark .text-slate-600,.dark .text-slate-700{color:#b9c4d9!important}.dark .text-slate-800{color:#e5ebf5!important}
-.dark .text-blue-700,.dark .text-blue-800{color:#34d399!important}
-.dark .fld{background:#0f1829;border-color:#22304a;color:#e5ebf5}
-.dark .hover\:bg-slate-100:hover{background-color:#1a2438!important}.dark .hover\:bg-blue-50:hover{background-color:#065f46!important}
-.dark .qi{background:#1a2438;color:#c7d2e6}.dark .qa{color:#8d9bb5}.dark .qa:hover .qi{background:#065f46;color:#34d399}
+.dark .lb.on{background:#374151;color:#34d399}
+
+/* تخصيص دقيق ومريح للعين في الوضع الداكن */
+html.dark #boot{background:#0b0f19!important;color:#f3f4f6!important}
+html.dark body{background:#0b0f19;color:#f3f4f6}
+.dark .bg-white,.dark .bg-white\/90,.dark .bg-white\/95{background-color:#111827!important}
+.dark .bg-emerald-50{background-color:rgba(16,185,129,.1) !important}.dark .bg-emerald-100{background-color:rgba(16,185,129,.2) !important}
+.dark .bg-slate-50{background-color:#1f2937!important}.dark .bg-slate-100{background-color:#374151!important}
+.dark .border-emerald-100,.dark .border-emerald-200,.dark .border-slate-100,.dark .border-slate-200{border-color:#374151!important}
+.dark .text-slate-500{color:#9ca3af!important}.dark .text-slate-600,.dark .text-slate-700{color:#d1d5db!important}.dark .text-slate-800{color:#f3f4f6!important}
+.dark .text-emerald-700,.dark .text-emerald-800{color:#34d399!important}
+.dark .fld{background:#1f2937;border-color:#374151;color:#f3f4f6}
+.dark .hover\:bg-slate-100:hover{background-color:#374151!important}.dark .hover\:bg-emerald-50:hover{background-color:rgba(16,185,129,.15)!important}
+.dark .qi{background:#1f2937;color:#34d399}.dark .qa{color:#9ca3af}.dark .qa:hover .qi{background:#065f46;color:#34d399}
 .dark .qa.danger .qi{background:#3b1519;color:#ff8a8a}
+
 .fld{width:100%;min-height:46px;padding:10px 14px;border-radius:12px;border:1px solid #d5dff0;background:#fff;outline:none;font-size:15px}
 .fld:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(16,185,129,.18)}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -202,23 +207,23 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 </aside>
 
 <div class="lg:ml-72 pb-24 lg:pb-8">
-  <header class="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-emerald-100 px-3 sm:px-4 h-16 flex items-center justify-between gap-2 sm:gap-3">
+  <header class="sticky top-0 z-20 bg-white/90 dark:bg-[#111827]/90 backdrop-blur border-b border-emerald-100 dark:border-slate-800 px-3 sm:px-4 h-16 flex items-center justify-between gap-2 sm:gap-3">
     <div class="flex items-center gap-2 sm:gap-3">
-      <button id="burger" class="lg:hidden w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 text-xl flex items-center justify-center" aria-label="Menu"></button>
+      <button id="burger" class="lg:hidden w-10 h-10 rounded-xl bg-emerald-50 dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 text-xl flex items-center justify-center" aria-label="Menu"></button>
       <div class="flex items-center">
         <img src="InShot_20261028_201908563.png" alt="Logo" class="h-9 sm:h-10 w-auto object-contain">
       </div>
     </div>
 
     <div class="flex items-center gap-2">
-      <button id="balChip" class="shrink-0 flex items-center gap-1.5 h-10 pl-2.5 pr-3 rounded-full bg-emerald-50 text-emerald-800 text-sm font-bold hover:bg-emerald-100 active:scale-95 transition" dir="ltr" aria-label="Account balance">
+      <button id="balChip" class="shrink-0 flex items-center gap-1.5 h-10 pl-2.5 pr-3 rounded-full bg-emerald-50 dark:bg-slate-800 text-emerald-800 dark:text-emerald-300 text-sm font-bold hover:bg-emerald-100 dark:hover:bg-slate-700 active:scale-95 transition" dir="ltr" aria-label="Account balance">
         <span id="hIc"></span><span>$<span id="hBal">0.00</span></span>
       </button>
 
       <div class="relative shrink-0">
-        <button id="notifBtn" class="relative w-10 h-10 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center active:scale-95 transition" aria-label="Notifications">
+        <button id="notifBtn" class="relative w-10 h-10 rounded-full bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700 text-emerald-700 dark:text-emerald-400 flex items-center justify-center active:scale-95 transition" aria-label="Notifications">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
+          <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
         </button>
       </div>
     </div>
@@ -261,18 +266,18 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <div id="plat"></div>
     </section>
 
-    <section id="sec0" class="sec bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h1 class="text-lg font-extrabold mb-4 text-emerald-800">New order</h1>
+    <section id="sec0" class="sec bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h1 class="text-lg font-extrabold mb-4 text-emerald-800 dark:text-emerald-400">New order</h1>
       <form id="of" class="space-y-4" novalidate>
         <input id="q" class="fld" placeholder="Search services…" type="search">
         <div><label class="block text-sm font-semibold mb-1.5" for="cat">Category</label><select id="cat" class="fld"></select></div>
         <div><label class="block text-sm font-semibold mb-1.5" for="srv">Service</label><select id="srv" class="fld"></select></div>
 
-        <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-sm leading-6">
-          <div class="font-bold text-emerald-800 mb-1">Description</div>
-          <div id="desc" class="whitespace-pre-line text-slate-700"></div>
-          <div class="font-bold text-emerald-800 mt-3 mb-1">Terms</div>
-          <ul class="list-disc ps-5 text-slate-600">
+        <div class="rounded-xl bg-emerald-50 dark:bg-[#1f2937] border border-emerald-100 dark:border-slate-700 p-4 text-sm leading-6">
+          <div class="font-bold text-emerald-800 dark:text-emerald-400 mb-1">Description</div>
+          <div id="desc" class="whitespace-pre-line text-slate-700 dark:text-slate-300"></div>
+          <div class="font-bold text-emerald-800 dark:text-emerald-400 mt-3 mb-1">Terms</div>
+          <ul class="list-disc ps-5 text-slate-600 dark:text-slate-400">
             <li>تأكد أن الحساب أو الرابط عام وليس خاصاً.</li>
             <li>لا ترسل أكثر من طلب لنفس الرابط قبل اكتمال الأول.</li>
             <li>لا يمكن إلغاء الطلب بعد بدء التنفيذ.</li>
@@ -290,23 +295,23 @@ html.dark body{background:#0b1220;color:#e5ebf5}
           <label class="block text-sm font-semibold mb-1.5" for="qty">Quantity <span id="range" class="text-slate-400 font-normal text-xs"></span></label>
           <input id="qty" class="fld" type="number" inputmode="numeric" placeholder="1000">
         </div>
-        <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 px-4 py-3">
-          <span class="text-sm text-slate-500">Charge</span>
-          <span class="text-xl font-extrabold text-emerald-700" dir="ltr">$<span id="charge">0.00</span></span>
+        <div class="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-[#1f2937] border border-slate-200 dark:border-slate-700 px-4 py-3">
+          <span class="text-sm text-slate-500 dark:text-slate-400">Charge</span>
+          <span class="text-xl font-extrabold text-emerald-700 dark:text-emerald-400" dir="ltr">$<span id="charge">0.00</span></span>
         </div>
         <p id="msg" dir="auto" class="min-h-[20px] text-sm text-red-500 break-words" role="alert"></p>
         <button id="sendBtn" type="submit" class="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">Submit order</button>
       </form>
     </section>
 
-    <section id="sec1" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-emerald-800">Services</h2><div id="svcList" class="space-y-3"></div></section>
+    <section id="sec1" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-emerald-800 dark:text-emerald-400">Services</h2><div id="svcList" class="space-y-3"></div></section>
 
-    <section id="sec2" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-emerald-800">Orders</h2><div id="ordList" class="space-y-3"></div></section>
+    <section id="sec2" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-emerald-800 dark:text-emerald-400">Orders</h2><div id="ordList" class="space-y-3"></div></section>
 
     <!-- شحن الرصيد الشامل -->
-    <section id="sec3" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-2 text-emerald-800 text-center">شحن الرصيد</h2>
-      <p class="text-sm text-slate-500 mb-6 text-center">اختر طريقة الدفع المناسبة لك</p>
+    <section id="sec3" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-2 text-emerald-800 dark:text-emerald-400 text-center">شحن الرصيد</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 text-center">اختر طريقة الدفع المناسبة لك</p>
 
       <div class="text-sm font-semibold mb-2">طرق الدفع المتوفرة</div>
       <div id="methods" class="grid grid-cols-4 gap-2 mb-6"></div>
@@ -315,72 +320,72 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <div class="grid grid-cols-4 gap-2 mb-3" id="presets"></div>
       <input id="fund" class="fld mb-4" type="number" inputmode="decimal" min="1" placeholder="مبلغ مخصص">
 
-      <p id="payMsg" class="min-h-[20px] text-sm text-amber-600 mb-2 text-center"></p>
+      <p id="payMsg" class="min-h-[20px] text-sm text-amber-500 mb-2 text-center"></p>
 
       <button id="payBtn" class="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.98] transition text-white font-bold shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2">متابعة الدفع الإلكتروني</button>
 
-      <div class="mt-4 flex items-start gap-2.5 rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-xs leading-5 text-emerald-800">
+      <div class="mt-4 flex items-start gap-2.5 rounded-xl bg-emerald-50 dark:bg-[#1f2937] border border-emerald-100 dark:border-slate-700 p-3 text-xs leading-5 text-emerald-800 dark:text-emerald-300">
         <span id="icLock" class="mt-0.5 shrink-0"></span>
         <span>اختر طريقة الدفع (البطاقة، بينانس، كاش بلوس، أو CIH) ثم اضغط على متابعة الدفع.</span>
       </div>
     </section>
 
-    <section id="sec4" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-4 text-emerald-800">Tickets</h2>
+    <section id="sec4" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-4 text-emerald-800 dark:text-emerald-400">Tickets</h2>
       <form id="tf" class="space-y-3"><input id="tsub" class="fld" placeholder="Subject"><textarea id="tmsg" rows="4" class="fld" placeholder="Message"></textarea>
       <button class="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">Send ticket</button></form>
     </section>
 
-    <section id="sec5" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-3 text-emerald-800">API</h2>
-      <div class="text-sm text-slate-500 mb-1">API URL</div><div class="rounded-xl bg-slate-50 border p-3 text-sm break-all" dir="ltr">https://your-domain.com/api/v2</div>
+    <section id="sec5" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-3 text-emerald-800 dark:text-emerald-400">API</h2>
+      <div class="text-sm text-slate-500 dark:text-slate-400 mb-1">API URL</div><div class="rounded-xl bg-slate-50 dark:bg-slate-800 border dark:border-slate-700 p-3 text-sm break-all" dir="ltr">https://your-domain.com/api/v2</div>
       <p class="text-xs text-slate-500 mt-3">يتم توليد مفتاح الـAPI من الخادم لكل مستخدم.</p>
     </section>
 
-    <section id="sec6" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-3 text-emerald-800">Affiliates</h2>
-      <div class="text-sm text-slate-500 mb-1">Your referral link</div>
+    <section id="sec6" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-3 text-emerald-800 dark:text-emerald-400">Affiliates</h2>
+      <div class="text-sm text-slate-500 dark:text-slate-400 mb-1">Your referral link</div>
       <div class="flex gap-2"><input id="ref" class="fld" dir="ltr" readonly><button id="copyRef" class="px-5 rounded-xl bg-emerald-600 text-white font-semibold">Copy</button></div>
     </section>
 
-    <section id="sec7" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-4 text-emerald-800">Account</h2>
-      <div class="flex items-center gap-4 mb-5 pb-5 border-b border-slate-100">
+    <section id="sec7" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-4 text-emerald-800 dark:text-emerald-400">Account</h2>
+      <div class="flex items-center gap-4 mb-5 pb-5 border-b border-slate-100 dark:border-slate-800">
         <div class="relative shrink-0">
-          <div id="accAv" class="overflow-hidden w-24 h-24 rounded-full grid place-items-center bg-gradient-to-br from-emerald-600 to-teal-400 text-white text-3xl font-bold ring-4 ring-emerald-50">G</div>
-          <button id="camBtn" type="button" class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Upload photo"></button>
+          <div id="accAv" class="overflow-hidden w-24 h-24 rounded-full grid place-items-center bg-gradient-to-br from-emerald-600 to-teal-400 text-white text-3xl font-bold ring-4 ring-emerald-50 dark:ring-slate-800">G</div>
+          <button id="camBtn" type="button" class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white grid place-items-center ring-2 ring-white dark:ring-slate-900 active:scale-95 transition" aria-label="Upload photo"></button>
         </div>
         <div class="min-w-0 flex-1">
           <div class="font-bold text-sm">Profile photo</div>
           <div class="text-xs text-slate-500 mb-2.5">JPG أو PNG حتى 5MB. تُقصّ الصورة إلى مربع تلقائياً.</div>
           <input id="avFile" type="file" accept="image/*" class="hidden">
-          <button id="upBtn" type="button" class="h-9 px-4 rounded-lg border border-emerald-200 text-emerald-700 text-sm font-semibold hover:bg-emerald-50 active:scale-95 transition">Upload photo</button>
+          <button id="upBtn" type="button" class="h-9 px-4 rounded-lg border border-emerald-200 dark:border-slate-700 text-emerald-700 dark:text-emerald-400 text-sm font-semibold hover:bg-emerald-50 dark:hover:bg-slate-800 active:scale-95 transition">Upload photo</button>
           <div id="avActs" class="hidden flex gap-2">
             <button id="avSave" type="button" class="h-9 px-4 rounded-lg bg-emerald-600 text-white text-sm font-semibold active:scale-95 transition">Save</button>
-            <button id="avCancel" type="button" class="h-9 px-4 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold active:scale-95 transition">Cancel</button>
+            <button id="avCancel" type="button" class="h-9 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-sm font-semibold active:scale-95 transition">Cancel</button>
           </div>
         </div>
       </div>
-      <dl class="text-sm divide-y divide-slate-100">
-        <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500">Name</dt><dd id="accName" class="font-semibold truncate" dir="auto"></dd></div>
-        <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500">Email</dt><dd id="accMail" class="font-semibold truncate" dir="ltr"></dd></div>
-        <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500">User ID</dt><dd id="accUid" class="font-mono text-xs truncate" dir="ltr"></dd></div>
+      <dl class="text-sm divide-y divide-slate-100 dark:divide-slate-800">
+        <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500 dark:text-slate-400">Name</dt><dd id="accName" class="font-semibold truncate" dir="auto"></dd></div>
+        <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500 dark:text-slate-400">Email</dt><dd id="accMail" class="font-semibold truncate" dir="ltr"></dd></div>
+        <div class="py-3 flex justify-between gap-4"><dt class="text-slate-500 dark:text-slate-400">User ID</dt><dd id="accUid" class="font-mono text-xs truncate" dir="ltr"></dd></div>
       </dl>
-      <button id="logout2" class="mt-4 w-full h-12 rounded-xl border border-red-200 text-red-600 font-bold hover:bg-red-50">Logout</button>
+      <button id="logout2" class="mt-4 w-full h-12 rounded-xl border border-red-200 text-red-600 font-bold hover:bg-red-50 dark:hover:bg-red-950/30">Logout</button>
     </section>
 
-    <section id="sec8" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-1 text-emerald-800">Child Panel</h2>
-      <p class="text-sm text-slate-500 mb-4">Resell our services under your own domain with your own prices.</p>
+    <section id="sec8" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-1 text-emerald-800 dark:text-emerald-400">Child Panel</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">Resell our services under your own domain with your own prices.</p>
       <div class="space-y-3">
         <input id="cpDom" class="fld" dir="ltr" placeholder="yourpanel.com">
         <button id="cpBtn" class="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[.98] transition text-white font-bold">Request child panel</button>
       </div>
     </section>
 
-    <section id="sec9" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-1 text-emerald-800">Mass order</h2>
-      <p class="text-sm text-slate-500 mb-3">One order per line: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs" dir="ltr">service_id | link | quantity</code></p>
+    <section id="sec9" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-1 text-emerald-800 dark:text-emerald-400">Mass order</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">One order per line: <code class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-xs" dir="ltr">service_id | link | quantity</code></p>
       <form id="mf" class="space-y-3" novalidate>
         <textarea id="mTxt" rows="6" dir="ltr" class="fld font-mono text-sm" placeholder="101 | https://t.me/channel | 1000"></textarea>
         <p id="mMsg" class="min-h-[20px] text-sm text-red-500"></p>
@@ -388,19 +393,19 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       </form>
     </section>
 
-    <section id="sec10" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-3 text-emerald-800">FAQ</h2>
-      <div class="divide-y divide-slate-100 text-sm">
-        <details class="py-3"><summary class="font-semibold cursor-pointer">How long until my order starts?</summary><p class="mt-2 text-slate-500">Most services start within minutes to a few hours. See the service description for details.</p></details>
-        <details class="py-3"><summary class="font-semibold cursor-pointer">Can I cancel an order?</summary><p class="mt-2 text-slate-500">Orders cannot be cancelled once processing has started.</p></details>
-        <details class="py-3"><summary class="font-semibold cursor-pointer">Does my account need to be public?</summary><p class="mt-2 text-slate-500">Yes. Private accounts or links cannot be processed.</p></details>
-        <details class="py-3"><summary class="font-semibold cursor-pointer">How do I add funds?</summary><p class="mt-2 text-slate-500">Open Add funds, choose an amount and a payment method.</p></details>
+    <section id="sec10" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-3 text-emerald-800 dark:text-emerald-400">FAQ</h2>
+      <div class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+        <details class="py-3"><summary class="font-semibold cursor-pointer">How long until my order starts?</summary><p class="mt-2 text-slate-500 dark:text-slate-400">Most services start within minutes to a few hours. See the service description for details.</p></details>
+        <details class="py-3"><summary class="font-semibold cursor-pointer">Can I cancel an order?</summary><p class="mt-2 text-slate-500 dark:text-slate-400">Orders cannot be cancelled once processing has started.</p></details>
+        <details class="py-3"><summary class="font-semibold cursor-pointer">Does my account need to be public?</summary><p class="mt-2 text-slate-500 dark:text-slate-400">Yes. Private accounts or links cannot be processed.</p></details>
+        <details class="py-3"><summary class="font-semibold cursor-pointer">How do I add funds?</summary><p class="mt-2 text-slate-500 dark:text-slate-400">Open Add funds, choose an amount and a payment method.</p></details>
       </div>
     </section>
 
-    <section id="sec11" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-3 text-emerald-800">Terms</h2>
-      <ul class="list-disc ps-5 space-y-2 text-sm text-slate-600">
+    <section id="sec11" class="hidden bg-white dark:bg-[#111827] rounded-2xl border border-emerald-100 dark:border-slate-800 shadow-sm p-4 md:p-6">
+      <h2 class="text-lg font-extrabold mb-3 text-emerald-800 dark:text-emerald-400">Terms</h2>
+      <ul class="list-disc ps-5 space-y-2 text-sm text-slate-600 dark:text-slate-400">
         <li>Results can vary; delivery times are estimates, not guarantees.</li>
         <li>Do not place multiple orders for the same link until the first is complete.</li>
         <li>Payments are non-refundable once an order has started.</li>
@@ -410,7 +415,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
   </main>
 </div>
 
-<nav id="bnav" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-emerald-100 safe-b grid grid-cols-4 shadow-[0_-4px_20px_rgba(16,185,129,.08)]"></nav>
+<nav id="bnav" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 dark:bg-[#111827]/95 backdrop-blur border-t border-emerald-100 dark:border-slate-800 safe-b grid grid-cols-4 shadow-[0_-4px_20px_rgba(16,185,129,.08)]"></nav>
 
 <div id="okM" class="okbg hidden fixed inset-0 z-[60] grid overflow-y-auto p-4" role="dialog" aria-modal="true" aria-labelledby="okT">
   <div class="okcard okcard2 w-full max-w-sm m-auto text-slate-100">
@@ -528,16 +533,16 @@ $("#hIc").innerHTML=ic("card",18);$("#burger").innerHTML=ic("menu",22);$("#close
 const setNav=i=>{
   document.querySelectorAll("[data-n]").forEach(el=>{
     const on=+el.dataset.n===i;
-    if(el.closest("#nav"))el.className=`w-full flex items-center gap-3 h-11 px-3 rounded-xl text-left active:scale-[.98] transition ${on?"bg-emerald-50 text-emerald-700 font-semibold":"text-slate-600 font-medium hover:bg-slate-100"}`;
+    if(el.closest("#nav"))el.className=`w-full flex items-center gap-3 h-11 px-3 rounded-xl text-left active:scale-[.98] transition ${on?"bg-emerald-50 dark:bg-[#1f2937] text-emerald-700 dark:text-emerald-400 font-semibold":"text-slate-600 dark:text-slate-300 font-medium hover:bg-slate-100 dark:hover:bg-slate-800"}`;
     else{
-      el.className=`flex flex-col items-center justify-center gap-1 h-16 text-[11px] leading-none ${on?"text-emerald-700 font-bold":"text-slate-500 font-medium"}`;
-      el.firstElementChild.className=`grid place-items-center w-14 h-8 rounded-full transition-colors ${on?"bg-emerald-100 text-emerald-700":""}`;
+      el.className=`flex flex-col items-center justify-center gap-1 h-16 text-[11px] leading-none ${on?"text-emerald-700 dark:text-emerald-400 font-bold":"text-slate-500 dark:text-slate-400 font-medium"}`;
+      el.firstElementChild.className=`grid place-items-center w-14 h-8 rounded-full transition-colors ${on?"bg-emerald-100 dark:bg-slate-800 text-emerald-700 dark:text-emerald-400":""}`;
       el.setAttribute("aria-current",on?"page":"false");
     }
   });
 };
 const MENU=[[0,"cart","New order"],[8,"layers","Child Panel","new"],[9,"checks","Mass order"],[1,"heart","Services"],[2,"package","Orders"],[3,"card","Add funds"],[10,"help","FAQ"],[5,"code","API"],[4,"ticket","Tickets","tk"],[11,"filecheck","Terms"]];
-$("#nav").innerHTML=MENU.map(x=>`<button data-n="${x[0]}"><span class="shrink-0">${ic(x[1],20)}</span><span class="flex-1 text-left">${x[2]}</span>${x[3]==="tk"?'<span id="tkBadge" class="hidden min-w-[22px] h-[22px] px-1.5 rounded-full bg-orange-500 text-white text-xs font-bold place-items-center shadow-sm shadow-orange-500/30">0</span>':x[3]==="new"?'<span class="px-2 h-[22px] rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold grid place-items-center">NEW</span>':""}</button>`).join("");
+$("#nav").innerHTML=MENU.map(x=>`<button data-n="${x[0]}"><span class="shrink-0">${ic(x[1],20)}</span><span class="flex-1 text-left">${x[2]}</span>${x[3]==="tk"?'<span id="tkBadge" class="hidden min-w-[22px] h-[22px] px-1.5 rounded-full bg-orange-500 text-white text-xs font-bold place-items-center shadow-sm shadow-orange-500/30">0</span>':x[3]==="new"?'<span class="px-2 h-[22px] rounded-full bg-emerald-100 dark:bg-slate-800 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold grid place-items-center">NEW</span>':""}</button>`).join("");
 $("#bnav").innerHTML=[0,1,2,3].map(i=>`<button data-n="${i}"><span>${ic(NAV[i][0],24)}</span><span>${NAV[i][1]}</span></button>`).join("");
 function showSec(i){
   tab=i;
@@ -779,7 +784,7 @@ $("#of").onsubmit=async e=>{
 
 function drawServices(){
   const l=SERVICES.filter(s=>plat==="all"||s.p===plat).slice(0,300);
-  $("#svcList").innerHTML=l.map(s=>`<div class="rounded-xl border border-emerald-100 p-3 flex items-center gap-3"><div class="flex-1 min-w-0"><div class="font-semibold text-sm truncate">${s.id} · ${esc(s.n)}</div><div class="text-xs text-slate-500">${esc(s.c)} · min ${s.min} – max ${s.max}</div></div><div class="text-emerald-700 font-bold text-sm" dir="ltr">$${s.r.toFixed(2)}/1K</div><button data-pick="${s.id}" class="h-9 px-3 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Order</button></div>`).join("")||'<p class="text-slate-500 text-sm">لا توجد خدمات.</p>';
+  $("#svcList").innerHTML=l.map(s=>`<div class="rounded-xl border border-emerald-100 dark:border-slate-800 p-3 flex items-center gap-3"><div class="flex-1 min-w-0"><div class="font-semibold text-sm truncate">${s.id} · ${esc(s.n)}</div><div class="text-xs text-slate-500 dark:text-slate-400">${esc(s.c)} · min ${s.min} – max ${s.max}</div></div><div class="text-emerald-700 dark:text-emerald-400 font-bold text-sm" dir="ltr">$${s.r.toFixed(2)}/1K</div><button data-pick="${s.id}" class="h-9 px-3 rounded-lg bg-emerald-600 text-white text-xs font-semibold">Order</button></div>`).join("")||'<p class="text-slate-500 text-sm">لا توجد خدمات.</p>';
 }
 $("#svcList").onclick=e=>{
   const b=e.target.closest("[data-pick]");if(!b)return;
@@ -804,7 +809,7 @@ function drawOrders(){
   $("#ordList").innerHTML=ORDERS.map(o=>{
     const st=ST[o.status]||ST.pending;
     const rem=o.rem!=null&&(o.status==="partial"||o.status==="canceled")?`<div class="text-xs mt-1" style="color:#f97316"><span>Remaining</span> <b dir="ltr">${o.rem}</b></div>`:"";
-    return `<div class="rounded-xl border border-emerald-100 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="stp" data-s="${st[1]}">${st[0]}</span></div>${reasonHtml(o)}${refundHtml(o)}(<div class="mt-2 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 truncate" dir="ltr">${esc(o.link)}</div>${rem}<div class="flex justify-between mt-1 text-xs text-slate-500"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
+    return `<div class="rounded-xl border border-emerald-100 dark:border-slate-800 p-3 text-sm"><div class="flex justify-between gap-2"><b>#${esc(String(o.id).slice(0,6).toUpperCase())}</b><span class="stp" data-s="${st[1]}">${st[0]}</span></div>${reasonHtml(o)}${refundHtml(o)}(<div class="mt-2 truncate">${esc(o.s)}</div><div class="text-xs text-slate-500 dark:text-slate-400 truncate" dir="ltr">${esc(o.link)}</div>${rem}<div class="flex justify-between mt-1 text-xs text-slate-500 dark:text-slate-400"><span>Qty ${o.n}</span><span dir="ltr">$${o.cost.toFixed(2)} · ${new Date(o.ts).toLocaleString()}</span></div></div>`}).join("")||'<p class="text-slate-500 text-sm">لا توجد طلبات بعد.</p>';
 }
 let syncing=false,lastSync=0;
 async function syncOrders(){
@@ -918,7 +923,7 @@ $("#payBtn").onclick = async () => {
   }
 };
 
-$("#presets").innerHTML=[5,10,25,50].map(v=>`<button type="button" data-v="${v}" class="h-12 rounded-xl border border-emerald-200 text-emerald-700 font-bold hover:bg-emerald-50">$${v}</button>`).join("");
+$("#presets").innerHTML=[5,10,25,50].map(v=>`<button type="button" data-v="${v}" class="h-12 rounded-xl border border-emerald-200 dark:border-slate-700 text-emerald-700 dark:text-emerald-400 font-bold hover:bg-emerald-50 dark:hover:bg-slate-800">$${v}</button>`).join("");
 $("#presets").onclick=e=>{const b=e.target.closest("[data-v]");if(b){$("#fund").value=b.dataset.v;$("#payMsg").textContent=""}};
 
 const USER_ID_KEY="lf_user_id";
