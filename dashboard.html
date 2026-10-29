@@ -185,7 +185,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <button id="sbCam" type="button" class="absolute -bottom-0.5 -right-0.5 w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Change photo"></button>
     </div>
     <div class="mt-3 flex justify-center items-baseline gap-1.5 min-w-0 text-[17px] font-bold leading-tight"><span class="shrink-0">Welcome</span><span id="sbName" class="truncate" dir="auto">Guest</span></div>
-    <div id="sbRole" class="text-xs text-slate-500 mt-0.5">Customer account</div>
+    <div id="sbRole" class="text-xs text-slate-500 mt-0.5" dir="ltr">ID: —</div>
 
     <div class="mt-4 grid grid-cols-4 gap-1 max-w-[280px] mx-auto">
       <button id="qBal" type="button" class="qa" aria-label="Balance"><span class="qi" id="qiBal"></span><span id="qBalTxt">$0.00</span></button>
@@ -211,7 +211,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
     <div class="flex items-center gap-2 sm:gap-3">
       <button id="burger" class="lg:hidden w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 text-xl flex items-center justify-center" aria-label="Menu"></button>
       <div class="flex items-center">
-        <img src="1000023699.png" alt="Logo" class="h-12 sm:h-10 w-auto object-contain">
+        <img src="InShot_20261028_201908563.png" alt="Logo" class="h-9 sm:h-10 w-auto object-contain">
       </div>
     </div>
 
@@ -510,11 +510,12 @@ function balError(){toast("Could not load balance")}
 function idError(){toast("Could not set up your account ID")}
 function setNumericId(id){                              
   numId=id;
-  if(id!=null){try{localStorage.setItem("lf_user_id",String(id))}catch(_){}}   
+  if(id!=null){try{localStorage.setItem("lf_user_id",String(id))}catch(_}{}}   
   $("#accUid").textContent=id==null?"—":String(id);
   $("#ref").value=id==null?"":location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+id;
   $("#hRole").textContent=id==null?"Customer":"ID #"+id;          
-  $("#sbRole").textContent=id==null?"Customer account":"ID #"+id; 
+  const sbRoleEl = $("#sbRole");
+  if(sbRoleEl) sbRoleEl.textContent = id == null ? "ID: —" : "ID #" + id;
 }
 $("#uname").textContent=user;
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
