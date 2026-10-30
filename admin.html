@@ -1,0 +1,90 @@
+<!-- نموذج البحث عن المستخدم وشحن الرصيد -->
+<div style="padding: 20px; background: #f9f9f9; border-radius: 8px; max-width: 400px; margin: auto; font-family: Tahoma;">
+  <h3>لوحة شحن رصيد العملاء</h3>
+  <input type="number" id="searchUserId" placeholder="أدخل ID المستخدم (مثلاً: 1231)" style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
+  <button onclick="findAndTopUpUser()" style="width: 100%; padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px;">بحث عن المستخدم</button>
+
+  <div id="userInfo" style="margin-top: 15px;"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebaseapp.js";
+  import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firestore.js";
+
+  // إعدادات فايربيس الخاصة بك
+  const firebaseConfig = {
+    apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
+    authDomain: "layal-follow.firebaseapp.com",
+    projectId: "layal-follow",
+    storageBucket: "layal-follow.firebasestorage.app",
+    messagingSenderId: "850647879566",
+    appId: "1:850647879566:web:54e2e67a395f5d56101edf",
+    measurementId: "G-KVN372FDCR"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.findAndTopUpUser = async function() {
+    const searchId = Number(document.getElementById('searchUserId').value);
+    const infoDiv = document.getElementById('userInfo');
+    
+    if (!searchId) {
+      infoDiv.innerHTML = "<p style='color:red;'>الرجاء إدخال رقم ID صحيح</p>";
+      return;
+    }
+
+    infoDiv.innerHTML = "جاري البحث...";
+
+    try {
+      const q = query(collection(db, "users"), where("userId", "==", searchId));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        infoDiv.innerHTML = "<p style='color:red;'>لم يتم العثور على أي مستخدم بهذا الـ ID</p>";
+        return;
+      }
+
+      querySnapshot.forEach((document) => {
+        const userData = document.data();
+        const docId = document.id;
+
+        infoDiv.innerHTML = `
+          <div style="background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <p><strong>البريد:</strong> ${userData.email || 'غير متوفر'}</p>
+            <p><strong>الرصيد الحالي:</strong> $${userData.balance || 0}</p>
+            <input type="number" id="addAmount" placeholder="المبلغ المراد إضافته" style="width:100%; padding:5px; margin-bottom:5px; box-sizing: border-box;">
+            <button onclick="addBalance('${docId}', ${userData.balance || 0})" style="width:100%; padding:8px; background:#007bff; color:white; border:none; cursor:pointer; border-radius: 4px;">تأكيد شحن الرصيد</button>
+          </div>
+        `;
+      });
+    } catch (error) {
+      console.error("خطأ في البحث:", error);
+      infoDiv.innerHTML = "<p style='color:red;'>حدث خطأ أثناء البحث</p>";
+    }
+  }
+
+  window.addBalance = async function(docId, currentBalance) {
+    const amountToAdd = Number(document.getElementById('addAmount').value);
+    if (!amountToAdd || amountToAdd <= 0) {
+      alert("الرجاء إدخال مبلغ صحيح");
+      return;
+    }
+
+    try {
+      const userRef = doc(db, "users", docId);
+      const newBalance = currentBalance + amountToAdd;
+      
+      await updateDoc(userRef, {
+        balance: newBalance
+      });
+
+      alert("تم شحن الرصيد بنجاح! الرصيد الجديد: $" + newBalance);
+      document.getElementById('userInfo').innerHTML = "";
+      document.getElementById('searchUserId').value = "";
+    } catch (error) {
+      console.error("خطأ في التحديث:", error);
+      alert("فشل تحديث الرصيد");
+    }
+  }
+</script>
