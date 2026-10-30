@@ -456,20 +456,13 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
 <script>
 // إزالة شاشة التحميل فوراً وقسرياً لضمان عدم التعليق نهائياً
-function bootDone(){
-  const e = document.getElementById("boot");
-  if(e) e.remove();
-}
-if(document.readyState === "complete" || document.readyState === "interactive"){
-  bootDone();
-} else {
-  window.addEventListener("DOMContentLoaded", bootDone);
-  window.addEventListener("load", bootDone);
-}
-setTimeout(bootDone, 200);
+(function(){
+  const bootEl = document.getElementById("boot");
+  if(bootEl) bootEl.remove();
+})();
 
 const $=s=>document.querySelector(s);
-let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
+let user="Guest", balance=15.00, spent=0, uid="user_amzal", numId=1001, ORDERS=[], tab=0;
 let SERVICES=[]; 
 const I=p=>`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const PLAT=[
@@ -513,7 +506,6 @@ const NAV=[["cart","New order"],["grid","Services"],["package","Orders"],["walle
 const money=n=>n.toFixed(2);
 let plat="telegram", cur=null, toastT;
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.remove("hidden");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add("hidden"),2400)};
-let balance=15.00, spent=0, uid="user_amzal", numId=1001, ORDERS=[], tab=0;
 const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=money(balance);$("#cSpent").textContent=money(spent);$("#qBalTxt")&&($("#qBalTxt").textContent="$"+money(balance))};
 
 function setNumericId(id){                              
@@ -939,7 +931,7 @@ function applyLang(l){
   try{localStorage.setItem("lf_lang",l)}catch(e){}
   try{drawOrders()}catch(_){}
   walk(document.body);
-  document.querySelectorAll(".lb").forEach(b=>b.classList.toggle("on",b.dataset.lang===l));
+  document.querySelectorAll(".lb").forEach(b=>b.classList.toggle("on",b.dataset.lang==l));
 }
 document.querySelectorAll(".lb").forEach(b=>b.onclick=()=>applyLang(b.dataset.lang));
 {let l=null;try{l=localStorage.getItem("lf_lang")}catch(e){}
@@ -947,10 +939,8 @@ document.querySelectorAll(".lb").forEach(b=>b.onclick=()=>applyLang(b.dataset.la
 
 fillAccount({displayName:"محمد أوحدوش", email:"amzal@layal.com", uid:"user_amzal"});
 setNumericId(1001);
-setBal(15.00);
 drawCats();
 refresh();
-bootDone();
 
 const out = () => { try { localStorage.removeItem("lf_user_id"); } catch (_) {} location.replace("index.html"); };
 document.getElementById("logout2").onclick = out;
