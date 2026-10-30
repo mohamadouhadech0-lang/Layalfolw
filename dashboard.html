@@ -224,7 +224,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <div class="relative shrink-0">
         <button id="notifBtn" class="relative w-10 h-10 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center active:scale-95 transition" aria-label="Notifications">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          <span id="notifDot" class="hidden absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
+          <span id="notifDot" class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
         </button>
       </div>
     </div>
@@ -423,7 +423,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <h3 class="text-base font-extrabold text-emerald-800 dark:text-emerald-400">الإشعارات / Notifications</h3>
       <button id="closeNotif" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200">✕</button>
     </div>
-    <div id="notifList" class="space-y-3 text-sm text-slate-600 dark:text-slate-300 max-h-60 overflow-y-auto">
+    <div class="space-y-3 text-sm text-slate-600 dark:text-slate-300 max-h-60 overflow-y-auto">
       <div class="p-3 rounded-xl bg-emerald-50 dark:bg-slate-800 border border-emerald-100 dark:border-slate-700">
         <div class="font-bold text-emerald-700 dark:text-emerald-400 text-xs mb-1">مرحباً بك في منصة Layal Folw</div>
         <p class="text-xs">تم تفعيل حسابك بنجاح. يمكنك بدء طلباتك ورصيدك الآن.</p>
@@ -464,7 +464,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-50 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-full shadow-xl"></div>
 
 <script>
-function bootFail(){            
+function bootFail(msg){            
   const m=document.getElementById("bootMsg"),s=document.getElementById("bootSpin");
   if(!m||window.__authDone)return;
   s.style.display="none";
@@ -1045,7 +1045,7 @@ drawCats();refresh();
 </script>
 <script type="module" onerror="bootFail()">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot, collection, query, where, getDocs, or } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const app = initializeApp({
@@ -1065,7 +1065,7 @@ async function ensureUserDoc(user) {
   const ref = doc(db, "users", user.uid);
   try {
     const snap = await getDoc(ref);
-    if (snap.exists() && snap.data().userId != null) return snap.data().userId;
+    if (snap.exists() && snap.data().userId != null) return;
     
     const cRef = doc(db, "counters", "users");
     let userId = 1000;
@@ -1087,21 +1087,18 @@ async function ensureUserDoc(user) {
       await runTransaction(db, async tx => {
         tx.update(ref, { userId: snap.data().userId || userId });
       });
-      return snap.data().userId || userId;
     } else {
       await runTransaction(db, async tx => {
         tx.set(ref, { balance: 0, userId: userId, email: user.email || "", createdAt: serverTimestamp() });
       });
-      return userId;
     }
   } catch (err) {
     console.error("ensureUserDoc safe bypass:", err);
-    return null;
   }
 }
 
-let unsubBal = null, unsubOrd = null, unsubNotif = null, sess = 0;                             
-const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } if (unsubNotif) { unsubNotif(); unsubNotif = null; } };
+let unsubBal = null, unsubOrd = null, sess = 0;                             
+const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } };
 
 onAuthStateChanged(auth, user => {
   stopBal();                                               
@@ -1111,7 +1108,7 @@ onAuthStateChanged(auth, user => {
   setBal(0, true);                                         
   ensureUserDoc(user)
     .catch(err => { if (my === sess) { console.error("create user doc:", err); idError(); } })
-    .then(async (numericUserId) => {
+    .then(() => {
       if (my !== sess) return;
       unsubBal = onSnapshot(
         doc(db, "users", user.uid),                        
@@ -1132,37 +1129,6 @@ onAuthStateChanged(auth, user => {
         }).sort((a, b) => b.ts - a.ts)),
         err => console.error("orders listener:", err)
       );
-
-      // نظام جلب الاستماع الفوري للإشعارات (عامة + مخصصة للـ uid أو الـ userId)
-      try {
-        const notifRef = collection(db, "notifications");
-        // جلب الإشعارات الموجهة للجميع أو لهذا الـ uid أو لهذا الـ userId
-        const qNotif = query(notifRef, or(where("to", "==", "all"), where("to", "==", user.uid), where("toUserId", "==", numericUserId)));
-        unsubNotif = onSnapshot(qNotif, snap => {
-          const list = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-          const notifListEl = document.getElementById("notifList");
-          if(notifListEl){
-            if(list.length === 0){
-              notifListEl.innerHTML = `<div class="p-3 text-center text-slate-400 text-xs">لا توجد إشعارات جديدة</div>`;
-            } else {
-              notifListEl.innerHTML = list.map(n => `
-                <div class="p-3 rounded-xl bg-emerald-50 dark:bg-slate-800 border border-emerald-100 dark:border-slate-700">
-                  <div class="font-bold text-emerald-700 dark:text-emerald-400 text-xs mb-1">${esc(n.title || "إشعار جديد")}</div>
-                  <p class="text-xs whitespace-pre-line">${esc(n.body || "")}</p>
-                </div>
-              `).join("");
-            }
-          }
-          // إظهار النقطة الحمراء إذا وُجدت إشعارات
-          if(list.length > 0){
-            const dot = document.getElementById("notifDot");
-            if(dot) dot.classList.remove("hidden");
-          }
-        }, err => console.warn("notifications listener error:", err));
-      } catch (e) {
-        console.warn("Notifications setup error:", e);
-      }
-
       loadServices();
       syncOrders();
     });
@@ -1172,7 +1138,7 @@ onAuthStateChanged(auth, user => {
 addEventListener("pagehide", stopBal);                     
 
 window.__getToken = () => auth.currentUser.getIdToken();
-const out = () => { stopBal(); try { localStorage.removeItem("lf_user_id"); } catch (_) {} return signOut(auth).catch(() => {}).finally(() => location.replace("index.html")); });
+const out = () => { stopBal(); try { localStorage.removeItem("lf_user_id"); } catch (_) {} return signOut(auth).catch(() => {}).finally(() => location.replace("index.html")); };
 document.getElementById("logout2").onclick = out;
 document.getElementById("logout3").onclick = out;
 const _editable=e=>/^(INPUT|TEXTAREA)$/.test((e.target&&e.target.tagName)||"");
@@ -1182,4 +1148,4 @@ document.addEventListener('copy',e=>{if(!_editable(e))e.preventDefault()});
 document.addEventListener('cut',e=>{if(!_editable(e))e.preventDefault()});
 document.addEventListener('dragstart',e=>{if(!_editable(e))e.preventDefault()});
 </script>
-</html>
+  </html>
