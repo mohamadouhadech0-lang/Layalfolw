@@ -26,7 +26,7 @@
   <div class="section">
     <h3>بحث وشحن رصيد العميل</h3>
     <label>أدخل ID المستخدم:</label>
-    <input type="number" id="searchUserId" placeholder="مثلاً: 1231">
+    <input type="number" id="searchUserId" value="1231" placeholder="مثلاً: 1231">
     <button onclick="findUser()">بحث عن المستخدم</button>
     <div id="resultArea"></div>
   </div>
@@ -37,7 +37,8 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebaseapp.js";
   import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firestore.js";
 
-  // إعدادات فايربيس الخاصة بك
+  console.p("Firebase loaded successfully!");
+
   const firebaseConfig = {
     apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
     authDomain: "layal-follow.firebaseapp.com",
@@ -51,7 +52,6 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // دالة البحث عن المستخدم
   window.findUser = async function() {
     const rawId = document.getElementById('searchUserId').value;
     const resultArea = document.getElementById('resultArea');
@@ -89,11 +89,10 @@
       });
     } catch (err) {
       console.error(err);
-      resultArea.innerHTML = "<p class='error'>حدث خطأ أثناء الاتصال بقاعدة البيانات</p>";
+      resultArea.innerHTML = "<p class='error'>خطأ تقني: " + err.message + "</p>";
     }
   };
 
-  // دالة تحديث الرصيد
   window.updateUserBalance = async function(docId, currentBalance) {
     const amountInput = document.getElementById('topupAmount').value;
     const resultArea = document.getElementById('resultArea');
@@ -116,7 +115,7 @@
       resultArea.innerHTML = `<p class='success'>تم التحديث بنجاح! الرصيد الجديد: $${newBalance}</p>`;
     } catch (err) {
       console.error(err);
-      alert("فشل تحديث الرصيد");
+      alert("فشل تحديث الرصيد: " + err.message);
     }
   };
 </script>
