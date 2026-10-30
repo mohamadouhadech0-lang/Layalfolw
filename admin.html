@@ -27,7 +27,7 @@
     <h3>بحث وشحن رصيد العميل</h3>
     <label>أدخل ID المستخدم:</label>
     <input type="number" id="searchUserId" value="1231" placeholder="مثلاً: 1231">
-    <button onclick="findUser()">بحث عن المستخدم</button>
+    <button id="searchBtn">بحث عن المستخدم</button>
     <div id="resultArea"></div>
   </div>
 
@@ -36,8 +36,6 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebaseapp.js";
   import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firestore.js";
-
-  console.p("Firebase loaded successfully!");
 
   const firebaseConfig = {
     apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
@@ -52,7 +50,8 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  window.findUser = async function() {
+  // ربط الزر برمجياً لضمان الاستجابة الفورية
+  document.getElementById('searchBtn').addEventListener('click', async function() {
     const rawId = document.getElementById('searchUserId').value;
     const resultArea = document.getElementById('resultArea');
 
@@ -62,7 +61,7 @@
     }
 
     const searchId = Number(rawId);
-    resultArea.innerHTML = "جاري البحث...";
+    resultArea.innerHTML = "جاري البحث في قاعدة البيانات...";
 
     try {
       const q = query(collection(db, "users"), where("userId", "==", searchId));
@@ -81,43 +80,44 @@
           <div class="user-card">
             <p><strong>البريد الإلكتروني:</strong> ${data.email || 'غير متوفر'}</p>
             <p><strong>الرصيد الحالي:</strong> $${data.balance || 0}</p>
-            <label>المبلغ المراد إضافته (أو خصمه بالسالب):</label>
+            <label>المبلغ المراد إضافته:</label>
             <input type="number" id="topupAmount" placeholder="أدخل المبلغ">
-            <button onclick="updateUserBalance('${docId}', ${data.balance || 0})" style="background: #007bff;">تحديث الرصيد</button>
+            <button id="updateBtn" style="background: #007bff;">تحديث الرصيد</button>
           </div>
         `;
+
+        // ربط زر التحديث أيضاً برمجياً
+        document.getElementById('updateBtn').addEventListener('click', async function() {
+          const amountInput = document.getElementById('topupAmount').value;
+
+          if (!amountInput) {
+            alert("الرجاء إدخال المبلغ");
+            return;
+          }
+
+          const amount = Number(amountInput);
+          const newBalance = Number(data.balance || 0) + amount;
+
+          try {
+            const userRef = doc(db, "users", docId);
+            await updateDoc(userRef, {
+              balance: newBalance
+            });
+
+            alert("تم تحديث الرصيد بنجاح! الرصيد الجديد: $" + newBalance);
+            resultArea.innerHTML = `<p class='success'>تم التحديث بنجاح! الرصيد الجديد: $${newBalance}</p>`;
+          } catch (err) {
+            console.error(err);
+            alert("فشل تحديث الرصيد: " + err.message);
+          }
+        });
+
       });
     } catch (err) {
       console.error(err);
       resultArea.innerHTML = "<p class='error'>خطأ تقني: " + err.message + "</p>";
     }
-  };
-
-  window.updateUserBalance = async function(docId, currentBalance) {
-    const amountInput = document.getElementById('topupAmount').value;
-    const resultArea = document.getElementById('resultArea');
-
-    if (!amountInput) {
-      alert("الرجاء إدخال المبلغ");
-      return;
-    }
-
-    const amount = Number(amountInput);
-    const newBalance = Number(currentBalance) + amount;
-
-    try {
-      const userRef = doc(db, "users", docId);
-      await updateDoc(userRef, {
-        balance: newBalance
-      });
-
-      alert("تم تحديث الرصيد بنجاح! الرصيد الجديد: $" + newBalance);
-      resultArea.innerHTML = `<p class='success'>تم التحديث بنجاح! الرصيد الجديد: $${newBalance}</p>`;
-    } catch (err) {
-      console.error(err);
-      alert("فشل تحديث الرصيد: " + err.message);
-    }
-  };
+  });
 </script>
 
 </body>
