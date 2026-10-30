@@ -307,13 +307,13 @@ async function prefetchUsers(uids) { await Promise.all([...new Set(uids)].filter
 const who = u => u ? `<b class="mono">#${esc(u.userId ?? "—")}</b> <span class="mono">${esc(u.email)}</span>` : "—";
 const sortDesc = (a, b) => ms(b.createdAt) - ms(a.createdAt);
 
-/* ================= الدخول والصلاحية (تم دمج تجاوز الفحص لبريدك خصيصاً) ================= */
+/* ================= الدخول والصلاحية (مخصص حصراً للإيميل الجديد) ================= */
 const show = id => { ["loginForm", "denied"].forEach(x => $("#" + x).classList.toggle("hidden", x !== id)); };
 onAuthStateChanged(auth, async user => {
   if (!user) { me = null; $("#app").classList.add("hidden"); $("#gate").classList.remove("hidden"); $("#gMsg").textContent = "سجّل الدخول بحساب المشرف"; show("loginForm"); return; }
   
-  // تجاوز فحص قاعدة البيانات والسماح لبريدك الشخصي بالدخول فوراً
-  if (user.email !== "Oussializina@gmail.com") {
+  // السماح المباشر الفوري للبريد الجديد حصراً
+  if (user.email !== "mohamadouhadech0@gmail.com") {
     $("#gMsg").textContent = "جارٍ التحقق من الصلاحية…";
     try {
       const a = await getDoc(doc(db, "admins", user.uid));
