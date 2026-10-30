@@ -1098,7 +1098,7 @@ async function ensureUserDoc(user) {
 }
 
 let unsubBal = null, unsubOrd = null, sess = 0;                             
-const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } };
+const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } if (unsubNotif) { unsubNotif(); unsubNotif = null; } };
 
 onAuthStateChanged(auth, user => {
   stopBal();                                               
