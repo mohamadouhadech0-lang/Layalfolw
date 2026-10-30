@@ -167,7 +167,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <meta name="theme-color" content="#0f172a">
 </head>
 <body class="min-h-screen">
-<div id="boot" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#eef3fb;color:#0f1f3d;font-family:system-ui,Segoe UI,Tahoma,sans-serif;text-align:center;padding:24px">
+<div id="boot" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0b1220;color:#e5ebf5;font-family:system-ui,Segoe UI,Tahoma,sans-serif;text-align:center;padding:24px">
   <div id="bootSpin" style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(16,185,129,.2);border-top-color:#059669;animation:spin .8s linear infinite"></div>
   <div id="bootMsg" style="font-weight:700">جاري الدخول إلى المنصة...</div>
 </div>
@@ -455,11 +455,19 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-50 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-full shadow-xl"></div>
 
 <script>
+// إخفاء شاشة التحميل فوراً ودون تأخير
 function bootDone(){
-  const e=document.getElementById("boot");
+  const e = document.getElementById("boot");
   if(e) e.remove();
 }
-setTimeout(bootDone, 1000);
+// تنفيذ الإزالة فور تحميل العناصر لضمان عدم التعليق نهائياً
+if(document.readyState === "complete" || document.readyState === "interactive"){
+  bootDone();
+} else {
+  window.addEventListener("DOMContentLoaded", bootDone);
+  window.addEventListener("load", bootDone);
+}
+setTimeout(bootDone, 300);
 
 const $=s=>document.querySelector(s);
 let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
@@ -511,7 +519,7 @@ const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=money(balance);
 
 function setNumericId(id){                              
   numId=id;
-  if(id!=null){try{localStorage.setItem("lf_user_id",String(id))}catch(_}{}}   
+  if(id!=null){try{localStorage.setItem("lf_user_id",String(id))}catch(_){}}   
   $("#accUid").textContent=id==null?"1001":String(id);
   $("#ref").value=id==null?"":location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+id;
   
@@ -542,7 +550,7 @@ async function copyUserId(){
   }
   toast("✓ Copied ID: " + idText);
 }
-$("#copyIdBtn").onclick=copyUserId;
+document.getElementById("copyIdBtn").onclick=copyUserId;
 
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
@@ -924,7 +932,7 @@ function walk(root){
 new MutationObserver(ms=>ms.forEach(m=>{
   if(m.type==="characterData")fixText(m.target);
   else m.addedNodes.forEach(n=>n.nodeType==3?fixText(n):n.nodeType==1&&walk(n));
-})).observe(document.body,{childList:true,subtree:true,characterData:true});
+})).observe(document.body,{childList:test=true,subtree:true,characterData:true});
 ["uname","sbName","hName","pmName","pmMail","accName","accMail","accUid","avInit","pmAv","accAv","sbAv","ref"].forEach(id=>{const e=document.getElementById(id);e&&e.setAttribute("data-notr","")});
 function applyLang(l){
   lang=l;const h=document.documentElement;
@@ -943,6 +951,7 @@ setNumericId(1001);
 setBal(15.00);
 drawCats();
 refresh();
+bootDone();
 
 const out = () => { try { localStorage.removeItem("lf_user_id"); } catch (_) {} location.replace("index.html"); };
 document.getElementById("logout2").onclick = out;
