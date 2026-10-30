@@ -12,16 +12,26 @@
 *{-webkit-user-select:none!important;-moz-user-select:none!important;-ms-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent!important}
 input,textarea,[contenteditable="true"]{-webkit-user-select:text!important;-moz-user-select:text!important;-ms-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important}
 body{font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;background:#eef3fb;color:#0f1f3d}
-/* زر نسخ الرابط */
+/* زر نسخ الرابط والـ ID */
 .cpb{flex:none;width:50px;min-height:46px;border-radius:12px;border:0;color:#fff;background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 6px 16px rgba(16,185,129,.28),inset 0 1px 0 rgba(255,255,255,.25);display:grid;place-items:center;cursor:pointer;transition:transform .12s,filter .15s,box-shadow .2s,background .25s}
 .cpb svg{width:20px;height:20px}
 .cpb .i-ck{display:none}
 .cpb:hover{filter:brightness(1.08)}
 .cpb:active{transform:scale(.93)}
-.cpb:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(16,185,129,.35)}
 .cpb.ok{background:linear-gradient(135deg,#34d399,#059669);box-shadow:0 6px 16px rgba(16,185,129,.32),inset 0 1px 0 rgba(255,255,255,.25)}
 .cpb.ok .i-cp{display:none}
 .cpb.ok .i-ck{display:block}
+
+/* زر نسخ مصغر خاص للـ ID */
+.cpb-sm{width:22px;height:22px;border-radius:6px;border:0;color:#059669;background:#d1fae5;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;vertical-align:middle;margin-inline-start:6px}
+.cpb-sm svg{width:12px;height:12px}
+.cpb-sm .i-ck{display:none}
+.cpb-sm:hover{background:#a7f3d0;transform:scale(1.05)}
+.cpb-sm:active{transform:scale(.9)}
+.cpb-sm.ok{background:#059669;color:#fff}
+.cpb-sm.ok .i-cp{display:none}
+.cpb-sm.ok .i-ck{display:inline-block}
+
 .noscroll::-webkit-scrollbar{display:none}.noscroll{scrollbar-width:none}
 .sb{transition:transform .32s cubic-bezier(.32,.72,0,1)}
 #scrim{opacity:0;pointer-events:none;transition:opacity .3s}
@@ -155,20 +165,11 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 .safe-b{padding-bottom:env(safe-area-inset-bottom,0px)}
 </style>
 <meta name="theme-color" content="#0f172a">
-<link rel="manifest" href="/manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
-<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Layal Folw">
 </head>
 <body class="min-h-screen">
 <div id="boot" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#eef3fb;color:#0f1f3d;font-family:system-ui,Segoe UI,Tahoma,sans-serif;text-align:center;padding:24px">
   <div id="bootSpin" style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(16,185,129,.2);border-top-color:#059669;animation:spin .8s linear infinite"></div>
   <div id="bootMsg" style="font-weight:700">جاري الدخول إلى المنصة...</div>
-  <div id="bootBtns" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px">
-    <button onclick="bootDone()" style="height:42px;padding:0 22px;border-radius:999px;background:#059669;color:#fff;font-weight:700;border:0;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(5,150,105,.3)">دخول فوري / Enter</button>
-  </div>
 </div>
 
 <div id="scrim" class="fixed inset-0 bg-slate-900/50 backdrop-blur-[2px] z-30 lg:hidden"></div>
@@ -183,7 +184,16 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <button id="sbCam" type="button" class="absolute -bottom-0.5 -right-0.5 w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Change photo"></button>
     </div>
     <div class="mt-3 flex justify-center items-baseline gap-1.5 min-w-0 text-[17px] font-bold leading-tight"><span class="shrink-0">Welcome</span><span id="sbName" class="truncate" dir="auto">Guest</span></div>
-    <div id="sbRole" class="text-xs text-slate-500 mt-0.5 font-mono" dir="ltr">ID: —</div>
+    
+    <!-- قسم الـ ID مع زر النسخ المصغر -->
+    <div class="mt-0.5 text-xs text-slate-500 font-mono flex items-center justify-center gap-1" dir="ltr">
+      <span id="sbRole">ID: —</span>
+      <button id="copyIdBtn" type="button" class="cpb-sm" title="Copy ID" aria-label="Copy ID">
+        <svg class="i-cp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <svg class="i-ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </button>
+    </div>
+
     <div id="sbMail" class="text-xs text-slate-400 mt-0.5 truncate" dir="ltr"></div>
 
     <div class="mt-4 grid grid-cols-4 gap-1 max-w-[280px] mx-auto">
@@ -307,7 +317,6 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
     <section id="sec2" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6"><h2 class="text-lg font-extrabold mb-4 text-emerald-800">Orders</h2><div id="ordList" class="space-y-3"></div></section>
 
-    <!-- شحن الرصيد الشامل -->
     <section id="sec3" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
       <h2 class="text-lg font-extrabold mb-2 text-emerald-800 text-center">شحن الرصيد</h2>
       <p class="text-sm text-slate-500 mb-6 text-center">اختر طريقة الدفع المناسبة لك</p>
@@ -400,7 +409,6 @@ html.dark body{background:#0b1220;color:#e5ebf5}
         <details class="py-3"><summary class="font-semibold cursor-pointer">Does my account need to be public?</summary><p class="mt-2 text-slate-500">Yes. Private accounts or links cannot be processed.</p></details>
         <details class="py-3"><summary class="font-semibold cursor-pointer">How do I add funds?</summary><p class="mt-2 text-slate-500">Open Add funds, choose an amount and a payment method.</p></details>
       </div>
-    </details>
     </section>
 
     <section id="sec11" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
@@ -451,8 +459,6 @@ function bootDone(){
   const e=document.getElementById("boot");
   if(e) e.remove();
 }
-
-// إزالة شاشة التحميل تلقائياً خلال ثانية واحدة كحد أقصى لضمان فتح الواجهة فوراً
 setTimeout(bootDone, 1000);
 
 const $=s=>document.querySelector(s);
@@ -500,14 +506,12 @@ const NAV=[["cart","New order"],["grid","Services"],["package","Orders"],["walle
 const money=n=>n.toFixed(2);
 let plat="telegram", cur=null, toastT;
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.remove("hidden");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.add("hidden"),2400)};
-let balLoading=false;                                   
-const balStr=()=>money(balance);
-const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=balStr();$("#cSpent").textContent=money(spent);$("#qBalTxt")&&($("#qBalTxt").textContent="$"+balStr())};
-function setBal(n){balance=n;refresh()}        
+let balance=15.00, spent=0, uid="user_amzal", numId=1001, ORDERS=[], tab=0;
+const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=money(balance);$("#cSpent").textContent=money(spent);$("#qBalTxt")&&($("#qBalTxt").textContent="$"+money(balance))};
 
 function setNumericId(id){                              
   numId=id;
-  if(id!=null){try{localStorage.setItem("lf_user_id",String(id))}catch(_){}}   
+  if(id!=null){try{localStorage.setItem("lf_user_id",String(id))}catch(_}{}}   
   $("#accUid").textContent=id==null?"1001":String(id);
   $("#ref").value=id==null?"":location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+id;
   
@@ -517,19 +521,38 @@ function setNumericId(id){
   if(sbMailEl && uemail) sbMailEl.textContent = uemail;
 }
 
-$("#uname").textContent="User";
+// دالة نسخ الـ ID
+async function copyUserId(){
+  const idText = String(numId || "1001");
+  try{
+    if(!(navigator.clipboard&&window.isSecureContext))throw 0;
+    await navigator.clipboard.writeText(idText);
+  }catch(_){
+    try{
+      const ta=document.createElement("textarea");
+      ta.value=idText;document.body.appendChild(ta);ta.select();
+      document.execCommand("copy");document.body.removeChild(ta);
+    }catch(e){toast("Copy failed");return;}
+  }
+  const btn=$("#copyIdBtn");
+  if(btn){
+    btn.classList.add("ok");
+    clearTimeout(btn._t);
+    btn._t=setTimeout(()=>btn.classList.remove("ok"),1600);
+  }
+  toast("✓ Copied ID: " + idText);
+}
+$("#copyIdBtn").onclick=copyUserId;
+
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-let uemail="user@layal.com";
+let uemail="amzal@layal.com";
 function fillAccount(u){                     
-  user=u.displayName||u.email||"User"; uid=u.uid||"local_user"; uemail=u.email||"user@layal.com";
+  user=u.displayName||u.email||"User"; uid=u.uid||"local_user"; uemail=u.email||"amzal@layal.com";
   $("#uname").textContent=user;$("#sbName").textContent=user;
   
   const sbMailEl = $("#sbMail");
   if(sbMailEl) sbMailEl.textContent = uemail;
-
-  const sbRoleEl = $("#sbRole");
-  if(sbRoleEl) sbRoleEl.textContent = "ID #1001";
 
   const w=user.trim().split(/[\s@._-]+/).filter(Boolean);
   ini=(w.length>1?w[0][0]+w[1][0]:user.trim().slice(0,2)).toUpperCase()||"G";
@@ -632,7 +655,6 @@ $("#qSet").onclick=()=>{openSb(false);showSec(7)};
 $("#sbCam").onclick=()=>{openSb(false);showSec(7)};
 $("#cpBtn").onclick=()=>{const v=$("#cpDom").value.trim();toast(/^[\w.-]+\.\w{2,}$/.test(v)?"✓ Request sent (demo)":"Enter a valid domain")};
 
-// خدمات افتراضية تعمل فوراً دون انتظار API الخارجي
 SERVICES=[
   {id:101, p:"telegram", c:"Telegram Members", n:"Telegram Members High Quality", r:1.50, min:100, max:50000, d:"خدمة أعضاء تلغرام عالية الجودة وضمان عدم النقصان."},
   {id:102, p:"instagram", c:"Instagram Followers", n:"Instagram Real Followers Active", r:2.80, min:50, max:20000, d:"متابعين انستغرام حقيقيين ومتفاعلين."},
@@ -921,7 +943,6 @@ setNumericId(1001);
 setBal(15.00);
 drawCats();
 refresh();
-bootDone();
 
 const out = () => { try { localStorage.removeItem("lf_user_id"); } catch (_) {} location.replace("index.html"); };
 document.getElementById("logout2").onclick = out;
