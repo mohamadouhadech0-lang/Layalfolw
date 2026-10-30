@@ -455,19 +455,18 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <div id="toast" class="hidden fixed left-1/2 -translate-x-1/2 bottom-24 lg:bottom-8 z-50 bg-slate-900 text-white text-sm px-4 py-2.5 rounded-full shadow-xl"></div>
 
 <script>
-// إخفاء شاشة التحميل فوراً ودون تأخير
+// إزالة شاشة التحميل فوراً وقسرياً لضمان عدم التعليق نهائياً
 function bootDone(){
   const e = document.getElementById("boot");
   if(e) e.remove();
 }
-// تنفيذ الإزالة فور تحميل العناصر لضمان عدم التعليق نهائياً
 if(document.readyState === "complete" || document.readyState === "interactive"){
   bootDone();
 } else {
   window.addEventListener("DOMContentLoaded", bootDone);
   window.addEventListener("load", bootDone);
 }
-setTimeout(bootDone, 300);
+setTimeout(bootDone, 200);
 
 const $=s=>document.querySelector(s);
 let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
@@ -932,7 +931,7 @@ function walk(root){
 new MutationObserver(ms=>ms.forEach(m=>{
   if(m.type==="characterData")fixText(m.target);
   else m.addedNodes.forEach(n=>n.nodeType==3?fixText(n):n.nodeType==1&&walk(n));
-})).observe(document.body,{childList:test=true,subtree:true,characterData:true});
+})).observe(document.body,{childList:true,subtree:true,characterData:true});
 ["uname","sbName","hName","pmName","pmMail","accName","accMail","accUid","avInit","pmAv","accAv","sbAv","ref"].forEach(id=>{const e=document.getElementById(id);e&&e.setAttribute("data-notr","")});
 function applyLang(l){
   lang=l;const h=document.documentElement;
