@@ -26,13 +26,16 @@
   const db = getFirestore(app);
 
   window.findAndTopUpUser = async function() {
-    const searchId = Number(document.getElementById('searchUserId').value);
+    const rawSearchId = document.getElementById('searchUserId').value;
     const infoDiv = document.getElementById('userInfo');
     
-    if (!searchId) {
+    if (!rawSearchId) {
       infoDiv.innerHTML = "<p style='color:red;'>الرجاء إدخال رقم ID صحيح</p>";
       return;
     }
+
+    // تحويل المدخل إلى رقم ليتطابق مع نوع البيانات في القاعدة (Int64)
+    const searchId = Number(rawSearchId);
 
     infoDiv.innerHTML = "جاري البحث...";
 
