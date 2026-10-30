@@ -185,7 +185,9 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <button id="sbCam" type="button" class="absolute -bottom-0.5 -right-0.5 w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Change photo"></button>
     </div>
     <div class="mt-3 flex justify-center items-baseline gap-1.5 min-w-0 text-[17px] font-bold leading-tight"><span class="shrink-0">Welcome</span><span id="sbName" class="truncate" dir="auto">Guest</span></div>
-    <div id="sbRole" class="text-xs text-slate-500 mt-0.5" dir="ltr">ID: —</div>
+    <!-- تم تعديل هذا القسم ليظهر الـ ID بوضوح تحت الاسم -->
+    <div id="sbRole" class="text-xs text-slate-500 mt-0.5 font-mono" dir="ltr">ID: —</div>
+    <div id="sbMail" class="text-xs text-slate-400 mt-0.5 truncate" dir="ltr"></div>
 
     <div class="mt-4 grid grid-cols-4 gap-1 max-w-[280px] mx-auto">
       <button id="qBal" type="button" class="qa" aria-label="Balance"><span class="qi" id="qiBal"></span><span id="qBalTxt">$0.00</span></button>
@@ -508,26 +510,38 @@ const refresh=()=>{$("#hBal").textContent=$("#cBal").textContent=balStr();$("#cS
 function setBal(n,loading){balance=n;balLoading=!!loading;refresh()}        
 function balError(){toast("Could not load balance")}
 function idError(){toast("Could not set up your account ID")}
+
 function setNumericId(id){                              
   numId=id;
-  if(id!=null){try{localStorage.setItem("lf_user_id",String(id))}catch(_}{}}   
+  if(id!=null){try{localStorage.setItem("lf_user_id",String(id))}catch(_){}}   
   $("#accUid").textContent=id==null?"—":String(id);
   $("#ref").value=id==null?"":location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+id;
-  $("#hRole").textContent=id==null?"Customer":"ID #"+id;          
+  
+  // تحديث الـ ID والبريد في القائمة الجانبية بشكل مباشر وصحيح
   const sbRoleEl = $("#sbRole");
   if(sbRoleEl) sbRoleEl.textContent = id == null ? "ID: —" : "ID #" + id;
+  const sbMailEl = $("#sbMail");
+  if(sbMailEl && uemail) sbMailEl.textContent = uemail;
 }
+
 $("#uname").textContent=user;
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let uemail="";
 function fillAccount(u){                     
   user=u.displayName||u.email||"User"; uid=u.uid; uemail=u.email||"";
   $("#uname").textContent=user;$("#sbName").textContent=user;
+  
+  // عرض البريد الإلكتروني مباشرة تحت الـ ID في القائمة الجانبية
+  const sbMailEl = $("#sbMail");
+  if(sbMailEl) sbMailEl.textContent = uemail;
+
   const w=user.trim().split(/[\s@._-]+/).filter(Boolean);
   ini=(w.length>1?w[0][0]+w[1][0]:user.trim().slice(0,2)).toUpperCase()||"G";
   let saved="";try{saved=localStorage.getItem("lf_avatar_"+u.uid)||""}catch(e){}
   applyAvatar(saved||u.photoURL||"");
   $("#hName")&&($("#hName").textContent=user);
-  $("#accName").textContent=u.displayName||"—";$("#accMail").textContent=u.email||"—";$("#accUid").textContent="…";
+  $("#accName").textContent=u.displayName||"—";$("#accMail").textContent=uemail||"—";$("#accUid").textContent="…";
 }
 $("#hIc").innerHTML=ic("card",18);$("#burger").innerHTML=ic("menu",22);$("#closeSb").innerHTML=ic("x",20);
 
@@ -825,7 +839,6 @@ async function syncOrders(){
 }
 setInterval(()=>{if(!document.hidden&&tab===2)syncOrders()},45000);
 
-let uemail="";
 $("#icLock").innerHTML=ic("lock",16);
 
 // طرق الدفع
