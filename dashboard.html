@@ -166,10 +166,10 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <body class="min-h-screen">
 <div id="boot" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#eef3fb;color:#0f1f3d;font-family:system-ui,Segoe UI,Tahoma,sans-serif;text-align:center;padding:24px">
   <div id="bootSpin" style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(16,185,129,.2);border-top-color:#059669;animation:spin .8s linear infinite"></div>
-  <div id="bootMsg" style="font-weight:700">layal folw</div>
-  <div id="bootBtns" style="display:none;gap:8px;flex-wrap:wrap;justify-content:center">
-    <button onclick="location.reload()" style="height:40px;padding:0 18px;border-radius:999px;background:#059669;color:#fff;font-weight:600;border:0">Reload</button>
-    <button onclick="location.href='index.html'" style="height:40px;padding:0 18px;border-radius:999px;background:#fff;color:#059669;font-weight:600;border:1px solid #a7f3d0">Login</button>
+  <div id="bootMsg" style="font-weight:700">جاري التحميل... / Loading...</div>
+  <div id="bootBtns" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+    <button onclick="bootDone()" style="height:38px;padding:0 16px;border-radius:999px;background:#059669;color:#fff;font-weight:600;border:0;font-size:13px;cursor:pointer">تخطي ودخول / Skip</button>
+    <button onclick="location.reload()" style="height:38px;padding:0 16px;border-radius:999px;background:#fff;color:#059669;font-weight:600;border:1px solid #a7f3d0;font-size:13px;cursor:pointer">إعادة تحميل</button>
   </div>
 </div>
 
@@ -185,7 +185,6 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <button id="sbCam" type="button" class="absolute -bottom-0.5 -right-0.5 w-8 h-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white grid place-items-center ring-2 ring-white active:scale-95 transition" aria-label="Change photo"></button>
     </div>
     <div class="mt-3 flex justify-center items-baseline gap-1.5 min-w-0 text-[17px] font-bold leading-tight"><span class="shrink-0">Welcome</span><span id="sbName" class="truncate" dir="auto">Guest</span></div>
-    <!-- تم تعديل هذا القسم ليظهر الـ ID بوضوح تحت الاسم -->
     <div id="sbRole" class="text-xs text-slate-500 mt-0.5 font-mono" dir="ltr">ID: —</div>
     <div id="sbMail" class="text-xs text-slate-400 mt-0.5 truncate" dir="ltr"></div>
 
@@ -452,12 +451,13 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 function bootFail(msg){            
   const m=document.getElementById("bootMsg"),b=document.getElementById("bootBtns"),s=document.getElementById("bootSpin");
   if(!m||window.__authDone)return;
-  s.style.display="none";b.style.display="flex";
-  m.textContent=msg||"تعذّر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة. / Could not connect. Check your connection and try again.";
+  s.style.display="none";
+  if(m) m.textContent=msg||"تعذّر الاتصال السريع. يمكنك النقر على زر (تخطي ودخول) أدناه.";
 }
 function bootDone(){const e=document.getElementById("boot");if(e)e.remove()}
 
-setTimeout(()=>{ if(document.getElementById("boot")) bootDone(); }, 3000);
+// فرض إزالة شاشة التحميل بعد 2.5 ثانية كحد أقصى لضمان عدم تعليق الصفحة أبداً
+setTimeout(()=>{ if(document.getElementById("boot")) bootDone(); }, 2500);
 
 const $=s=>document.querySelector(s);
 let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
@@ -517,7 +517,6 @@ function setNumericId(id){
   $("#accUid").textContent=id==null?"—":String(id);
   $("#ref").value=id==null?"":location.origin+location.pathname.replace(/[^/]*$/,"")+"index.html?ref="+id;
   
-  // تحديث الـ ID والبريد في القائمة الجانبية بشكل مباشر وصحيح
   const sbRoleEl = $("#sbRole");
   if(sbRoleEl) sbRoleEl.textContent = id == null ? "ID: —" : "ID #" + id;
   const sbMailEl = $("#sbMail");
@@ -532,7 +531,6 @@ function fillAccount(u){
   user=u.displayName||u.email||"User"; uid=u.uid; uemail=u.email||"";
   $("#uname").textContent=user;$("#sbName").textContent=user;
   
-  // عرض البريد الإلكتروني مباشرة تحت الـ ID في القائمة الجانبية
   const sbMailEl = $("#sbMail");
   if(sbMailEl) sbMailEl.textContent = uemail;
 
@@ -1011,7 +1009,6 @@ document.querySelectorAll(".lb").forEach(b=>b.onclick=()=>applyLang(b.dataset.la
  applyLang(l||((navigator.language||"").toLowerCase().startsWith("ar")?"ar":"en"))}
 
 drawCats();refresh();
-setTimeout(()=>bootFail(),9000);   
 </script>
 <script type="module" onerror="bootFail()">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
