@@ -307,19 +307,25 @@ async function prefetchUsers(uids) { await Promise.all([...new Set(uids)].filter
 const who = u => u ? `<b class="mono">#${esc(u.userId ?? "—")}</b> <span class="mono">${esc(u.email)}</span>` : "—";
 const sortDesc = (a, b) => ms(b.createdAt) - ms(a.createdAt);
 
-/* ================= الدخول والصلاحية ================= */
+/* ================= الدخول والصلاحية (تم تجاوز الفحص لبريدك خصيصاً) ================= */
 const show = id => { ["loginForm", "denied"].forEach(x => $("#" + x).classList.toggle("hidden", x !== id)); };
 onAuthStateChanged(auth, async user => {
   if (!user) { me = null; $("#app").classList.add("hidden"); $("#gate").classList.remove("hidden"); $("#gMsg").textContent = "سجّل الدخول بحساب المشرف"; show("loginForm"); return; }
-  $("#gMsg").textContent = "جارٍ التحقق من الصلاحية…";
-  try {
-    const a = await getDoc(doc(db, "admins", user.uid));
-    if (!a.exists()) { $("#myUid").textContent = user.uid; $("#gMsg").textContent = user.email || ""; show("denied"); return; }
-  } catch (e) { console.error(e); $("#myUid").textContent = user.uid; $("#gMsg").textContent = "تعذّر التحقق: " + errMsg(e); show("denied"); return; }
+  
+  // السماح المباشر الفوري لبريدك دون أي قيود
+  if (user.email !== "Oussializina@gmail.com") {
+    $("#gMsg").textContent = "جارٍ التحقق من الصلاحية…";
+    try {
+      const a = await getDoc(doc(db, "admins", user.uid));
+      if (!a.exists()) { $("#myUid").textContent = user.uid; $("#gMsg").textContent = user.email || ""; show("denied"); return; }
+    } catch (e) { console.error(e); $("#myUid").textContent = user.uid; $("#gMsg").textContent = "تعذّر التحقق: " + errMsg(e); show("denied"); return; }
+  }
+
   me = { uid: user.uid, email: user.email };
   $("#who").textContent = user.email || user.uid; $("#gate").classList.add("hidden"); $("#app").classList.remove("hidden");
   loadOverview();
 });
+
 $("#loginForm").onsubmit = e => {
   e.preventDefault();
   run($("#lBtn"), async () => {
