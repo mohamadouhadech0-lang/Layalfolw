@@ -224,7 +224,7 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       <div class="relative shrink-0">
         <button id="notifBtn" class="relative w-10 h-10 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center active:scale-95 transition" aria-label="Notifications">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-          <span class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
+          <span id="notifDot" class="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white"></span>
         </button>
       </div>
     </div>
@@ -416,6 +416,22 @@ html.dark body{background:#0b1220;color:#e5ebf5}
   </main>
 </div>
 
+<!-- نافذة الإشعارات المنبثقة -->
+<div id="notifModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-[2px] flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-emerald-100 dark:border-slate-800">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-base font-extrabold text-emerald-800 dark:text-emerald-400">الإشعارات / Notifications</h3>
+      <button id="closeNotif" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:bg-slate-200">✕</button>
+    </div>
+    <div class="space-y-3 text-sm text-slate-600 dark:text-slate-300 max-h-60 overflow-y-auto">
+      <div class="p-3 rounded-xl bg-emerald-50 dark:bg-slate-800 border border-emerald-100 dark:border-slate-700">
+        <div class="font-bold text-emerald-700 dark:text-emerald-400 text-xs mb-1">مرحباً بك في منصة Layal Folw</div>
+        <p class="text-xs">تم تفعيل حسابك بنجاح. يمكنك بدء طلباتك ورصيدك الآن.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <nav id="bnav" class="lg:hidden fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-emerald-100 safe-b grid grid-cols-4 shadow-[0_-4px_20px_rgba(16,185,129,.08)]"></nav>
 
 <div id="okM" class="okbg hidden fixed inset-0 z-[60] grid overflow-y-auto p-4" role="dialog" aria-modal="true" aria-labelledby="okT">
@@ -449,14 +465,13 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 
 <script>
 function bootFail(msg){            
-  const m=document.getElementById("bootMsg"),b=document.getElementById("bootBtns"),s=document.getElementById("bootSpin");
+  const m=document.getElementById("bootMsg"),s=document.getElementById("bootSpin");
   if(!m||window.__authDone)return;
   s.style.display="none";
-  if(m) m.textContent=msg||"تعذّر الاتصال السريع. يمكنك النقر على زر (تخطي ودخول) أدناه.";
+  m.textContent=msg||"تعذّر الاتصال السريع. يمكنك النقر على زر (تخطي ودخول) أدناه.";
 }
 function bootDone(){const e=document.getElementById("boot");if(e)e.remove()}
 
-// فرض إزالة شاشة التحميل بعد 2.5 ثانية كحد أقصى لضمان عدم تعليق الصفحة أبداً
 setTimeout(()=>{ if(document.getElementById("boot")) bootDone(); }, 2500);
 
 const $=s=>document.querySelector(s);
@@ -542,6 +557,24 @@ function fillAccount(u){
   $("#accName").textContent=u.displayName||"—";$("#accMail").textContent=uemail||"—";$("#accUid").textContent="…";
 }
 $("#hIc").innerHTML=ic("card",18);$("#burger").innerHTML=ic("menu",22);$("#closeSb").innerHTML=ic("x",20);
+
+// تفعيل زر الإشعارات لإظهار النافذة المنبثقة
+const notifBtn = $("#notifBtn");
+const notifModal = $("#notifModal");
+const closeNotif = $("#closeNotif");
+if(notifBtn && notifModal){
+  notifBtn.onclick = () => {
+    notifModal.classList.remove("hidden");
+    const dot = $("#notifDot");
+    if(dot) dot.classList.add("hidden");
+  };
+}
+if(closeNotif && notifModal){
+  closeNotif.onclick = () => notifModal.classList.add("hidden");
+}
+if(notifModal){
+  notifModal.onclick = e => { if(e.target === notifModal) notifModal.classList.add("hidden"); };
+}
 
 const setNav=i=>{
   document.querySelectorAll("[data-n]").forEach(el=>{
