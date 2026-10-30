@@ -1,10 +1,36 @@
-<!-- نموذج البحث عن المستخدم وشحن الرصيد -->
-<div style="padding: 20px; background: #f9f9f9; border-radius: 8px; max-width: 400px; margin: auto; font-family: Tahoma;">
-  <h3>لوحة شحن رصيد العملاء</h3>
-  <input type="number" id="searchUserId" placeholder="أدخل ID المستخدم (مثلاً: 1231)" style="width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box;">
-  <button onclick="findAndTopUpUser()" style="width: 100%; padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px;">بحث عن المستخدم</button>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم الشاملة - Admin Dashboard</title>
+  <style>
+    body { font-family: Tahoma, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; direction: rtl; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h2 { color: #333; text-align: center; }
+    .section { margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-radius: 6px; border: 1px solid #ddd; }
+    input, button { width: 100%; padding: 10px; margin-top: 8px; margin-bottom: 12px; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
+    button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+    button:hover { background: #218838; }
+    .user-card { background: #fff; padding: 15px; border: 1px solid #007bff; border-radius: 6px; margin-top: 10px; }
+    .error { color: red; font-weight: bold; }
+    .success { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
 
-  <div id="userInfo" style="margin-top: 15px;"></div>
+<div class="container">
+  <h2>لوحة التحكم الإدارية</h2>
+
+  <!-- قسم البحث وشحن رصيد المستخدمين -->
+  <div class="section">
+    <h3>بحث وشحن رصيد العميل</h3>
+    <label>أدخل ID المستخدم:</label>
+    <input type="number" id="searchUserId" placeholder="مثلاً: 1231">
+    <button onclick="findUser()">بحث عن المستخدم</button>
+    <div id="resultArea"></div>
+  </div>
+
 </div>
 
 <script type="module">
@@ -25,69 +51,75 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  window.findAndTopUpUser = async function() {
-    const rawSearchId = document.getElementById('searchUserId').value;
-    const infoDiv = document.getElementById('userInfo');
-    
-    if (!rawSearchId) {
-      infoDiv.innerHTML = "<p style='color:red;'>الرجاء إدخال رقم ID صحيح</p>";
+  // دالة البحث عن المستخدم
+  window.findUser = async function() {
+    const rawId = document.getElementById('searchUserId').value;
+    const resultArea = document.getElementById('resultArea');
+
+    if (!rawId) {
+      resultArea.innerHTML = "<p class='error'>الرجاء إدخال رقم الـ ID</p>";
       return;
     }
 
-    // تحويل المدخل إلى رقم ليتطابق مع نوع البيانات في القاعدة (Int64)
-    const searchId = Number(rawSearchId);
-
-    infoDiv.innerHTML = "جاري البحث...";
+    const searchId = Number(rawId);
+    resultArea.innerHTML = "جاري البحث...";
 
     try {
       const q = query(collection(db, "users"), where("userId", "==", searchId));
       const querySnapshot = await getDocs(q);
 
       if (querySnapshot.empty) {
-        infoDiv.innerHTML = "<p style='color:red;'>لم يتم العثور على أي مستخدم بهذا الـ ID</p>";
+        resultArea.innerHTML = "<p class='error'>لم يتم العثور على مستخدم بهذا الـ ID</p>";
         return;
       }
 
-      querySnapshot.forEach((document) => {
-        const userData = document.data();
-        const docId = document.id;
+      querySnapshot.forEach((documentSnap) => {
+        const data = documentSnap.data();
+        const docId = documentSnap.id;
 
-        infoDiv.innerHTML = `
-          <div style="background: #fff; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
-            <p><strong>البريد:</strong> ${userData.email || 'غير متوفر'}</p>
-            <p><strong>الرصيد الحالي:</strong> $${userData.balance || 0}</p>
-            <input type="number" id="addAmount" placeholder="المبلغ المراد إضافته" style="width:100%; padding:5px; margin-bottom:5px; box-sizing: border-box;">
-            <button onclick="addBalance('${docId}', ${userData.balance || 0})" style="width:100%; padding:8px; background:#007bff; color:white; border:none; cursor:pointer; border-radius: 4px;">تأكيد شحن الرصيد</button>
+        resultArea.innerHTML = `
+          <div class="user-card">
+            <p><strong>البريد الإلكتروني:</strong> ${data.email || 'غير متوفر'}</p>
+            <p><strong>الرصيد الحالي:</strong> $${data.balance || 0}</p>
+            <label>المبلغ المراد إضافته (أو خصمه بالسالب):</label>
+            <input type="number" id="topupAmount" placeholder="أدخل المبلغ">
+            <button onclick="updateUserBalance('${docId}', ${data.balance || 0})" style="background: #007bff;">تحديث الرصيد</button>
           </div>
         `;
       });
-    } catch (error) {
-      console.error("خطأ في البحث:", error);
-      infoDiv.innerHTML = "<p style='color:red;'>حدث خطأ أثناء البحث</p>";
+    } catch (err) {
+      console.error(err);
+      resultArea.innerHTML = "<p class='error'>حدث خطأ أثناء الاتصال بقاعدة البيانات</p>";
     }
-  }
+  };
 
-  window.addBalance = async function(docId, currentBalance) {
-    const amountToAdd = Number(document.getElementById('addAmount').value);
-    if (!amountToAdd || amountToAdd <= 0) {
-      alert("الرجاء إدخال مبلغ صحيح");
+  // دالة تحديث الرصيد
+  window.updateUserBalance = async function(docId, currentBalance) {
+    const amountInput = document.getElementById('topupAmount').value;
+    const resultArea = document.getElementById('resultArea');
+
+    if (!amountInput) {
+      alert("الرجاء إدخال المبلغ");
       return;
     }
 
+    const amount = Number(amountInput);
+    const newBalance = Number(currentBalance) + amount;
+
     try {
       const userRef = doc(db, "users", docId);
-      const newBalance = currentBalance + amountToAdd;
-      
       await updateDoc(userRef, {
         balance: newBalance
       });
 
-      alert("تم شحن الرصيد بنجاح! الرصيد الجديد: $" + newBalance);
-      document.getElementById('userInfo').innerHTML = "";
-      document.getElementById('searchUserId').value = "";
-    } catch (error) {
-      console.error("خطأ في التحديث:", error);
+      alert("تم تحديث الرصيد بنجاح! الرصيد الجديد: $" + newBalance);
+      resultArea.innerHTML = `<p class='success'>تم التحديث بنجاح! الرصيد الجديد: $${newBalance}</p>`;
+    } catch (err) {
+      console.error(err);
       alert("فشل تحديث الرصيد");
     }
-  }
+  };
 </script>
+
+</body>
+</html>
