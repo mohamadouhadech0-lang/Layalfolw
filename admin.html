@@ -1,124 +1,653 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم الشاملة - Admin Dashboard</title>
-  <style>
-    body { font-family: Tahoma, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; direction: rtl; }
-    .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    h2 { color: #333; text-align: center; }
-    .section { margin-bottom: 25px; padding: 15px; background: #f9f9f9; border-radius: 6px; border: 1px solid #ddd; }
-    input, button { width: 100%; padding: 10px; margin-top: 8px; margin-bottom: 12px; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
-    button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
-    button:hover { background: #218838; }
-    .user-card { background: #fff; padding: 15px; border: 1px solid #007bff; border-radius: 6px; margin-top: 10px; }
-    .error { color: red; font-weight: bold; }
-    .success { color: green; font-weight: bold; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Layal Folw – لوحة الإدارة</title>
+<script>try{var t=localStorage.getItem("lf_theme");if((t||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"))==="dark")document.documentElement.classList.add("dark")}catch(e){}</script>
+<style>
+:root{--bg:#eef3fb;--card:#fff;--ink:#0f1f3d;--mut:#64748b;--line:#dbe4f3;--pri:#2563eb;--pri2:#1d4ed8;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444;--soft:#eff6ff;--shadow:0 1px 3px rgba(15,31,61,.08),0 6px 18px rgba(15,31,61,.05)}
+html.dark{--bg:#0b1220;--card:#111a2e;--ink:#e5ebf5;--mut:#8d9bb5;--line:#22304a;--soft:#14233f;--shadow:0 1px 3px rgba(0,0,0,.4)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI","Noto Sans Arabic",Tahoma,system-ui,sans-serif;font-size:15px;line-height:1.5;padding-bottom:env(safe-area-inset-bottom,0)}
+button{font:inherit;cursor:pointer}
+h1,h2,h3{margin:0}
+.hidden{display:none!important}
+/* gate */
+#gate{min-height:100vh;display:grid;place-items:center;padding:20px}
+.gcard{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:24px}
+.gcard h1{font-size:22px;margin-bottom:4px}
+.gcard p{color:var(--mut);margin:4px 0 16px;font-size:14px}
+/* layout */
+header.top{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--line);padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top,0));display:flex;align-items:center;gap:10px}
+header.top .brand{font-weight:800;color:var(--pri);font-size:18px}
+header.top .who{margin-inline-start:auto;font-size:12px;color:var(--mut);max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+nav.tabs{position:sticky;top:57px;z-index:15;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:10px 12px;scrollbar-width:none;border-bottom:1px solid var(--line)}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:999px;font-weight:600;font-size:14px;white-space:nowrap}
+nav.tabs button.on{background:var(--pri);border-color:var(--pri);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:14px 12px 40px}
+.sec{display:none}.sec.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h2 .sp{margin-inline-start:auto}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.stat{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:12px}
+.stat b{display:block;font-size:22px;line-height:1.2}
+.stat span{font-size:12px;color:var(--mut)}
+/* forms */
+label{display:block;font-size:13px;font-weight:600;margin:0 0 4px;color:var(--mut)}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px;outline:none}
+textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1 1 150px}
+.row>.fit{flex:0 0 auto}
+.btn{border:0;border-radius:12px;min-height:44px;padding:0 16px;font-weight:700;color:#fff;background:var(--pri);display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s,transform .1s}
+.btn:hover{filter:brightness(1.07)}.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn.ok{background:var(--ok)}.btn.bad{background:var(--bad)}.btn.warn{background:var(--warn)}
+.btn.ghost{background:transparent;color:var(--pri);border:1px solid var(--line)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13px}
+.spin{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .7s linear infinite}
+.btn.ghost .spin{border-color:rgba(37,99,235,.3);border-top-color:var(--pri)}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* items */
+.item{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;background:var(--card)}
+.item .top{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.item .meta{color:var(--mut);font-size:12.5px;margin-top:4px;word-break:break-word}
+.item .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.item .acts select{flex:1 1 140px;max-width:220px;min-height:36px;padding:4px 10px}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent;white-space:nowrap}
+.p-pending{background:rgba(245,158,11,.15);color:#d97706;border-color:rgba(245,158,11,.35)}
+.p-processing,.p-inprogress{background:rgba(59,130,246,.15);color:#3b82f6;border-color:rgba(59,130,246,.35)}
+.p-completed{background:rgba(16,185,129,.15);color:#059669;border-color:rgba(16,185,129,.35)}
+.p-canceled,.p-failed,.p-rejected{background:rgba(239,68,68,.15);color:#dc2626;border-color:rgba(239,68,68,.35)}
+.p-partial{background:rgba(249,115,22,.15);color:#ea580c;border-color:rgba(249,115,22,.35)}
+.p-review{background:rgba(139,92,246,.15);color:#7c3aed;border-color:rgba(139,92,246,.35)}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.kv div{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.kv small{display:block;color:var(--mut);font-size:11.5px}
+.kv b{font-size:15px;word-break:break-all}
+.empty{color:var(--mut);text-align:center;padding:18px 8px;font-size:14px}
+.err{color:var(--bad);font-size:13px;min-height:18px;margin-top:6px}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--pri)}
+.mono{font-family:ui-monospace,Consolas,monospace;direction:ltr;unicode-bidi:isolate}
+.link{background:none;border:0;color:var(--pri);padding:0;font-weight:600;text-decoration:underline}
+/* toast + modal */
+#toasts{position:fixed;inset-inline:0;bottom:16px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:100;pointer-events:none;padding:0 12px}
+.toast{pointer-events:auto;background:#0f172a;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;max-width:560px;box-shadow:0 8px 24px rgba(0,0,0,.3);animation:fi .2s}
+.toast.bad{background:#b91c1c}.toast.ok{background:#047857}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#ov{position:fixed;inset:0;background:rgba(2,6,23,.6);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:90;padding:14px}
+#ov.on{display:flex}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:18px;width:100%;max-width:520px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.modal header{padding:14px 16px;border-bottom:1px solid var(--line);font-weight:800}
+.modal .body{padding:14px 16px;overflow:auto}
+.modal footer{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.modal img.rc{display:block;max-width:100%;border-radius:12px;border:1px solid var(--line);margin:8px 0;cursor:zoom-in}
+.modal img.rc.z{max-width:none;width:180%;cursor:zoom-out}
+.modal .imgbox{overflow:auto;max-height:50vh}
+@media (min-width:900px){nav.tabs{justify-content:center}}
+</style>
 </head>
 <body>
 
-<div class="container">
-  <h2>لوحة التحكم الإدارية</h2>
-
-  <!-- قسم البحث وشحن رصيد المستخدمين -->
-  <div class="section">
-    <h3>بحث وشحن رصيد العميل</h3>
-    <label>أدخل ID المستخدم:</label>
-    <input type="number" id="searchUserId" value="1231" placeholder="مثلاً: 1231">
-    <button id="searchBtn">بحث عن المستخدم</button>
-    <div id="resultArea"></div>
+<!-- تسجيل الدخول والتحقق من الصلاحية -->
+<div id="gate">
+  <div class="gcard">
+    <h1>لوحة الإدارة</h1>
+    <p id="gMsg">جارٍ التحقق…</p>
+    <form id="loginForm" class="hidden" novalidate>
+      <label for="lEmail">البريد الإلكتروني</label>
+      <input id="lEmail" type="email" autocomplete="username" dir="ltr">
+      <div style="height:10px"></div>
+      <label for="lPass">كلمة المرور</label>
+      <input id="lPass" type="password" autocomplete="current-password" dir="ltr">
+      <div id="lErr" class="err" role="alert"></div>
+      <button class="btn" style="width:100%;margin-top:6px" id="lBtn">دخول</button>
+      <button type="button" class="btn ghost" style="width:100%;margin-top:8px" id="lGoogle">الدخول بحساب Google</button>
+    </form>
+    <div id="denied" class="hidden">
+      <p>هذا الحساب ليس مشرفاً. لمنحه الصلاحية أنشئ مستنداً في Firestore:</p>
+      <div class="mono" style="background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px;font-size:13px;word-break:break-all">admins / <b id="myUid">…</b></div>
+      <p style="margin-top:10px">(أي حقل، مثل <span class="mono">role: "admin"</span>) ثم أعد تحميل الصفحة.</p>
+      <button class="btn ghost" id="deniedOut" style="width:100%">تسجيل الخروج</button>
+    </div>
   </div>
-
 </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebaseapp.js";
-  import { getFirestore, collection, query, where, getDocs, updateDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firestore.js";
+<div id="app" class="hidden">
+  <header class="top">
+    <span class="brand">Layal Folw • الإدارة</span>
+    <span class="who" id="who"></span>
+    <button class="btn ghost sm" id="themeBtn" aria-label="تبديل المظهر">🌓</button>
+    <button class="btn ghost sm" id="outBtn">خروج</button>
+  </header>
+  <nav class="tabs" id="tabs">
+    <button data-tab="overview" class="on">الإحصائيات</button>
+    <button data-tab="users">المستخدمون والرصيد</button>
+    <button data-tab="deposits">طلبات الشحن <span id="depBadge" class="pill p-pending hidden"></span></button>
+    <button data-tab="orders">الطلبات</button>
+    <button data-tab="messages">الرسائل</button>
+    <button data-tab="logs">سجل العمليات</button>
+  </nav>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
-    authDomain: "layal-follow.firebaseapp.com",
-    projectId: "layal-follow",
-    storageBucket: "layal-follow.firebasestorage.app",
-    messagingSenderId: "850647879566",
-    appId: "1:850647879566:web:54e2e67a395f5d56101edf",
-    measurementId: "G-KVN372FDCR"
-  };
+  <main>
+    <!-- 1) الإحصائيات والمراقبة -->
+    <section class="sec on" id="s-overview">
+      <div class="card">
+        <h2>نظرة عامة <button class="btn ghost sm sp" data-act="refresh-overview">تحديث</button></h2>
+        <div class="grid g4" id="stats"></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><h2>حالة الطلبات</h2><div id="ordStats"></div></div>
+        <div class="card"><h2>مدخلات قاعدة البيانات</h2><div id="dbCounts" class="grid" style="grid-template-columns:repeat(2,1fr)"></div></div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><h2>آخر الطلبات</h2><div id="recOrders"></div></div>
+        <div class="card"><h2>آخر طلبات الشحن</h2><div id="recDeps"></div></div>
+      </div>
+      <div class="card"><h2>آخر عمليات الإدارة</h2><div id="recLogs"></div></div>
+    </section>
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    <!-- 2) المستخدمون والرصيد -->
+    <section class="sec" id="s-users">
+      <div class="card">
+        <h2>بحث عن مستخدم</h2>
+        <form id="userSearch" class="row" novalidate>
+          <div><label for="uq">رقم الحساب (userId) أو البريد أو UID</label><input id="uq" dir="ltr" placeholder="1000" autocomplete="off"></div>
+          <button class="btn fit" id="uqBtn">بحث</button>
+        </form>
+        <div id="uErr" class="err" role="alert"></div>
+      </div>
+      <div id="userBox"></div>
+      <div class="card"><h2>أحدث المسجّلين <button class="btn ghost sm sp" data-act="refresh-recent-users">تحديث</button></h2><div id="recentUsers"></div></div>
+    </section>
 
-  // ربط الزر برمجياً لضمان الاستجابة الفورية
-  document.getElementById('searchBtn').addEventListener('click', async function() {
-    const rawId = document.getElementById('searchUserId').value;
-    const resultArea = document.getElementById('resultArea');
+    <!-- 4) طلبات الشحن -->
+    <section class="sec" id="s-deposits">
+      <div class="card">
+        <h2>طلبات الشحن <span class="sp"></span></h2>
+        <div class="row">
+          <div><label for="depFilter">الحالة</label><select id="depFilter"><option value="pending">قيد المراجعة</option><option value="completed">مكتملة</option><option value="rejected">مرفوضة</option><option value="all">الكل (آخر 100)</option></select></div>
+          <button class="btn ghost fit" data-act="refresh-deposits">تحديث</button>
+        </div>
+      </div>
+      <div id="depList"></div>
+    </section>
 
-    if (!rawId) {
-      resultArea.innerHTML = "<p class='error'>الرجاء إدخال رقم الـ ID</p>";
-      return;
-    }
+    <!-- 4) الطلبات -->
+    <section class="sec" id="s-orders">
+      <div class="card">
+        <h2>الطلبات</h2>
+        <div class="row">
+          <div><label for="ordFilter">الحالة</label><select id="ordFilter"><option value="all">الكل (آخر 100)</option><option value="pending">قيد الانتظار</option><option value="processing">قيد المعالجة</option><option value="inprogress">قيد التنفيذ</option><option value="review">قيد المراجعة</option><option value="completed">مكتمل</option><option value="partial">جزئي</option><option value="canceled">ملغي</option><option value="failed">فاشل</option></select></div>
+          <div><label for="ordQ">بحث في القائمة</label><input id="ordQ" placeholder="خدمة / رابط / رقم" autocomplete="off"></div>
+          <button class="btn ghost fit" data-act="refresh-orders">تحديث</button>
+        </div>
+      </div>
+      <div id="ordList"></div>
+    </section>
 
-    const searchId = Number(rawId);
-    resultArea.innerHTML = "جاري البحث في قاعدة البيانات...";
-
-    try {
-      const q = query(collection(db, "users"), where("userId", "==", searchId));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        resultArea.innerHTML = "<p class='error'>لم يتم العثور على مستخدم بهذا الـ ID</p>";
-        return;
-      }
-
-      querySnapshot.forEach((documentSnap) => {
-        const data = documentSnap.data();
-        const docId = documentSnap.id;
-
-        resultArea.innerHTML = `
-          <div class="user-card">
-            <p><strong>البريد الإلكتروني:</strong> ${data.email || 'غير متوفر'}</p>
-            <p><strong>الرصيد الحالي:</strong> $${data.balance || 0}</p>
-            <label>المبلغ المراد إضافته:</label>
-            <input type="number" id="topupAmount" placeholder="أدخل المبلغ">
-            <button id="updateBtn" style="background: #007bff;">تحديث الرصيد</button>
+    <!-- 3) الرسائل -->
+    <section class="sec" id="s-messages">
+      <div class="card">
+        <h2>إرسال رسالة / إعلان</h2>
+        <form id="msgForm" novalidate>
+          <div class="row">
+            <div><label for="mTo">المستلم</label><select id="mTo"><option value="all">كل المستخدمين</option><option value="one">مستخدم محدد (userId)</option></select></div>
+            <div id="mUidWrap" class="hidden"><label for="mUid">رقم الحساب userId</label><input id="mUid" dir="ltr" inputmode="numeric" placeholder="1000"></div>
+            <div><label for="mType">النوع</label><select id="mType"><option value="info">معلومة</option><option value="success">نجاح / عرض</option><option value="warning">تنبيه</option></select></div>
           </div>
-        `;
+          <div style="height:10px"></div>
+          <label for="mTitle">العنوان</label><input id="mTitle" maxlength="80">
+          <div style="height:10px"></div>
+          <label for="mBody">الرسالة</label><textarea id="mBody" maxlength="600"></textarea>
+          <div id="mErr" class="err" role="alert"></div>
+          <button class="btn" id="mBtn">إرسال</button>
+        </form>
+        <p style="color:var(--mut);font-size:12.5px;margin:10px 0 0">تظهر الرسائل للمستخدم في أيقونة الإشعارات 🔔 داخل لوحته.</p>
+      </div>
+      <div class="card"><h2>آخر الرسائل المرسلة <button class="btn ghost sm sp" data-act="refresh-messages">تحديث</button></h2><div id="msgList"></div></div>
+    </section>
 
-        // ربط زر التحديث أيضاً برمجياً
-        document.getElementById('updateBtn').addEventListener('click', async function() {
-          const amountInput = document.getElementById('topupAmount').value;
+    <section class="sec" id="s-logs">
+      <div class="card"><h2>سجل عمليات المشرفين <button class="btn ghost sm sp" data-act="refresh-logs">تحديث</button></h2><div id="logList"></div></div>
+    </section>
+  </main>
+</div>
 
-          if (!amountInput) {
-            alert("الرجاء إدخال المبلغ");
-            return;
-          }
+<div id="ov"><div class="modal" role="dialog" aria-modal="true"><header id="mdTitle"></header><div class="body" id="mdBody"></div><footer id="mdFoot"></footer></div></div>
+<div id="toasts" aria-live="polite"></div>
 
-          const amount = Number(amountInput);
-          const newBalance = Number(data.balance || 0) + amount;
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, runTransaction, serverTimestamp, increment, getCountFromServer, getAggregateFromServer, sum } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-          try {
-            const userRef = doc(db, "users", docId);
-            await updateDoc(userRef, {
-              balance: newBalance
-            });
+const app = initializeApp({
+  apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
+  authDomain: "layal-follow.firebaseapp.com",
+  projectId: "layal-follow",
+  storageBucket: "layal-follow.firebasestorage.app",
+  messagingSenderId: "850647879566",
+  appId: "1:850647879566:web:54e2e67a395f5d56101edf"
+});
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-            alert("تم تحديث الرصيد بنجاح! الرصيد الجديد: $" + newBalance);
-            resultArea.innerHTML = `<p class='success'>تم التحديث بنجاح! الرصيد الجديد: $${newBalance}</p>`;
-          } catch (err) {
-            console.error(err);
-            alert("فشل تحديث الرصيد: " + err.message);
-          }
-        });
+/* ================= أدوات ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const num = v => Number(v) || 0;
+const r4 = n => Math.round(n * 10000) / 10000;
+const usd = n => "$" + Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+const ms = t => (t && t.toMillis ? t.toMillis() : 0);
+const when = t => { const m = ms(t); return m ? new Date(m).toLocaleString() : "—"; };
+const METHOD = { card: "بطاقة", binance: "Binance", usdt: "USDT", morocco: "CIH / Cash Plus", cashplus: "Cash Plus", cih: "CIH Bank", gpay: "Google Pay" };
+const ST = { pending: "قيد الانتظار", processing: "قيد المعالجة", inprogress: "قيد التنفيذ", review: "قيد المراجعة", completed: "مكتمل", partial: "جزئي", canceled: "ملغي", failed: "فاشل", rejected: "مرفوض" };
+const pill = s => `<span class="pill p-${esc(s)}">${esc(ST[s] || s)}</span>`;
 
-      });
-    } catch (err) {
-      console.error(err);
-      resultArea.innerHTML = "<p class='error'>خطأ تقني: " + err.message + "</p>";
-    }
+const ERR = {
+  "permission-denied": "ليست لديك صلاحية. تأكد من نشر firestore.rules ومن وجود مستندك في admins.",
+  "unauthenticated": "انتهت الجلسة. أعد تسجيل الدخول.",
+  "failed-precondition": "الاستعلام يحتاج فهرساً. افتح وحدة التحكم (Console) وانسخ رابط إنشاء الفهرس من الخطأ.",
+  "unavailable": "تعذّر الاتصال بـ Firestore. تحقق من الإنترنت.",
+  negative_balance: "لا يمكن أن يصبح الرصيد سالباً.", user_missing: "المستخدم غير موجود.", not_pending: "هذا الطلب لم يعد قيد الانتظار.",
+  already_refunded: "تم استرجاع مبلغ هذا الطلب مسبقاً.", bad_amount: "أدخل مبلغاً صحيحاً أكبر من صفر.", deposit_missing: "طلب الشحن غير موجود.", order_missing: "الطلب غير موجود."
+};
+const errMsg = e => ERR[e && e.code] || ERR[e && e.message] || (e && e.message) || String(e);
+
+function toast(msg, type = "") {
+  const t = document.createElement("div"); t.className = "toast " + type; t.textContent = msg;
+  $("#toasts").appendChild(t); setTimeout(() => t.remove(), type === "bad" ? 6000 : 3200);
+}
+/* تنفيذ مع تعطيل الزر ومؤشر وتحميل ومعالجة أخطاء موحّدة */
+async function run(btn, fn, errBox) {
+  if (btn && btn.disabled) return;
+  const old = btn ? btn.innerHTML : ""; if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; }
+  if (errBox) errBox.textContent = "";
+  try { return await fn(); }
+  catch (e) { console.error(e); const m = errMsg(e); if (errBox) errBox.textContent = m; toast(m, "bad"); }
+  finally { if (btn) { btn.disabled = false; btn.innerHTML = old; } }
+}
+/* نافذة منبثقة: تُرجع {act, el} عند الضغط على زر */
+function modal({ title, body, actions }) {
+  return new Promise(res => {
+    $("#mdTitle").textContent = title; $("#mdBody").innerHTML = body;
+    const f = $("#mdFoot"); f.innerHTML = "";
+    const close = act => { $("#ov").classList.remove("on"); document.removeEventListener("keydown", onKey); res({ act, el: $("#mdBody") }); };
+    const onKey = e => { if (e.key === "Escape") close(null); };
+    (actions || []).forEach(a => { const b = document.createElement("button"); b.className = "btn " + (a.cls || ""); b.textContent = a.label; b.onclick = () => close(a.act); f.appendChild(b); });
+    $("#ov").onclick = e => { if (e.target.id === "ov") close(null); };
+    document.addEventListener("keydown", onKey); $("#ov").classList.add("on");
   });
-</script>
+}
+const sendLog = async (action, data = {}) => {
+  try { await addDoc(collection(db, "admin_logs"), { by: me.uid, byEmail: me.email || "", action, ...data, createdAt: serverTimestamp() }); } catch (e) { console.warn("log failed", e); }
+};
+const cnt = async (col, ...w) => { try { return (await getCountFromServer(w.length ? query(collection(db, col), where(...w)) : collection(db, col))).data().count; } catch (e) { console.warn("count", col, e); return null; } };
 
+let me = null;
+const userCache = new Map();
+async function userInfo(uid) {
+  if (!uid) return null;
+  if (userCache.has(uid)) return userCache.get(uid);
+  let v = null;
+  try { const s = await getDoc(doc(db, "users", uid)); if (s.exists()) v = { uid, userId: s.data().userId ?? null, email: s.data().email || "" }; } catch (e) { console.warn(e); }
+  userCache.set(uid, v); return v;
+}
+async function prefetchUsers(uids) { await Promise.all([...new Set(uids)].filter(u => !userCache.has(u)).slice(0, 60).map(userInfo)); }
+const who = u => u ? `<b class="mono">#${esc(u.userId ?? "—")}</b> <span class="mono">${esc(u.email)}</span>` : "—";
+const sortDesc = (a, b) => ms(b.createdAt) - ms(a.createdAt);
+
+/* ================= الدخول والصلاحية ================= */
+const show = id => { ["loginForm", "denied"].forEach(x => $("#" + x).classList.toggle("hidden", x !== id)); };
+onAuthStateChanged(auth, async user => {
+  if (!user) { me = null; $("#app").classList.add("hidden"); $("#gate").classList.remove("hidden"); $("#gMsg").textContent = "سجّل الدخول بحساب المشرف"; show("loginForm"); return; }
+  $("#gMsg").textContent = "جارٍ التحقق من الصلاحية…";
+  try {
+    const a = await getDoc(doc(db, "admins", user.uid));
+    if (!a.exists()) { $("#myUid").textContent = user.uid; $("#gMsg").textContent = user.email || ""; show("denied"); return; }
+  } catch (e) { console.error(e); $("#myUid").textContent = user.uid; $("#gMsg").textContent = "تعذّر التحقق: " + errMsg(e); show("denied"); return; }
+  me = { uid: user.uid, email: user.email };
+  $("#who").textContent = user.email || user.uid; $("#gate").classList.add("hidden"); $("#app").classList.remove("hidden");
+  loadOverview();
+});
+$("#loginForm").onsubmit = e => {
+  e.preventDefault();
+  run($("#lBtn"), async () => {
+    const em = $("#lEmail").value.trim(), pw = $("#lPass").value;
+    if (!em || !pw) throw new Error("أدخل البريد وكلمة المرور.");
+    await signInWithEmailAndPassword(auth, em, pw);
+  }, $("#lErr"));
+};
+$("#lGoogle").onclick = () => run($("#lGoogle"), () => signInWithPopup(auth, new GoogleAuthProvider()), $("#lErr"));
+const logout = () => signOut(auth).catch(() => {});
+$("#outBtn").onclick = $("#deniedOut").onclick = logout;
+$("#themeBtn").onclick = () => { const d = !document.documentElement.classList.contains("dark"); document.documentElement.classList.toggle("dark", d); try { localStorage.setItem("lf_theme", d ? "dark" : "light"); } catch (_) {} };
+addEventListener("unhandledrejection", e => { console.error(e.reason); toast(errMsg(e.reason), "bad"); });
+
+/* ================= التبويبات ================= */
+const loaded = {};
+const loaders = { overview: () => loadOverview(), users: () => loadRecentUsers(), deposits: () => loadDeposits(), orders: () => loadOrders(), messages: () => loadMessages(), logs: () => loadLogs() };
+function showTab(t) {
+  $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
+  $$(".sec").forEach(s => s.classList.toggle("on", s.id === "s-" + t));
+  if (!loaded[t]) { loaded[t] = true; loaders[t](); }
+  scrollTo({ top: 0 });
+}
+$("#tabs").onclick = e => { const b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); };
+
+/* ================= 1) الإحصائيات ================= */
+async function loadOverview() {
+  loaded.overview = true;
+  const stats = $("#stats"); stats.innerHTML = '<div class="empty" style="grid-column:1/-1">جارٍ التحميل…</div>';
+  const states = ["pending", "processing", "inprogress", "completed", "partial", "canceled", "failed"];
+  const [users, orders, dep, pr, ntf, logs, ...byState] = await Promise.all([
+    cnt("users"), cnt("orders"), cnt("deposits", "status", "==", "pending"), cnt("payment_requests", "status", "==", "pending"), cnt("notifications"), cnt("admin_logs"),
+    ...states.map(s => cnt("orders", "status", "==", s))
+  ]);
+  let agg = null;
+  try { agg = (await getAggregateFromServer(collection(db, "users"), { bal: sum("balance"), sp: sum("spent") })).data(); } catch (e) { console.warn("aggregate", e); }
+  const v = x => x == null ? "—" : x;
+  stats.innerHTML = [
+    ["إجمالي الحسابات", v(users)], ["إجمالي الطلبات", v(orders)], ["شحن بانتظار المراجعة", v(dep)],
+    ["مجموع الأرصدة", agg ? usd(agg.bal) : "—"], ["مجموع المصروف", agg ? usd(agg.sp) : "—"]
+  ].map(([l, n]) => `<div class="stat"><b>${esc(n)}</b><span>${l}</span></div>`).join("");
+  const total = num(orders) || 1;
+  $("#ordStats").innerHTML = states.map((s, i) => `<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:13px"><span>${pill(s)}</span><b>${v(byState[i])}</b></div><div class="bar"><i style="width:${Math.min(100, num(byState[i]) / total * 100)}%"></i></div></div>`).join("");
+  $("#dbCounts").innerHTML = [["users", users], ["orders", orders], ["deposits (معلّقة)", dep], ["payment_requests (معلّقة)", pr], ["notifications", ntf], ["admin_logs", logs]].map(([l, n]) => `<div class="stat"><b>${v(n)}</b><span class="mono">${l}</span></div>`).join("");
+  const badge = $("#depBadge"); badge.textContent = num(dep) + num(0); badge.classList.toggle("hidden", !num(dep));
+  const [ro, rd, rl] = await Promise.all([
+    getDocs(query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(6))).catch(e => (console.warn(e), null)),
+    getDocs(query(collection(db, "deposits"), orderBy("createdAt", "desc"), limit(6))).catch(e => (console.warn(e), null)),
+    getDocs(query(collection(db, "admin_logs"), orderBy("createdAt", "desc"), limit(6))).catch(e => (console.warn(e), null))
+  ]);
+  $("#recOrders").innerHTML = ro && ro.docs.length ? ro.docs.map(d => { const o = d.data(); return `<div class="item"><div class="top"><b class="mono">#${esc(d.id.slice(0, 6).toUpperCase())}</b>${pill(o.status)}</div><div class="meta">${esc(o.serviceName || "")} • ${usd(o.cost)} • ${when(o.createdAt)}</div></div>`; }).join("") : '<div class="empty">لا توجد طلبات</div>';
+  $("#recDeps").innerHTML = rd && rd.docs.length ? rd.docs.map(d => { const o = d.data(); return `<div class="item"><div class="top"><b class="mono">${esc(o.reference || d.id.slice(0, 6))}</b>${pill(o.status)}</div><div class="meta">${esc(METHOD[o.method] || o.method || "")} • ${usd(o.amount)} • ${when(o.createdAt)}</div></div>`; }).join("") : '<div class="empty">لا توجد طلبات شحن</div>';
+  $("#recLogs").innerHTML = rl && rl.docs.length ? rl.docs.map(d => logRow(d.data())).join("") : '<div class="empty">لا توجد عمليات بعد</div>';
+}
+const logRow = l => `<div class="item"><div class="top"><b>${esc(l.action)}</b><span class="meta">${when(l.createdAt)}</span></div><div class="meta">${l.userId != null ? "المستخدم #" + esc(l.userId) + " • " : ""}${l.amount != null ? usd(l.amount) + " • " : ""}${l.before != null ? esc(usd(l.before)) + " ← " + esc(usd(l.after)) + " • " : ""}${esc(l.note || "")} • <span class="mono">${esc(l.byEmail || "")}</span></div></div>`;
+
+/* ================= 2) المستخدمون والرصيد ================= */
+async function findUsers(q) {
+  q = q.trim(); if (!q) return [];
+  const col = collection(db, "users");
+  if (/^\d+$/.test(q)) return (await getDocs(query(col, where("userId", "==", Number(q)), limit(5)))).docs;
+  if (q.includes("@")) {
+    let r = (await getDocs(query(col, where("email", "==", q), limit(5)))).docs;
+    if (!r.length && q !== q.toLowerCase()) r = (await getDocs(query(col, where("email", "==", q.toLowerCase()), limit(5)))).docs;
+    return r;
+  }
+  const s = await getDoc(doc(db, "users", q)); return s.exists() ? [s] : [];
+}
+$("#userSearch").onsubmit = e => {
+  e.preventDefault();
+  run($("#uqBtn"), async () => {
+    const q = $("#uq").value; if (!q.trim()) throw new Error("اكتب رقم الحساب أو البريد.");
+    const r = await findUsers(q);
+    if (!r.length) { $("#userBox").innerHTML = ""; throw new Error("لم يتم العثور على مستخدم."); }
+    await renderUser(r[0]);
+  }, $("#uErr"));
+};
+async function openUser(uid) {
+  const s = await getDoc(doc(db, "users", uid)); if (!s.exists()) throw new Error("user_missing");
+  await renderUser(s); $("#userBox").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+async function renderUser(snap) {
+  const u = snap.data(), uid = snap.id; userCache.set(uid, { uid, userId: u.userId ?? null, email: u.email || "" });
+  const [os, ds] = await Promise.all([
+    getDocs(query(collection(db, "orders"), where("uid", "==", uid), limit(60))).catch(() => null),
+    getDocs(query(collection(db, "deposits"), where("uid", "==", uid), limit(60))).catch(() => null)
+  ]);
+  const orders = os ? os.docs.map(d => ({ id: d.id, ...d.data() })).sort(sortDesc).slice(0, 8) : [];
+  const deps = ds ? ds.docs.map(d => ({ id: d.id, ...d.data() })).sort(sortDesc).slice(0, 8) : [];
+  $("#userBox").innerHTML = `<div class="card" data-uid="${esc(uid)}">
+    <h2>تفاصيل المستخدم <span class="pill p-completed">#${esc(u.userId ?? "بدون رقم")}</span></h2>
+    <div class="kv">
+      <div><small>الرصيد الحالي</small><b id="uBal">${usd(u.balance)}</b></div>
+      <div><small>المصروف</small><b>${usd(u.spent)}</b></div>
+      <div><small>البريد</small><b class="mono">${esc(u.email || "—")}</b></div>
+      <div><small>UID</small><b class="mono" style="font-size:12px">${esc(uid)}</b></div>
+      <div><small>تاريخ التسجيل</small><b>${when(u.createdAt)}</b></div>
+      <div><small>عدد الطلبات (آخر 60)</small><b>${os ? os.size : "—"}</b></div>
+    </div>
+    <h2 style="margin-top:14px">تعديل الرصيد</h2>
+    <div class="row">
+      <div><label for="adjAmt">المبلغ (USD)</label><input id="adjAmt" type="number" min="0" step="0.01" inputmode="decimal" dir="ltr" placeholder="10.00"></div>
+      <div><label for="adjNote">ملاحظة (تُسجَّل في السجل)</label><input id="adjNote" maxlength="120" placeholder="مثال: شحن يدوي عبر Cash Plus"></div>
+    </div>
+    <label style="display:flex;gap:8px;align-items:center;margin:10px 0;font-weight:500;color:var(--ink)"><input type="checkbox" id="adjNotify" checked style="width:auto;min-height:0"> إرسال إشعار للمستخدم</label>
+    <div class="row">
+      <button class="btn ok" data-act="adj" data-mode="add">+ شحن الرصيد</button>
+      <button class="btn bad" data-act="adj" data-mode="sub">− خصم</button>
+      <button class="btn warn" data-act="adj" data-mode="set">= تعيين الرصيد</button>
+    </div>
+    <div id="adjErr" class="err" role="alert"></div>
+    <div class="acts" style="display:flex;gap:8px;margin-top:6px"><button class="btn ghost sm" data-act="msg-user" data-userid="${esc(u.userId ?? "")}">✉ مراسلة المستخدم</button></div>
+    <h2 style="margin-top:14px">آخر نشاط</h2>
+    <div class="grid g2"><div><b style="font-size:13px;color:var(--mut)">الطلبات</b>${orders.length ? orders.map(o => `<div class="item"><div class="top"><span class="mono">#${esc(o.id.slice(0, 6).toUpperCase())}</span>${pill(o.status)}</div><div class="meta">${esc(o.serviceName || "")} • ${usd(o.cost)} • ${when(o.createdAt)}</div></div>`).join("") : '<div class="empty">لا توجد طلبات</div>'}</div>
+    <div><b style="font-size:13px;color:var(--mut)">طلبات الشحن</b>${deps.length ? deps.map(o => `<div class="item"><div class="top"><span class="mono">${esc(o.reference || o.id.slice(0, 6))}</span>${pill(o.status)}</div><div class="meta">${esc(METHOD[o.method] || o.method || "")} • ${usd(o.amount)} • ${when(o.createdAt)}</div></div>`).join("") : '<div class="empty">لا توجد طلبات شحن</div>'}</div></div>
+  </div>`;
+}
+async function adjustBalance(uid, mode, amt, note, notify) {
+  let res;
+  await runTransaction(db, async tx => {
+    const ref = doc(db, "users", uid), s = await tx.get(ref);
+    if (!s.exists()) throw new Error("user_missing");
+    const u = s.data(), before = r4(num(u.balance));
+    const after = r4(mode === "add" ? before + amt : mode === "sub" ? before - amt : amt);
+    if (after < 0) throw new Error("negative_balance");
+    tx.update(ref, { balance: after });
+    tx.set(doc(collection(db, "admin_logs")), { by: me.uid, byEmail: me.email || "", action: mode === "add" ? "شحن رصيد" : mode === "sub" ? "خصم رصيد" : "تعيين الرصيد", targetUid: uid, userId: u.userId ?? null, amount: amt, before, after, note, createdAt: serverTimestamp() });
+    if (notify) tx.set(doc(collection(db, "notifications")), { to: uid, toUserId: u.userId ?? null, type: mode === "sub" ? "warning" : "success", title: mode === "add" ? "تم شحن رصيدك" : mode === "sub" ? "تم تعديل رصيدك" : "تم تحديث رصيدك", body: mode === "add" ? `تمت إضافة ${usd(amt)} إلى رصيدك.${note ? "\n" + note : ""}` : mode === "sub" ? `تم خصم ${usd(amt)} من رصيدك.${note ? "\n" + note : ""}` : `رصيدك الآن ${usd(amt)}.${note ? "\n" + note : ""}`, by: me.uid, createdAt: serverTimestamp() });
+    res = { before, after };
+  });
+  return res;
+}
+async function loadRecentUsers() {
+  loaded.users = true;
+  const box = $("#recentUsers");
+  try {
+    const r = await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(15)));
+    box.innerHTML = r.docs.length ? r.docs.map(d => { const u = d.data(); return `<div class="item"><div class="top"><span><b class="mono">#${esc(u.userId ?? "—")}</b> <span class="mono">${esc(u.email || "")}</span></span><button class="btn ghost sm" data-act="open-user" data-uid="${esc(d.id)}">فتح</button></div><div class="meta">${usd(u.balance)} • ${when(u.createdAt)}</div></div>`; }).join("") : '<div class="empty">لا يوجد مستخدمون</div>';
+  } catch (e) { box.innerHTML = `<div class="empty">${esc(errMsg(e))}</div>`; }
+}
+
+/* ================= 4) طلبات الشحن ================= */
+let DEPS = [];
+async function loadDeposits() {
+  loaded.deposits = true;
+  const box = $("#depList"); box.innerHTML = '<div class="empty">جارٍ التحميل…</div>';
+  try {
+    const f = $("#depFilter").value, col = collection(db, "deposits");
+    const snap = await getDocs(f === "all" ? query(col, orderBy("createdAt", "desc"), limit(100)) : query(col, where("status", "==", f), limit(100)));
+    DEPS = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort(sortDesc);
+    await prefetchUsers(DEPS.map(d => d.uid));
+    box.innerHTML = DEPS.length ? DEPS.map(d => `<div class="item" data-id="${esc(d.id)}"><div class="top"><span><b class="mono">${esc(d.reference || d.id.slice(0, 8))}</b> • ${esc(METHOD[d.method] || d.method || "")}</span>${pill(d.status)}</div>
+      <div class="kv"><div><small>المبلغ المطلوب</small><b>${usd(d.amount)}</b></div><div><small>المستخدم</small><b>${who(userCache.get(d.uid))}</b></div><div><small>التاريخ</small><b>${when(d.createdAt)}</b></div><div><small>الإيصال</small><b>${d.receiptSubmitted ? "✔ مرفق" : "لم يُرفع"}</b></div></div>
+      <div class="acts"><button class="btn sm" data-act="review-dep" data-id="${esc(d.id)}">${d.status === "pending" ? "مراجعة وإجراء" : "عرض التفاصيل"}</button></div></div>`).join("") : '<div class="empty">لا توجد طلبات</div>';
+    if (f === "pending") { const b = $("#depBadge"); b.textContent = DEPS.length; b.classList.toggle("hidden", !DEPS.length); }
+  } catch (e) { console.error(e); box.innerHTML = `<div class="empty">${esc(errMsg(e))}</div>`; }
+}
+async function reviewDeposit(id) {
+  const d = DEPS.find(x => x.id === id); if (!d) return;
+  let pr = null;
+  if (d.receiptSubmitted) { try { const s = await getDoc(doc(db, "payment_requests", id)); if (s.exists()) pr = s.data(); } catch (e) { toast("تعذّر تحميل الإيصال: " + errMsg(e), "bad"); } }
+  const img = pr && /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test(pr.receiptImageUrl || "") ? `<div class="imgbox"><img class="rc" id="rcImg" alt="إيصال الدفع" src="${pr.receiptImageUrl}"></div>` : '<div class="empty">لم يُرفع إيصال لهذا الطلب.</div>';
+  const pending = d.status === "pending";
+  const r = await modal({
+    title: `طلب شحن ${d.reference || ""}`,
+    body: `<div class="kv"><div><small>الطريقة</small><b>${esc(METHOD[d.method] || d.method || "")}</b></div><div><small>المبلغ المطلوب</small><b>${usd(d.amount)}</b></div><div style="grid-column:1/-1"><small>المستخدم</small><b>${who(userCache.get(d.uid))}</b></div></div>
+      ${pr && pr.receiptNote ? `<div class="meta" style="margin:6px 0">ملاحظة العميل: <b class="mono">${esc(pr.receiptNote)}</b></div>` : ""}${img}
+      ${pending ? `<label for="credAmt">المبلغ المراد إضافته (USD)</label><input id="credAmt" type="number" min="0" step="0.01" dir="ltr" value="${esc(d.amount)}"><div style="height:8px"></div><label for="rejWhy">سبب الرفض (اختياري)</label><input id="rejWhy" maxlength="120">` : `<div class="meta">الحالة: ${pill(d.status)} ${d.creditedAmount != null ? "• أُضيف " + usd(d.creditedAmount) : ""}${d.rejectReason ? " • " + esc(d.rejectReason) : ""}</div>`}`,
+    actions: pending ? [{ label: "اعتماد وشحن الرصيد", cls: "ok", act: "ok" }, { label: "رفض", cls: "bad", act: "no" }, { label: "إغلاق", cls: "ghost", act: null }] : [{ label: "إغلاق", cls: "ghost", act: null }]
+  });
+  if (r.act === null) return;
+  if (r.act === "ok") {
+    const amt = r4(num($("#credAmt", r.el).value)); if (!(amt > 0)) return toast(ERR.bad_amount, "bad");
+    if (!(await modal({ title: "تأكيد الشحن", body: `سيُضاف <b>${usd(amt)}</b> إلى رصيد ${who(userCache.get(d.uid))}.`, actions: [{ label: "تأكيد", cls: "ok", act: "y" }, { label: "رجوع", cls: "ghost", act: null }] })).act) return;
+    await approveDeposit(id, amt);
+  } else if (r.act === "no") {
+    await rejectDeposit(id, $("#rejWhy", r.el).value.trim());
+  }
+}
+async function approveDeposit(id, amt) {
+  await runTransaction(db, async tx => {
+    const dRef = doc(db, "deposits", id), dS = await tx.get(dRef);
+    if (!dS.exists()) throw new Error("deposit_missing");
+    const d = dS.data(); if (d.status !== "pending") throw new Error("not_pending");
+    const uRef = doc(db, "users", d.uid), uS = await tx.get(uRef); if (!uS.exists()) throw new Error("user_missing");
+    const pRef = doc(db, "payment_requests", id), pS = await tx.get(pRef);
+    const before = r4(num(uS.data().balance)), after = r4(before + amt);
+    tx.update(uRef, { balance: after });
+    tx.update(dRef, { status: "completed", creditedAmount: amt, approvedBy: me.uid, approvedAt: serverTimestamp() });
+    if (pS.exists()) tx.update(pRef, { status: "approved", reviewedBy: me.uid, reviewedAt: serverTimestamp() });
+    tx.set(doc(collection(db, "admin_logs")), { by: me.uid, byEmail: me.email || "", action: "اعتماد شحن", targetUid: d.uid, userId: d.userId ?? uS.data().userId ?? null, amount: amt, before, after, note: d.reference || id, createdAt: serverTimestamp() });
+    tx.set(doc(collection(db, "notifications")), { to: d.uid, toUserId: d.userId ?? null, type: "success", title: "تم شحن رصيدك", body: `تمت إضافة ${usd(amt)} إلى رصيدك. المرجع: ${d.reference || id}`, by: me.uid, createdAt: serverTimestamp() });
+  });
+  toast("تم اعتماد الشحن وإضافة الرصيد", "ok"); loadDeposits();
+}
+async function rejectDeposit(id, why) {
+  await runTransaction(db, async tx => {
+    const dRef = doc(db, "deposits", id), dS = await tx.get(dRef);
+    if (!dS.exists()) throw new Error("deposit_missing");
+    const d = dS.data(); if (d.status !== "pending") throw new Error("not_pending");
+    const pRef = doc(db, "payment_requests", id), pS = await tx.get(pRef);
+    tx.update(dRef, { status: "rejected", rejectReason: why, rejectedBy: me.uid, rejectedAt: serverTimestamp() });
+    if (pS.exists()) tx.update(pRef, { status: "rejected", reviewedBy: me.uid, reviewedAt: serverTimestamp() });
+    tx.set(doc(collection(db, "admin_logs")), { by: me.uid, byEmail: me.email || "", action: "رفض شحن", targetUid: d.uid, userId: d.userId ?? null, amount: d.amount, note: why || d.reference || id, createdAt: serverTimestamp() });
+    tx.set(doc(collection(db, "notifications")), { to: d.uid, toUserId: d.userId ?? null, type: "warning", title: "تم رفض طلب الشحن", body: `تعذّر قبول طلب الشحن ${d.reference || ""}.${why ? "\nالسبب: " + why : ""}`, by: me.uid, createdAt: serverTimestamp() });
+  });
+  toast("تم رفض الطلب", "ok"); loadDeposits();
+}
+
+/* ================= 4) الطلبات ================= */
+let ORDS = [];
+async function loadOrders() {
+  loaded.orders = true;
+  const box = $("#ordList"); box.innerHTML = '<div class="empty">جارٍ التحميل…</div>';
+  try {
+    const f = $("#ordFilter").value, col = collection(db, "orders");
+    const snap = await getDocs(f === "all" ? query(col, orderBy("createdAt", "desc"), limit(100)) : query(col, where("status", "==", f), limit(150)));
+    ORDS = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort(sortDesc);
+    await prefetchUsers(ORDS.map(o => o.uid)); drawOrders();
+  } catch (e) { console.error(e); box.innerHTML = `<div class="empty">${esc(errMsg(e))}</div>`; }
+}
+function drawOrders() {
+  const q = $("#ordQ").value.trim().toLowerCase();
+  const list = ORDS.filter(o => !q || [o.id, o.serviceName, o.link, o.japOrder, userCache.get(o.uid)?.userId, userCache.get(o.uid)?.email].join(" ").toLowerCase().includes(q));
+  const opts = ["pending", "processing", "inprogress", "completed", "partial", "canceled"];
+  $("#ordList").innerHTML = list.length ? list.map(o => `<div class="item" data-id="${esc(o.id)}"><div class="top"><span><b class="mono">#${esc(o.id.slice(0, 6).toUpperCase())}</b> • ${esc(o.serviceName || "")}</span>${pill(o.status)}</div>
+    <div class="kv"><div><small>الكمية</small><b>${esc(o.quantity ?? "—")}</b></div><div><small>التكلفة</small><b>${usd(o.cost)}</b></div><div><small>المستخدم</small><b>${who(userCache.get(o.uid))}</b></div><div><small>التاريخ</small><b>${when(o.createdAt)}</b></div></div>
+    <div class="meta mono" style="word-break:break-all">${esc(o.link || "")}</div>
+    ${o.japOrder ? `<div class="meta">رقم المزوّد: <span class="mono">${esc(o.japOrder)}</span></div>` : ""}${o.cancel_reason ? `<div class="meta">السبب: ${esc(o.cancel_reason)}</div>` : ""}${o.refunded ? `<div class="meta" style="color:var(--ok)">✓ أُرجع ${usd(o.refundAmount)}</div>` : ""}
+    <div class="acts"><select aria-label="الحالة">${opts.map(s => `<option value="${s}" ${o.status === s ? "selected" : ""}>${ST[s]}</option>`).join("")}</select>
+      <button class="btn sm" data-act="set-status" data-id="${esc(o.id)}">تطبيق</button>
+      ${o.refunded ? "" : `<button class="btn sm bad" data-act="cancel-order" data-id="${esc(o.id)}">إلغاء واسترجاع</button>`}</div></div>`).join("") : '<div class="empty">لا توجد طلبات مطابقة</div>';
+}
+async function setOrderStatus(id, status) {
+  await updateDoc(doc(db, "orders", id), { status, updatedAt: serverTimestamp() });
+  const o = ORDS.find(x => x.id === id); if (o) o.status = status;
+  sendLog("تغيير حالة طلب", { targetUid: o?.uid || null, userId: userCache.get(o?.uid)?.userId ?? null, note: `#${id.slice(0, 6).toUpperCase()} ← ${ST[status] || status}` });
+  toast("تم تحديث حالة الطلب", "ok"); drawOrders();
+}
+async function cancelOrder(id) {
+  const o = ORDS.find(x => x.id === id); if (!o) return;
+  const r = await modal({ title: "إلغاء الطلب واسترجاع المبلغ", body: `<div class="meta" style="margin-bottom:8px">#${esc(id.slice(0, 6).toUpperCase())} • ${esc(o.serviceName || "")}</div><label for="rfAmt">مبلغ الاسترجاع (USD)</label><input id="rfAmt" type="number" min="0" step="0.01" dir="ltr" value="${esc(o.cost)}"><div style="height:8px"></div><label for="rfWhy">سبب الإلغاء (يظهر للمستخدم)</label><input id="rfWhy" maxlength="120" value="ألغاه المشرف">`, actions: [{ label: "إلغاء الطلب واسترجاع", cls: "bad", act: "y" }, { label: "رجوع", cls: "ghost", act: null }] });
+  if (!r.act) return;
+  const amt = r4(num($("#rfAmt", r.el).value)), why = $("#rfWhy", r.el).value.trim() || "ألغاه المشرف";
+  if (amt < 0) return toast(ERR.bad_amount, "bad");
+  await runTransaction(db, async tx => {
+    const oRef = doc(db, "orders", id), oS = await tx.get(oRef); if (!oS.exists()) throw new Error("order_missing");
+    const od = oS.data(); if (od.refunded === true) throw new Error("already_refunded");
+    const uRef = doc(db, "users", od.uid), uS = await tx.get(uRef); if (!uS.exists()) throw new Error("user_missing");
+    const before = r4(num(uS.data().balance)), after = r4(before + amt);
+    if (amt > 0) tx.update(uRef, { balance: after, spent: increment(-amt) });
+    tx.update(oRef, { status: "canceled", refunded: true, refundAmount: amt, refundedAt: serverTimestamp(), cancel_reason: why, cancel_reason_en: "Canceled by admin", updatedAt: serverTimestamp() });
+    tx.set(doc(collection(db, "admin_logs")), { by: me.uid, byEmail: me.email || "", action: "إلغاء طلب واسترجاع", targetUid: od.uid, userId: uS.data().userId ?? null, amount: amt, before, after, note: `#${id.slice(0, 6).toUpperCase()} — ${why}`, createdAt: serverTimestamp() });
+    tx.set(doc(collection(db, "notifications")), { to: od.uid, toUserId: uS.data().userId ?? null, type: "warning", title: "تم إلغاء طلبك", body: `الطلب #${id.slice(0, 6).toUpperCase()} (${od.serviceName || ""}) أُلغي.${amt > 0 ? "\nتم إرجاع " + usd(amt) + " إلى رصيدك." : ""}\nالسبب: ${why}`, by: me.uid, createdAt: serverTimestamp() });
+  });
+  toast("تم إلغاء الطلب وإرجاع المبلغ", "ok"); loadOrders();
+}
+
+/* ================= 3) الرسائل ================= */
+$("#mTo").onchange = () => $("#mUidWrap").classList.toggle("hidden", $("#mTo").value !== "one");
+$("#msgForm").onsubmit = e => {
+  e.preventDefault();
+  run($("#mBtn"), async () => {
+    const title = $("#mTitle").value.trim(), body = $("#mBody").value.trim(), type = $("#mType").value;
+    if (!title || !body) throw new Error("اكتب العنوان والرسالة.");
+    let to = "all", toUserId = null;
+    if ($("#mTo").value === "one") {
+      const id = Number($("#mUid").value.trim()); if (!Number.isInteger(id) || id <= 0) throw new Error("أدخل رقم حساب صحيح.");
+      const r = await getDocs(query(collection(db, "users"), where("userId", "==", id), limit(1)));
+      if (!r.docs.length) throw new Error("لا يوجد مستخدم بهذا الرقم.");
+      to = r.docs[0].id; toUserId = id;
+    } else if (!(await modal({ title: "إرسال لكل المستخدمين", body: "ستظهر هذه الرسالة لجميع المستخدمين. هل تريد المتابعة؟", actions: [{ label: "إرسال", cls: "", act: "y" }, { label: "إلغاء", cls: "ghost", act: null }] })).act) return;
+    await addDoc(collection(db, "notifications"), { to, toUserId, type, title, body, by: me.uid, createdAt: serverTimestamp() });
+    sendLog("إرسال رسالة", { targetUid: to === "all" ? null : to, userId: toUserId, note: title });
+    $("#msgForm").reset(); $("#mUidWrap").classList.add("hidden"); toast("تم إرسال الرسالة", "ok"); loadMessages();
+  }, $("#mErr"));
+};
+async function loadMessages() {
+  loaded.messages = true;
+  const box = $("#msgList");
+  try {
+    const r = await getDocs(query(collection(db, "notifications"), orderBy("createdAt", "desc"), limit(30)));
+    box.innerHTML = r.docs.length ? r.docs.map(d => { const m = d.data(); return `<div class="item"><div class="top"><b>${esc(m.title)}</b><span class="pill p-${m.type === "warning" ? "pending" : m.type === "success" ? "completed" : "processing"}">${m.to === "all" ? "للجميع" : "#" + esc(m.toUserId ?? "")}</span></div><div class="meta" style="white-space:pre-line">${esc(m.body)}</div><div class="meta">${when(m.createdAt)}</div><div class="acts"><button class="btn sm bad ghost" data-act="del-msg" data-id="${esc(d.id)}">حذف</button></div></div>`; }).join("") : '<div class="empty">لا توجد رسائل</div>';
+  } catch (e) { box.innerHTML = `<div class="empty">${esc(errMsg(e))}</div>`; }
+}
+
+/* ================= السجل ================= */
+async function loadLogs() {
+  loaded.logs = true;
+  try {
+    const r = await getDocs(query(collection(db, "admin_logs"), orderBy("createdAt", "desc"), limit(50)));
+    $("#logList").innerHTML = r.docs.length ? r.docs.map(d => logRow(d.data())).join("") : '<div class="empty">لا توجد عمليات بعد</div>';
+  } catch (e) { $("#logList").innerHTML = `<div class="empty">${esc(errMsg(e))}</div>`; }
+}
+
+/* ================= الأحداث (تفويض واحد لكل الأزرار) ================= */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act;
+  if (act === "refresh-overview") run(b, loadOverview);
+  else if (act === "refresh-recent-users") run(b, loadRecentUsers);
+  else if (act === "refresh-deposits") run(b, loadDeposits);
+  else if (act === "refresh-orders") run(b, loadOrders);
+  else if (act === "refresh-messages") run(b, loadMessages);
+  else if (act === "refresh-logs") run(b, loadLogs);
+  else if (act === "open-user") run(b, () => openUser(b.dataset.uid), $("#uErr"));
+  else if (act === "review-dep") run(b, () => reviewDeposit(b.dataset.id));
+  else if (act === "set-status") { const sel = b.closest(".item").querySelector("select"); run(b, () => setOrderStatus(b.dataset.id, sel.value)); }
+  else if (act === "cancel-order") run(b, () => cancelOrder(b.dataset.id));
+  else if (act === "del-msg") run(b, async () => { if (!(await modal({ title: "حذف الرسالة", body: "سيتم حذفها من إشعارات المستخدمين.", actions: [{ label: "حذف", cls: "bad", act: "y" }, { label: "رجوع", cls: "ghost", act: null }] })).act) return; await deleteDoc(doc(db, "notifications", b.dataset.id)); toast("تم الحذف", "ok"); loadMessages(); });
+  else if (act === "msg-user") { showTab("messages"); $("#mTo").value = "one"; $("#mUidWrap").classList.remove("hidden"); $("#mUid").value = b.dataset.userid || ""; $("#mTitle").focus(); }
+  else if (act === "adj") {
+    const card = b.closest("[data-uid]"), uid = card.dataset.uid, mode = b.dataset.mode, err = $("#adjErr", card);
+    run(b, async () => {
+      const amt = r4(num($("#adjAmt", card).value));
+      if (mode === "set" ? !(amt >= 0 && $("#adjAmt", card).value !== "") : !(amt > 0)) throw new Error("bad_amount");
+      if (amt > 5000 && !(await modal({ title: "مبلغ كبير", body: `هل أنت متأكد من ${usd(amt)}؟`, actions: [{ label: "نعم", cls: "warn", act: "y" }, { label: "لا", cls: "ghost", act: null }] })).act) return;
+      const lbl = mode === "add" ? "إضافة" : mode === "sub" ? "خصم" : "تعيين الرصيد إلى";
+      const u = userCache.get(uid);
+      if (!(await modal({ title: "تأكيد العملية", body: `${lbl} <b>${usd(amt)}</b> — المستخدم ${who(u)}`, actions: [{ label: "تأكيد", cls: "ok", act: "y" }, { label: "رجوع", cls: "ghost", act: null }] })).act) return;
+      const r = await adjustBalance(uid, mode, amt, $("#adjNote", card).value.trim(), $("#adjNotify", card).checked);
+      toast(`تم: ${usd(r.before)} ← ${usd(r.after)}`, "ok"); await openUser(uid);
+    }, err);
+  }
+});
+$("#depFilter").onchange = () => loadDeposits();
+$("#ordFilter").onchange = () => loadOrders();
+$("#ordQ").oninput = () => drawOrders();
+</script>
 </body>
 </html>
