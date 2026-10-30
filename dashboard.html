@@ -1098,7 +1098,7 @@ async function ensureUserDoc(user) {
 }
 
 let unsubBal = null, unsubOrd = null, sess = 0;                             
-const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } if (unsubNotif) { unsubNotif(); unsubNotif = null; } };
+const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } };
 
 onAuthStateChanged(auth, user => {
   stopBal();                                               
@@ -1148,4 +1148,4 @@ document.addEventListener('copy',e=>{if(!_editable(e))e.preventDefault()});
 document.addEventListener('cut',e=>{if(!_editable(e))e.preventDefault()});
 document.addEventListener('dragstart',e=>{if(!_editable(e))e.preventDefault()});
 </script>
-  </html>
+</html>
