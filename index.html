@@ -394,7 +394,11 @@ $("#logout").onclick = () => signOut(auth).then(() => { $("#pass").value = ""; s
 
 document.getElementById("gBtn").onclick = () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithRedirect(provider);
+  firebase.auth().signInWithPopup(provider).then((result) => {
+    location.replace("dashboard.html");
+  }).catch((error) => {
+    showErr(error.message);
+  });
 };
 </script>
 </body>
