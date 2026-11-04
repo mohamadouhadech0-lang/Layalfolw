@@ -238,7 +238,7 @@ import { initializeAuth, browserSessionPersistence, browserPopupRedirectResolver
 /* 1) التهيئة: انسخ القيم من Firebase Console > Project settings > Your apps */
 const firebaseConfig = {
   apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
-  authDomain:"layalfolw.com",
+  authDomain: "layal-follow.firebaseapp.com",
   projectId: "layal-follow",
   storageBucket: "layal-follow.firebasestorage.app",
   messagingSenderId: "850647879566",
@@ -379,7 +379,8 @@ function showUser(user, forcedName) {
   } else { av.textContent = name.trim()[0] || "م"; }
   $("#auth").classList.add("hidden");
   $("#app").classList.remove("hidden");
-}};
+}
+
 /* يتابع حالة الدخول (الجلسة في الذاكرة فقط، فلا تُستعاد بعد التحديث) */
 onAuthStateChanged(auth, user => {
   if (busy) return;
@@ -389,17 +390,8 @@ onAuthStateChanged(auth, user => {
 
 window.__fbReady = true;
 
-/* تسجيل الخروج */
-$("#logout").onclick = () => signOut(auth).then(() => { $("#pass").value = ""; showErr(""); }).catch(e => alert(e.message));
-
-document.getElementById("gBtn").onclick = () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider).then((result) => {
-    location.replace("dashboard.html");
-  }).catch((error) => {
-    showErr(error.message);
-  });
-};
+/* 7) تسجيل الخروج */
+$("#logout").onclick = () => signOut(auth).then(() => { $("#pass").value = ""; showErr(""); }).catch(e => alert(msg(e)));
 </script>
 </body>
 </html>
