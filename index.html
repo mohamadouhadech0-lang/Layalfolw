@@ -379,11 +379,7 @@ function showUser(user, forcedName) {
   } else { av.textContent = name.trim()[0] || "م"; }
   $("#auth").classList.add("hidden");
   $("#app").classList.remove("hidden");
-}
-$("#gBtn").onclick = () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithRedirect(provider);
-};
+}};
 /* يتابع حالة الدخول (الجلسة في الذاكرة فقط، فلا تُستعاد بعد التحديث) */
 onAuthStateChanged(auth, user => {
   if (busy) return;
@@ -394,7 +390,11 @@ onAuthStateChanged(auth, user => {
 window.__fbReady = true;
 
 /* 7) تسجيل الخروج */
-$("#logout").onclick = () => signOut(auth).then(() => { $("#pass").value = ""; showErr(""); }).catch(e => alert(msg(e)));
+$("#logout").onclick = () => signOut(auth).then(() => { $("#pass").value = ""; showErr(""); }).catch(e => alert(msg(e))); 
+document.getElementById("gBtn").onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithRedirect(provider);
+};
 </script>
 </body>
 </html>
