@@ -380,7 +380,10 @@ function showUser(user, forcedName) {
   $("#auth").classList.add("hidden");
   $("#app").classList.remove("hidden");
 }
-
+$("#gBtn").onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithRedirect(provider);
+};
 /* يتابع حالة الدخول (الجلسة في الذاكرة فقط، فلا تُستعاد بعد التحديث) */
 onAuthStateChanged(auth, user => {
   if (busy) return;
