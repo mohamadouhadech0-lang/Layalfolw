@@ -297,10 +297,9 @@ const cardLoader=on=>{
 async function flow(label, doAuth) {
   busy = true;
   try {
-    const user = await doAuth();         // نجاح التحقق من Firebase
-    cardLoader(true);                    // الدائرة + الاسم أعلى البطاقة
-    await sleep(5000);                   // 5 ثوانٍ كاملة
-    location.href = "dashboard.html";    // الانتقال للوحة
+    const user = await doAuth();
+    cardLoader(true);
+    location.href = "dashboard.html"; // الانتقال للوحة مباشرة دون انتظار
   } finally { busy = false; cardLoader(false); }
 }
 
