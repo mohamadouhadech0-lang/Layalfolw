@@ -294,12 +294,16 @@ const cardLoader=on=>{
   $("#cardLoader").classList.toggle("hidden",!on);
   $("#authBody").classList.toggle("busy",on);
 };
-async function flow(label, doAuth) {
+ async function flow(label, doAuth) {
   busy = true;
   try {
     const user = await doAuth();
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("isLoggedIn", "true");
+    }
     cardLoader(true);
-    location.href = "dashboard.html"; // الانتقال للوحة مباشرة دون انتظار
+    location.href = "dashboard.html";
   } finally { busy = false; cardLoader(false); }
 }
 
