@@ -22,13 +22,13 @@ async function initiateYouCanPayment(amountUsd) {
         "Accept": "application/json",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        pub_key: publicKey,
-        order_id: orderId,
-        amount: minor,
-        currency: "MAD",
-        "metadata[uid]": user.uid
-      })
+     body: JSON.stringify({
+            public_key: publicKey,
+            order_id: orderId,
+            amount: minor,
+            currency: "MAD",
+            metadata: { uid: user.uid }
+        })
     });
 
     const data = await response.json();
