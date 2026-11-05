@@ -1,61 +1,75 @@
-// payment.js - كود واجهة الدفع المعدل والمحمي من أخطاء السيرفر
+const crypto = require("crypto");
 
-async function initiateYouCanPayment(amountUsd = 5) {
-  const payButton = document.querySelector('#pay-button');
-  const errorElement = document.querySelector('#payment-error');
+module.exports = async (req, res) => {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "method_not_allowed" });
+  }
 
   try {
-    const user = firebase.auth().currentUser;
-    if (!user) {
-      alert("يرجى تسجيل الدخول إلى حسابك أولاً لتتمكن من الشحن.");
-      return;
+    const { admin, db, auth } = require("../lib/firebase");
+    
+    // 1. التحقق من المستخدم
+    const authHeader = req.headers.authorization || "";
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    if (!token) {
+      return res.status(401).json({ error: "unauthorized", detail: "Missing Authorization header" });
+    }
+    const decodedToken = await auth.verifyIdToken(token);
+    const uid = decodedToken.uid;
+
+    // 2. التحقق من المفاتيح
+    const privateKey = process.env.YOUCAN_PRIVATE_KEY;
+    const publicKey = process.env.YOUCAN_PUBLIC_KEY;
+    if (!privateKey || !publicKey) {
+      return res.status(500).json({ error: "config_error", detail: "Missing YouCan API keys in environment variables" });
     }
 
-    if (payButton) payButton.disabled = true;
-    if (errorElement) errorElement.textContent = "";
+    const usd = Number((req.body || {}).amount) || 5;
+    const minor = Math.round(usd * 10 * 100); // تحويل المبلغ بناء على السعر
+    const orderId = "YC" + crypto.randomBytes(6).toString("hex").toUpperCase();
 
-    const idToken = await user.getIdToken(true);
-
-    // إرسال الطلب إلى الخادم
-    const response = await fetch('/api/youcan-token', {
-      method: 'POST',
+    // 3. الاتصال المباشر بـ YouCan Pay Sandbox API
+    const response = await fetch("https://youcanpay.com/sandbox/api/tokenize", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`
+        "Accept": "application/json",
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({ amount: amountUsd })
+      body: JSON.stringify({
+        pri_key: privateKey.trim(),
+        pub_key: publicKey.trim(),
+        order_id: orderId,
+        amount: minor,
+        currency: "MAD",
+        "metadata[type]": "topup",
+        "metadata[uid]": uid
+      })
     });
 
-    // قراءة الرد كنص أولاً لمنع خطأ "is not valid JSON"
-    const textResponse = await response.text();
+    const responseText = await response.text();
     let data;
-
     try {
-      data = JSON.parse(textResponse);
+      data = JSON.parse(responseText);
     } catch (e) {
-      // في حال أرجع السيرفر خطأ HTML أو النص الخام من Vercel
-      throw new Error(textResponse || `خطأ سيرفر (${response.status})`);
+      data = { raw_response: responseText };
     }
 
-    if (!response.ok) {
-      throw new Error(data.detail || data.error || data.message || 'فشل الاتصال بـ API الدفع');
+    if (!response.ok || !data.token) {
+      // إرجاع السبب الحقيقي الوارد من YouCan Pay مباشرة إلى الشاشة
+      return res.status(502).json({ 
+        error: "youcan_rejected", 
+        detail: data.message || data.error || JSON.stringify(data) 
+      });
     }
 
-    // التوجيه إلى YouCan Pay عند التمكن من التوكن
-    const payUrl = data.sandbox 
-      ? `https://paylink.youcanpay.com/sandbox/${data.tokenId}`
-      : `https://paylink.youcanpay.com/${data.tokenId}`;
+    const tokenId = typeof data.token === "string" ? data.token : data.token.id;
 
-    window.location.href = payUrl;
+    return res.status(200).json({
+      tokenId: tokenId,
+      sandbox: true
+    });
 
-  } catch (error) {
-    console.error("خطأ الدفع:", error);
-    if (errorElement) {
-      errorElement.textContent = `حدث خطأ: ${error.message}`;
-    } else {
-      alert(`حدث خطأ: ${error.message}`);
-    }
-  } finally {
-    if (payButton) payButton.disabled = false;
+  } catch (err) {
+    return res.status(500).json({ error: "server_crash", detail: err.message });
   }
-}
+};
