@@ -23,8 +23,8 @@ async function initiateYouCanPayment(amountUsd) {
         "Content-Type": "application/json"
       },
     body: JSON.stringify({
-            pri_key: publicKey,
-            private_key: privateKey,
+            public_key : publicKey,
+            pri_key: privateKey,
             order_id: orderId,
             amount: minor,
             currency: "MAD",
