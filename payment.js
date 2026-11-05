@@ -11,39 +11,47 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        if (payMsg) payMsg.innerText = "جاري إنشاء طلب الدفع...";
+        const publicKey = "pub_sandbox_ee76a43c-4dda-43d5-b6ea-1db36";
+
+        if (payMsg) payMsg.innerText = "جاري الاتصال ببوابة الدفع...";
 
         try {
-            // 1) جلب التوكن من سيرفرك الخاص (المحمي)
-            // ملاحظة: استبدل الرابط برابط الـ API الخاص بـ Vercel أو الخادم لديك
-            const response = await fetch('/api/youcan-token', {
+            // إرسال الطلب المباشر للـ tokenize باستخدام المفتاح العام والعملة المناسبة
+            const response = await fetch('https://youcanpay.com/sandbox/api/tokenize', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // إذا كان النظام يتطلب مصادقة Firebase للمستخدم، أضف الـ Token هنا:
-                    // 'Authorization': 'Bearer ' + firebaseUserToken
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify({ amount: parseFloat(amountInput) })
+                body: JSON.stringify({
+                    pub_key: publicKey,
+                    amount: Math.round(parseFloat(amountInput) * 100),
+                    currency: 'MAD',
+                    order_id: 'ORDER_' + Date.now()
+                })
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.detail || data.error || "خطأ في إنشاء الطلب");
+            const textResponse = await response.text();
+            let data;
+            try {
+                data = JSON.parse(textResponse);
+            } catch (err) {
+                throw new Error("استجابة غير صالحة من البوابة");
             }
 
-            if (data.tokenId) {
+            const tokenId = typeof data.token === "string" ? data.token : (data.token && data.token.id);
+
+            if (tokenId) {
                 if (payMsg) payMsg.innerText = "جاري تحويلك لبوابة الدفع...";
-                
-                // 2) التوجيه إلى صفحة الدفع الرسمية باستخدام الـ Token المستلم من السيرفر
-                window.location.href = `https://youcanpay.com/sandbox/api/payment-form/${data.tokenId}`;
+                window.location.href = `https://youcanpay.com/sandbox/api/payment-form/${tokenId}`;
             } else {
-                if (payMsg) payMsg.innerText = "فشل في الحصول على رمز الدفع.";
+                const errorMsg = data.message || data.error || "فشل في إنشاء رمز الدفع";
+                if (payMsg) payMsg.innerText = "خطأ: " + errorMsg;
             }
 
         } catch (error) {
             console.error("Payment Error:", error);
-            if (payMsg) payMsg.innerText = "حدث خطأ: " + (error.message || "تعذر الاتصال");
+            if (payMsg) payMsg.innerText = "حدث خطأ في الاتصال ببوابة الدفع.";
         }
     });
 });
