@@ -939,29 +939,27 @@ $("#payBtn").onclick = async () => {
   const amount = Number(amountVal);
 
  if (selectedMethod === "card") {
-    try {
-        const payBtn = $("#payBtn");
-        payBtn.prop("disabled", true);
-        
-        // استدعاء دالة الدفع المباشر بالمتصفح
-        await initiateYouCanPayment(amount);
+try {
+    const payBtn = $("#payBtn");
+    payBtn.prop("disabled", true);
+    
+    // استدعاء دالة الدفع المباشر بالمتصفح
+    await initiateYouCanPayment(amount);
 
-    } catch (error) {
-        console.error("Payment Error:", error);
+} catch (error) {
+    console.error("Payment Error:", error);
+    if (typeof msg !== 'undefined' && msg.text) {
         msg.text("خطأ في الاتصال: " + error.message);
-        const payBtn = $("#payBtn");
-        payBtn.prop("disabled", false);
+    } else if (typeof msg !== 'undefined' && msg.textContent) {
+        msg.textContent = "خطأ في الاتصال: " + error.message;
+    } else {
+        alert("خطأ في الاتصال: " + error.message);
     }
+} finally {
+    const payBtn = $("#payBtn");
+    payBtn.prop("disabled", false);
 }
-  
-
-      else msg.textContent = d.error || "تعذّر بدء جلسة الدفع بالبطاقة.";
-    }catch(err){
-      msg.textContent = "حدث خطأ في الاتصال ببوابة الدفع.";
-    } finally {
-      $("#payBtn").disabled = false;
-    }
-  } else if(selectedMethod === "binance"){
+ } else if(selectedMethod === "binance"){
     toast("جاري تحويلك لبوابة Binance Pay...");
   } else if(selectedMethod === "cashplus" || selectedMethod === "cih"){
     const bankName = selectedMethod === "cashplus" ? "Cash Plus" : "CIH Bank";
