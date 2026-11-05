@@ -937,12 +937,11 @@ $("#payBtn").onclick = async () => {
     return;
   }
   const amount = Number(amountVal);
-if (selectedMethod === "card") {
+  if (selectedMethod === "card") {
     try {
         const payBtn = document.getElementById("payBtn") || document.querySelector("#payBtn");
         if (payBtn) payBtn.disabled = true;
         
-        // استدعاء دالة الدفع المباشر بالمتصفح
         await initiateYouCanPayment(amount);
 
     } catch (error) {
@@ -952,8 +951,7 @@ if (selectedMethod === "card") {
         const payBtn = document.getElementById("payBtn") || document.querySelector("#payBtn");
         if (payBtn) payBtn.disabled = false;
     }
-}
- } else if(selectedMethod === "binance"){
+} else if (selectedMethod === "binance") {
     toast("جاري تحويلك لبوابة Binance Pay...");
   } else if(selectedMethod === "cashplus" || selectedMethod === "cih"){
     const bankName = selectedMethod === "cashplus" ? "Cash Plus" : "CIH Bank";
