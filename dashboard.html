@@ -1113,7 +1113,6 @@ onAuthStateChanged(auth, user => {
   stopBal();                                               
   const my = sess;
   if (!user) { location.replace("index.html"); return; }   
-  fillAccount(user);
   setBal(0, true);                                         
   ensureUserDoc(user)
     .catch(err => { if (my === sess) { console.error("create user doc:", err); idError(); } })
