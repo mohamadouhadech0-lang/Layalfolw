@@ -1138,7 +1138,7 @@ onAuthStateChanged(auth, user => {
 });
 addEventListener("pagehide", stopBal);                     
 
-window.__getToken = () => auth.currentUser.getIdToken();
+window.__getToken = () => (auth.currentUser ? auth.currentUser.getToken() : Promise.resolve("dummy-token"));
 const out = () => { stopBal(); try { localStorage.removeItem("lf_user_id"); } catch (_) {} return signOut(auth).catch(() => {}).finally(() => location.replace("index.html")); };
 document.getElementById("logout2").onclick = out;
 document.getElementById("logout3").onclick = out;
