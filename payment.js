@@ -40,9 +40,8 @@ async function initiateYouCanPayment(amountUsd) {
 
     const tokenId = typeof data.token === "string" ? data.token : data.token.id;
     
-    // الانتقال المباشر لصفحة الدفع الآمنة
-    window.location.href = `https://paylink.youcanpay.com/sandbox/${tokenId}`;
-
+    // التوجيه المحلي الصحيح لصفحة الدفع
+    window.location.href = `https://youcanpay.com/sandbox/checkout/${tokenId}`;
   } catch (error) {
     console.error("Payment Error:", error);
     if (errorElement) {
