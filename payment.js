@@ -1,30 +1,20 @@
-// ==========================================
-// ملف واحد متكامل لمعالجة الدفع عبر YouCan Pay
-// ==========================================
-
 async function initiateYouCanPayment(amountUsd) {
   const payButton = document.querySelector('#pay-button');
-  const errorElement = document.querySelector('#payment-error');
+  const errorElement = document.querySelector('#payment-error'); // مكان ظهور الخطأ تحت الزر
 
   try {
-    // 1. التحقق من تسجيل دخول المستخدم عبر Firebase
     const user = firebase.auth().currentUser;
     if (!user) {
-      alert("يرجى تسجيل الدخول إلى حسابك أولاً لتتمكن من الشحن.");
+      alert("يرجى تسجيل الدخول أولاً");
       return;
     }
 
-    // تعطيل الزر مؤقتاً لمنع الضغط المتكرر
     if (payButton) payButton.disabled = true;
     if (errorElement) errorElement.textContent = "";
 
-    // 2. جلب Firebase ID Token الخاص بالمستخدم
     const idToken = await user.getIdToken(true);
-
-    // تحديد المبلغ (إما المُمرر أو المقروء من الحقل)
     const finalAmount = amountUsd || parseFloat(document.querySelector('#amount-input')?.value || 5);
 
-    // 3. إرسال الطلب إلى السيرفر الخاص بك على Vercel
     const response = await fetch('/api/youcan-token', {
       method: 'POST',
       headers: {
@@ -34,41 +24,34 @@ async function initiateYouCanPayment(amountUsd) {
       body: JSON.stringify({ amount: finalAmount })
     });
 
-    // قراءة الاستجابة كنص أولاً لتفادي أخطاء تنسيق JSON
-    const textResponse = await response.text();
+    const textRes = await response.text();
     let data;
-
     try {
-      data = JSON.parse(textResponse);
+      data = JSON.parse(textRes);
     } catch (e) {
-      throw new Error(textResponse || `خطأ في استجابة الخادم (${response.status})`);
+      throw new Error(textRes || "خطأ غير متوقع من الخادم");
     }
 
-    // التحقق من نجاح الرد
     if (!response.ok) {
-      throw new Error(data.detail || data.error || data.message || 'فشل الاتصال بـ API الدفع');
+      // هنا يظهر الخطأ الحقيقي والدقيق قادماً من السيرفر مباشرة
+      throw new Error(data.detail || data.error || "حدث خطأ في الاتصال ببوابة الدفع.");
     }
 
-    // 4. التوجيه التلقائي إلى بوابة YouCan Pay (سواء Sandbox أو Production)
-    const payUrl = data.sandbox 
-      ? `https://paylink.youcanpay.com/sandbox/${data.tokenId}`
-      : `https://paylink.youcanpay.com/${data.tokenId}`;
-
+    const payUrl = `https://paylink.youcanpay.com/sandbox/${data.tokenId}`;
     window.location.href = payUrl;
 
   } catch (error) {
-    console.error("خطأ أثناء عملية الدفع:", error);
+    console.error("Payment Error:", error);
     if (errorElement) {
-      errorElement.textContent = `حدث خطأ: ${error.message}`;
+      errorElement.textContent = error.message; // عرض السبب الحقيقي تحت الزر مباشرة
     } else {
-      alert(`حدث خطأ: ${error.message}`);
+      alert(error.message);
     }
   } finally {
     if (payButton) payButton.disabled = false;
   }
 }
 
-// 5. ربط الحدث بزر الدفع تلقائياً بمجرد تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
   const payBtn = document.querySelector('#pay-button');
   if (payBtn) {
