@@ -1,8 +1,17 @@
 {
+  "version": 2,
   "rewrites": [
     {
       "source": "/__/auth/:path*",
       "destination": "https://layal-follow.firebaseapp.com/__/auth/:path*"
+    },
+    {
+      "source": "/api/youcan-token",
+      "destination": "/api/youcan-token.js"
+    },
+    {
+      "source": "/api/youcan-webhook",
+      "destination": "/api/youcan-webhook.js"
     }
   ]
 }
