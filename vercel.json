@@ -7,11 +7,7 @@
     },
     {
       "source": "/api/youcan-token",
-      "destination": "/api/youcan-token.js"
-    },
-    {
-      "source": "/api/youcan-webhook",
-      "destination": "/api/youcan-webhook.js"
+      "destination": "/token.js"
     }
   ]
 }
