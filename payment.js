@@ -1,6 +1,6 @@
 async function initiateYouCanPayment(amountUsd) {
   const payButton = document.querySelector('#pay-button');
-  const errorElement = document.querySelector('#payment-error'); // مكان ظهور الخطأ تحت الزر
+  const errorElement = document.querySelector('#payment-error');
 
   try {
     const user = firebase.auth().currentUser;
@@ -12,38 +12,43 @@ async function initiateYouCanPayment(amountUsd) {
     if (payButton) payButton.disabled = true;
     if (errorElement) errorElement.textContent = "";
 
-    const idToken = await user.getIdToken(true);
     const finalAmount = amountUsd || parseFloat(document.querySelector('#amount-input')?.value || 5);
+    const minor = Math.round(finalAmount * 10 * 100);
+    const orderId = "YC" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    const response = await fetch('/api/youcan-token', {
-      method: 'POST',
+    // المفتاح العام الخاص بك
+    const publicKey = "Pub_sandbox_ee76a43c-4dda-43d5-b6ea-1db36";
+
+    const response = await fetch("https://youcanpay.com/sandbox/api/tokenize", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`
+        "Accept": "application/json",
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({ amount: finalAmount })
+      body: JSON.stringify({
+        pub_key: publicKey,
+        order_id: orderId,
+        amount: minor,
+        currency: "MAD",
+        "metadata[uid]": user.uid
+      })
     });
 
-    const textRes = await response.text();
-    let data;
-    try {
-      data = JSON.parse(textRes);
-    } catch (e) {
-      throw new Error(textRes || "خطأ غير متوقع من الخادم");
+    const data = await response.json();
+    
+    if (!response.ok || !data.token) {
+      throw new Error(data.message || "فشل الاتصال ببوابة الدفع، تأكد من المفتاح العام");
     }
 
-    if (!response.ok) {
-      // هنا يظهر الخطأ الحقيقي والدقيق قادماً من السيرفر مباشرة
-      throw new Error(data.detail || data.error || "حدث خطأ في الاتصال ببوابة الدفع.");
-    }
-
-    const payUrl = `https://paylink.youcanpay.com/sandbox/${data.tokenId}`;
-    window.location.href = payUrl;
+    const tokenId = typeof data.token === "string" ? data.token : data.token.id;
+    
+    // الانتقال المباشر لصفحة الدفع الآمنة
+    window.location.href = `https://paylink.youcanpay.com/sandbox/${tokenId}`;
 
   } catch (error) {
     console.error("Payment Error:", error);
     if (errorElement) {
-      errorElement.textContent = error.message; // عرض السبب الحقيقي تحت الزر مباشرة
+      errorElement.textContent = error.message;
     } else {
       alert(error.message);
     }
