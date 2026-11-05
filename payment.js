@@ -11,47 +11,33 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        const publicKey = "pub_sandbox_ee76a43c-4dda-43d5-b6ea-1db36";
-
-        if (payMsg) payMsg.innerText = "جاري الاتصال ببوابة الدفع...";
+        if (payMsg) payMsg.innerText = "جاري إنشاء طلب الدفع...";
 
         try {
-            // إرسال الطلب المباشر للـ tokenize باستخدام المفتاح العام والعملة المناسبة
-            const response = await fetch('https://youcanpay.com/sandbox/api/tokenize', {
+            const response = await fetch('/api/youcan-token', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    pub_key: publicKey,
-                    amount: Math.round(parseFloat(amountInput) * 100),
-                    currency: 'MAD',
-                    order_id: 'ORDER_' + Date.now()
-                })
+                body: JSON.stringify({ amount: parseFloat(amountInput) })
             });
 
-            const textResponse = await response.text();
-            let data;
-            try {
-                data = JSON.parse(textResponse);
-            } catch (err) {
-                throw new Error("استجابة غير صالحة من البوابة");
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || data.error || "خطأ في إنشاء الطلب");
             }
 
-            const tokenId = typeof data.token === "string" ? data.token : (data.token && data.token.id);
-
-            if (tokenId) {
+            if (data.tokenId) {
                 if (payMsg) payMsg.innerText = "جاري تحويلك لبوابة الدفع...";
-                window.location.href = `https://youcanpay.com/sandbox/api/payment-form/${tokenId}`;
+                window.location.href = `https://youcanpay.com/sandbox/api/payment-form/${data.tokenId}`;
             } else {
-                const errorMsg = data.message || data.error || "فشل في إنشاء رمز الدفع";
-                if (payMsg) payMsg.innerText = "خطأ: " + errorMsg;
+                if (payMsg) payMsg.innerText = "فشل في الحصول على رمز الدفع.";
             }
 
         } catch (error) {
             console.error("Payment Error:", error);
-            if (payMsg) payMsg.innerText = "حدث خطأ في الاتصال ببوابة الدفع.";
+            if (payMsg) payMsg.innerText = "حدث خطأ: " + (error.message || "تعذر الاتصال");
         }
     });
 });
