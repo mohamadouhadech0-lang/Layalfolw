@@ -1138,7 +1138,14 @@ onAuthStateChanged(auth, user => {
 });
 addEventListener("pagehide", stopBal);                     
 window.__getToken = async () => (auth.currentUser ? await auth.currentUser.getIdToken() : "");
-const out = () => { stopBal(); try { localStorage.removeItem("lf_user_id"); } catch (_) {} return signOut(auth).catch(() => {}).finally(() => location.replace("index.html")); };
+window.__getToken = async () => {
+    try {
+        if (!auth.currentUser) return "";
+        return await auth.currentUser.getIdToken(true);
+    } catch (e) {
+        return "";
+    }
+};
 document.getElementById("logout2").onclick = out;
 document.getElementById("logout3").onclick = out;
 const _editable=e=>/^(INPUT|TEXTAREA)$/.test((e.target&&e.target.tagName)||"");
