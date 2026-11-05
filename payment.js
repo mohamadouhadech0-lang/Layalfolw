@@ -15,20 +15,21 @@ async function initiateYouCanPayment(amountUsd) {
 
     // المفتاح العام الخاص بك
     const publicKey = "Pub_sandbox_ee76a43c-4dda-43d5-b6ea-1db36";
-
+    const privateKey = "Pri_sandbox_3d6c46c7-f00b-4169-9af2-e6a9b"; 
     const response = await fetch("https://youcanpay.com/sandbox/api/tokenize", {
       method: "POST",
       headers: {
         "Accept": "application/json",
         "Content-Type": "application/json"
       },
-     body: JSON.stringify({
+    body: JSON.stringify({
             public_key: publicKey,
+            private_key: privateKey,
             order_id: orderId,
             amount: minor,
             currency: "MAD",
             metadata: { uid: user.uid }
-        })
+        }) 
     });
 
     const data = await response.json();
