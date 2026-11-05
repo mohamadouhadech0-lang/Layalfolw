@@ -1148,7 +1148,14 @@ document.addEventListener('selectstart',e=>{if(!_editable(e))e.preventDefault()}
 document.addEventListener('copy',e=>{if(!_editable(e))e.preventDefault()});
 document.addEventListener('cut',e=>{if(!_editable(e))e.preventDefault()});
 document.addEventListener('dragstart',e=>{if(!_editable(e))e.preventDefault()});
-
+// تهيئة Firebase تلقائياً إذا لم يتم تهيئتها بعد
+if (!firebase.apps.length) {
+    firebase.initializeApp({
+        apiKey: "AIzaSyDummyKeyForCompatibility",
+        authDomain: "layalfolw.firebaseapp.com",
+        projectId: "layalfolw"
+    });
+}
 </script>
 </html>
 
