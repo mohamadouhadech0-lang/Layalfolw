@@ -41,7 +41,7 @@ async function initiateYouCanPayment(amountUsd) {
     const tokenId = typeof data.token === "string" ? data.token : data.token.id;
     
     // التوجيه المحلي الصحيح لصفحة الدفع
-    window.location.href = `https://youcanpay.com/sandbox/checkout/${tokenId}`;
+    window.location.href = `https://paylink.youcanpay.com/sandbox/${tokenId}`;
   } catch (error) {
     console.error("Payment Error:", error);
     if (errorElement) {
