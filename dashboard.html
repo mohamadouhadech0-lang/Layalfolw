@@ -937,27 +937,21 @@ $("#payBtn").onclick = async () => {
     return;
   }
   const amount = Number(amountVal);
+if (selectedMethod === "card") {
+    try {
+        const payBtn = document.getElementById("payBtn") || document.querySelector("#payBtn");
+        if (payBtn) payBtn.disabled = true;
+        
+        // استدعاء دالة الدفع المباشر بالمتصفح
+        await initiateYouCanPayment(amount);
 
- if (selectedMethod === "card") {
-try {
-    const payBtn = $("#payBtn");
-    payBtn.prop("disabled", true);
-    
-    // استدعاء دالة الدفع المباشر بالمتصفح
-    await initiateYouCanPayment(amount);
-
-} catch (error) {
-    console.error("Payment Error:", error);
-    if (typeof msg !== 'undefined' && msg.text) {
-        msg.text("خطأ في الاتصال: " + error.message);
-    } else if (typeof msg !== 'undefined' && msg.textContent) {
-        msg.textContent = "خطأ في الاتصال: " + error.message;
-    } else {
+    } catch (error) {
+        console.error("Payment Error:", error);
         alert("خطأ في الاتصال: " + error.message);
+    } finally {
+        const payBtn = document.getElementById("payBtn") || document.querySelector("#payBtn");
+        if (payBtn) payBtn.disabled = false;
     }
-} finally {
-    const payBtn = $("#payBtn");
-    payBtn.prop("disabled", false);
 }
  } else if(selectedMethod === "binance"){
     toast("جاري تحويلك لبوابة Binance Pay...");
