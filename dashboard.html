@@ -1044,7 +1044,7 @@ drawCats();refresh();
 <script type="module" onerror="bootFail()">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
@@ -1057,7 +1057,6 @@ const app = initializeApp({
 });
 
 const auth = getAuth(app);
-const authReady = setPersistence(auth, browserLocalPersistence);
 const db = getFirestore(app);
 
 async function ensureUserDoc(user) {
@@ -1099,8 +1098,7 @@ async function ensureUserDoc(user) {
 let unsubBal = null, unsubOrd = null, sess = 0;                             
 const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } };
 
-authReady.then(() => {
-  onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, user => {
     stopBal();
     const my = sess;
     if (!user) { location.replace("index.html"); return; }
@@ -1134,13 +1132,9 @@ authReady.then(() => {
       });
     window.__authDone = true;
     bootDone();
-  }, error => {
-    console.error("Firebase auth state:", error);
-    bootFail("تعذّر استعادة جلسة الدخول. أعد تحميل الصفحة أو سجّل الدخول مجدداً.");
-  });
-}).catch(error => {
-  console.error("Firebase auth persistence:", error);
-  bootFail("تعذّر تهيئة جلسة الدخول في هذا المتصفح.");
+}, error => {
+  console.error("Firebase auth state:", error);
+  bootFail("تعذّر استعادة جلسة الدخول. أعد تحميل الصفحة أو سجّل الدخول مجدداً.");
 });
 addEventListener("pagehide", stopBal);                     
 window.__getToken = async () => (auth.currentUser ? await auth.currentUser.getIdToken() : "");

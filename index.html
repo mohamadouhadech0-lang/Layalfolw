@@ -231,7 +231,7 @@ ${v.map((n,i)=>`<circle cx="${x(i)}" cy="${y(n)}" r="4.5" fill="#6366f1"/><text 
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, FacebookAuthProvider,
+import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, FacebookAuthProvider,
   signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
@@ -247,7 +247,6 @@ const firebaseConfig = {
 };
 const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const authReady = setPersistence(auth, browserLocalPersistence);
 auth.languageCode = "ar";
 
 const $ = s => document.querySelector(s);
@@ -295,7 +294,6 @@ const cardLoader=on=>{
  async function flow(label, doAuth) {
   busy = true;
   try {
-    await authReady;
     const user = await doAuth();
     if (user === null) return;
     if (!user || auth.currentUser?.uid !== user.uid) {
@@ -326,21 +324,11 @@ function saveGoogleProfile(credential) {          // credential = response.crede
   } catch (e) { console.warn("JWT decode failed", e); return null; }
 }
 
-/* 3) Google */
-$("#gBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول...", async () => {
+/* 3) Google: تجنب حظر/إغلاق النافذة المنبثقة باستخدام تدفق إعادة التوجيه */
+$("#gBtn").onclick = () => run(allBtns(), async () => {
   const p = new GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" });
-  let result;
-  try {
-    result = await signInWithPopup(auth, p);
-  } catch (error) {
-    if (!["auth/popup-closed-by-user", "auth/popup-blocked"].includes(error?.code)) throw error;
-    await signInWithRedirect(auth, p);
-    return null;
-  }
-  const gc = GoogleAuthProvider.credentialFromResult(result);     // يحتوي idToken (JWT) من Google
-  if (gc && gc.idToken) saveGoogleProfile(gc.idToken);            // حفظ sub والبريد بعد نجاح التحقق
-  return result.user;
-}));
+  await signInWithRedirect(auth, p);
+});
 
 /* 4) Facebook */
 $("#fbBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول...", async () => {
@@ -391,11 +379,12 @@ function showUser(user, forcedName) {
 }
 
 /* استعد نتيجة إعادة التوجيه قبل اتخاذ قرار عرض صفحة الدخول */
-authReady.then(async () => {
+(async () => {
   try {
     const result = await getRedirectResult(auth);
-    if (result?.user) {
-      const gc = GoogleAuthProvider.credentialFromResult(result);
+    const user = result?.user || auth.currentUser;
+    if (user) {
+      const gc = result && GoogleAuthProvider.credentialFromResult(result);
       if (gc?.idToken) saveGoogleProfile(gc.idToken);
       location.replace("dashboard.html");
       return;
@@ -410,8 +399,8 @@ authReady.then(async () => {
     if (user) location.replace("dashboard.html");
     else { $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); }
   });
-}).catch(error => {
-  console.error("Firebase auth persistence:", error);
+})().catch(error => {
+  console.error("Firebase auth initialization:", error);
   showErr(msg(error));
 });
 
