@@ -1052,7 +1052,7 @@ import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut 
 
 const app = initializeApp({
   apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
-  authDomain: "layal-follow.firebaseapp.com",
+  authDomain: "layalfolw.com",
   projectId: "layal-follow",
   storageBucket: "layal-follow.firebasestorage.app",
   messagingSenderId: "850647879566",
@@ -1106,6 +1106,7 @@ onAuthStateChanged(auth, user => {
   stopBal();                                               
   const my = sess;
   if (!user) { location.replace("index.html"); return; }   
+  fillAccount(user);
   setBal(0, true);                                         
   ensureUserDoc(user)
     .catch(err => { if (my === sess) { console.error("create user doc:", err); idError(); } })
@@ -1146,8 +1147,17 @@ window.__getToken = async () => {
         return "";
     }
 };
-// document.getElementById("logout2").onclick = out;
-// document.getElementById("logout3").onclick = out;
+const out = () => {
+  stopBal();
+  try {
+    localStorage.removeItem("lf_user_id");
+    localStorage.removeItem("user");
+    localStorage.removeItem("isLoggedIn");
+  } catch (_) {}
+  return signOut(auth).catch(err => console.error("sign out:", err));
+};
+document.getElementById("logout2").onclick = out;
+document.getElementById("logout3").onclick = out;
 const _editable=e=>/^(INPUT|TEXTAREA)$/.test((e.target&&e.target.tagName)||"");
 document.addEventListener('contextmenu',e=>{if(!_editable(e))e.preventDefault()});
 document.addEventListener('selectstart',e=>{if(!_editable(e))e.preventDefault()});
