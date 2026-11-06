@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="ltr">
 <head>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
 <script src="payment.js" defer></script>
 
 
@@ -1048,7 +1044,7 @@ drawCats();refresh();
 <script type="module" onerror="bootFail()">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import { initializeAuth, browserSessionPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
@@ -1060,7 +1056,8 @@ const app = initializeApp({
   measurementId: "G-KVN372FDCR"
 });
 
-const auth = initializeAuth(app, { persistence: browserSessionPersistence });
+const auth = getAuth(app);
+const authReady = setPersistence(auth, browserLocalPersistence);
 const db = getFirestore(app);
 
 async function ensureUserDoc(user) {
@@ -1102,40 +1099,48 @@ async function ensureUserDoc(user) {
 let unsubBal = null, unsubOrd = null, sess = 0;                             
 const stopBal = () => { sess++; if (unsubBal) { unsubBal(); unsubBal = null; } if (unsubOrd) { unsubOrd(); unsubOrd = null; } };
 
-onAuthStateChanged(auth, user => {
-  stopBal();                                               
-  const my = sess;
-  if (!user) { location.replace("index.html"); return; }   
-  fillAccount(user);
-  setBal(0, true);                                         
-  ensureUserDoc(user)
-    .catch(err => { if (my === sess) { console.error("create user doc:", err); idError(); } })
-    .then(() => {
-      if (my !== sess) return;
-      unsubBal = onSnapshot(
-        doc(db, "users", user.uid),                        
-        snap => {
-          const data = snap.exists() ? snap.data() : {};
-          const b = Number(data.balance);
-          setBal(Number.isFinite(b) ? b : 0, false);       
-          setNumericId(Number.isFinite(Number(data.userId)) && data.userId != null ? data.userId : null);
-          setSpent(Number(data.spent) || 0);
-        },
-        err => { console.error("user listener:", err); setBal(0, false); setNumericId(null); balError(); }
-      );
-      unsubOrd = onSnapshot(
-        query(collection(db, "orders"), where("uid", "==", user.uid)),
-        snap => setOrders(snap.docs.map(d => {
-          const x = d.data();
-          return { id: d.id, s: x.serviceName || "", link: x.link || "", n: x.quantity || 0, cost: Number(x.cost) || 0, status: x.status, rem: x.remains == null ? null : Number(x.remains), reason: x.cancel_reason || "", reasonEn: x.cancel_reason_en || "", refund: Number(x.refundAmount) || 0, ts: x.createdAt ? x.createdAt.toMillis() : Date.now() };
-        }).sort((a, b) => b.ts - a.ts)),
-        err => console.error("orders listener:", err)
-      );
-      loadServices();
-      syncOrders();
-    });
-  window.__authDone = true;
-  bootDone();
+authReady.then(() => {
+  onAuthStateChanged(auth, user => {
+    stopBal();
+    const my = sess;
+    if (!user) { location.replace("index.html"); return; }
+    fillAccount(user);
+    setBal(0, true);
+    ensureUserDoc(user)
+      .catch(err => { if (my === sess) { console.error("create user doc:", err); idError(); } })
+      .then(() => {
+        if (my !== sess) return;
+        unsubBal = onSnapshot(
+          doc(db, "users", user.uid),
+          snap => {
+            const data = snap.exists() ? snap.data() : {};
+            const b = Number(data.balance);
+            setBal(Number.isFinite(b) ? b : 0, false);
+            setNumericId(Number.isFinite(Number(data.userId)) && data.userId != null ? data.userId : null);
+            setSpent(Number(data.spent) || 0);
+          },
+          err => { console.error("user listener:", err); setBal(0, false); setNumericId(null); balError(); }
+        );
+        unsubOrd = onSnapshot(
+          query(collection(db, "orders"), where("uid", "==", user.uid)),
+          snap => setOrders(snap.docs.map(d => {
+            const x = d.data();
+            return { id: d.id, s: x.serviceName || "", link: x.link || "", n: x.quantity || 0, cost: Number(x.cost) || 0, status: x.status, rem: x.remains == null ? null : Number(x.remains), reason: x.cancel_reason || "", reasonEn: x.cancel_reason_en || "", refund: Number(x.refundAmount) || 0, ts: x.createdAt ? x.createdAt.toMillis() : Date.now() };
+          }).sort((a, b) => b.ts - a.ts)),
+          err => console.error("orders listener:", err)
+        );
+        loadServices();
+        syncOrders();
+      });
+    window.__authDone = true;
+    bootDone();
+  }, error => {
+    console.error("Firebase auth state:", error);
+    bootFail("تعذّر استعادة جلسة الدخول. أعد تحميل الصفحة أو سجّل الدخول مجدداً.");
+  });
+}).catch(error => {
+  console.error("Firebase auth persistence:", error);
+  bootFail("تعذّر تهيئة جلسة الدخول في هذا المتصفح.");
 });
 addEventListener("pagehide", stopBal);                     
 window.__getToken = async () => (auth.currentUser ? await auth.currentUser.getIdToken() : "");
@@ -1165,13 +1170,5 @@ document.addEventListener('selectstart',e=>{if(!_editable(e))e.preventDefault()}
 document.addEventListener('copy',e=>{if(!_editable(e))e.preventDefault()});
 document.addEventListener('cut',e=>{if(!_editable(e))e.preventDefault()});
 document.addEventListener('dragstart',e=>{if(!_editable(e))e.preventDefault()});
-// تهيئة Firebase تلقائياً إذا لم يتم تهيئتها بعد
-if (!firebase.apps.length) {
-    firebase.initializeApp({
-        apiKey: "AIzaSyDummyKeyForCompatibility",
-        authDomain: "layalfolw.firebaseapp.com",
-        projectId: "layalfolw"
-    });
-}
 </script>
 </html>

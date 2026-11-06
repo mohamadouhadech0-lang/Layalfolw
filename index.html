@@ -231,7 +231,7 @@ ${v.map((n,i)=>`<circle cx="${x(i)}" cy="${y(n)}" r="4.5" fill="#6366f1"/><text 
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { initializeAuth, browserSessionPersistence, browserPopupRedirectResolver, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider,
+import { getAuth, setPersistence, browserLocalPersistence, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, FacebookAuthProvider,
   signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
@@ -246,11 +246,8 @@ const firebaseConfig = {
   measurementId: "G-KVN372FDCR"
 };
 const app  = initializeApp(firebaseConfig);
-/* الجلسة تُحفظ لتبويب المتصفح فقط (تنتقل بين index و dashboard وتُمحى عند إغلاق التبويب) */
-const auth = initializeAuth(app, {
-  persistence: browserSessionPersistence,
-  popupRedirectResolver: browserPopupRedirectResolver
-});
+const auth = getAuth(app);
+const authReady = setPersistence(auth, browserLocalPersistence);
 auth.languageCode = "ar";
 
 const $ = s => document.querySelector(s);
@@ -269,7 +266,8 @@ const ERRORS = {
   "auth/too-many-requests": "محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً.",
   "auth/network-request-failed": "تعذّر الاتصال. تحقق من الإنترنت.",
   "auth/popup-blocked": "المتصفح حظر النافذة المنبثقة. اسمح بها ثم أعد المحاولة.",
-  "auth/popup-closed-by-user": "أُغلقت نافذة تسجيل الدخول قبل الإكمال.",
+  "auth/popup-closed-by-user": "تعذّر إكمال تسجيل الدخول بالنافذة المنبثقة. أعد المحاولة أو اسمح بإعادة التوجيه.",
+  "auth/redirect-cancelled-by-user": "أُلغيت عملية تسجيل الدخول قبل إكمالها.",
   "auth/cancelled-popup-request": "تم إلغاء الطلب السابق. حاول مرة أخرى.",
   "auth/account-exists-with-different-credential": "يوجد حساب بنفس البريد بطريقة دخول أخرى (مثل Google أو البريد). سجّل بها أولاً.",
   "auth/operation-not-allowed": "طريقة الدخول هذه غير مفعّلة في Firebase Console.",
@@ -297,13 +295,14 @@ const cardLoader=on=>{
  async function flow(label, doAuth) {
   busy = true;
   try {
+    await authReady;
     const user = await doAuth();
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("isLoggedIn", "true");
+    if (user === null) return;
+    if (!user || auth.currentUser?.uid !== user.uid) {
+      throw new Error("تعذر استعادة جلسة Firebase بعد تسجيل الدخول. أعد المحاولة.");
     }
     cardLoader(true);
-    location.href = "dashboard.html";
+    location.replace("dashboard.html");
   } finally { busy = false; cardLoader(false); }
 }
 
@@ -330,7 +329,14 @@ function saveGoogleProfile(credential) {          // credential = response.crede
 /* 3) Google */
 $("#gBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول...", async () => {
   const p = new GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" });
-  const result = await signInWithPopup(auth, p);
+  let result;
+  try {
+    result = await signInWithPopup(auth, p);
+  } catch (error) {
+    if (!["auth/popup-closed-by-user", "auth/popup-blocked"].includes(error?.code)) throw error;
+    await signInWithRedirect(auth, p);
+    return null;
+  }
   const gc = GoogleAuthProvider.credentialFromResult(result);     // يحتوي idToken (JWT) من Google
   if (gc && gc.idToken) saveGoogleProfile(gc.idToken);            // حفظ sub والبريد بعد نجاح التحقق
   return result.user;
@@ -384,11 +390,29 @@ function showUser(user, forcedName) {
   $("#app").classList.remove("hidden");
 }
 
-/* يتابع حالة الدخول (الجلسة في الذاكرة فقط، فلا تُستعاد بعد التحديث) */
-onAuthStateChanged(auth, user => {
-  if (busy) return;
-  if (user) location.replace("dashboard.html");
-  else { $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); }
+/* استعد نتيجة إعادة التوجيه قبل اتخاذ قرار عرض صفحة الدخول */
+authReady.then(async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result?.user) {
+      const gc = GoogleAuthProvider.credentialFromResult(result);
+      if (gc?.idToken) saveGoogleProfile(gc.idToken);
+      location.replace("dashboard.html");
+      return;
+    }
+  } catch (error) {
+    console.error("Firebase Google redirect:", error);
+    showErr(msg(error));
+  }
+
+  onAuthStateChanged(auth, user => {
+    if (busy) return;
+    if (user) location.replace("dashboard.html");
+    else { $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); }
+  });
+}).catch(error => {
+  console.error("Firebase auth persistence:", error);
+  showErr(msg(error));
 });
 
 window.__fbReady = true;
