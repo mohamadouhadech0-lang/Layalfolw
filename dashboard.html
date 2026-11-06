@@ -95,7 +95,6 @@ html[dir=rtl] #welcome>div.relative{padding-right:0;padding-left:2.25rem}
 .dark .lb.on{background:#22304a;color:#34d399}
 
 /* Dark Mode isolated rules */
-html.dark #boot{background:#0b1220!important;color:#e5ebf5!important}
 html.dark body{background:#0b1220;color:#e5ebf5}
 .dark .bg-white,.dark .bg-white\/90,.dark .bg-white\/95{background-color:#111a2e!important}
 .dark .bg-emerald-50{background-color:#064e3b !important}.dark .bg-emerald-100{background-color:#065f46 !important}
@@ -111,6 +110,10 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 .fld{width:100%;min-height:46px;padding:10px 14px;border-radius:12px;border:1px solid #d5dff0;background:#fff;outline:none;font-size:15px}
 .fld:focus{border-color:#059669;box-shadow:0 0 0 3px rgba(16,185,129,.18)}
 @keyframes spin{to{transform:rotate(360deg)}}
+.auth-loading{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:#070b14;text-align:center;color:#22e0f0}
+.auth-loading img{height:56px;width:auto;object-fit:contain}
+.auth-loading .auth-spinner{width:42px;height:42px;border-width:4px}
+.auth-loading p{margin:0;color:#a8b4cc;font-size:14px}
 .btnspin{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:lfspin .7s linear infinite}
 @keyframes lfspin{to{transform:rotate(360deg)}}
 .stp{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:700;border:1px solid transparent;white-space:nowrap}
@@ -167,11 +170,11 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 <script>if("serviceWorker"in navigator)addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})</script>
 </head>
 <body class="min-h-screen">
-<div id="boot" style="position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#eef3fb;color:#0f1f3d;font-family:system-ui,Segoe UI,Tahoma,sans-serif;text-align:center;padding:24px">
-  <div id="bootSpin" style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(16,185,129,.2);border-top-color:#059669;animation:spin .8s linear infinite"></div>
-  <div id="bootMsg" style="font-weight:700">جاري التحميل... / Loading...</div>
-  <div id="bootBtns" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px">
-    <button onclick="bootDone()" style="height:38px;padding:0 16px;border-radius:999px;background:#059669;color:#fff;font-weight:600;border:0;font-size:13px;cursor:pointer">تخطي ودخول / Skip</button>
+<div id="boot" class="auth-loading" role="status" aria-live="polite">
+  <img src="1000023699.png" alt="Layal Folw">
+  <div id="bootSpin" class="spin auth-spinner" aria-hidden="true"></div>
+  <div id="bootMsg">جارٍ تسجيل الدخول، يرجى الانتظار...</div>
+  <div id="bootBtns" style="display:none">
     <button onclick="location.reload()" style="height:38px;padding:0 16px;border-radius:999px;background:#fff;color:#059669;font-weight:600;border:1px solid #a7f3d0;font-size:13px;cursor:pointer">إعادة تحميل</button>
   </div>
 </div>
@@ -470,12 +473,11 @@ html.dark body{background:#0b1220;color:#e5ebf5}
 function bootFail(msg){            
   const m=document.getElementById("bootMsg"),s=document.getElementById("bootSpin");
   if(!m||window.__authDone)return;
-  s.style.display="none";
-  m.textContent=msg||"تعذّر الاتصال السريع. يمكنك النقر على زر (تخطي ودخول) أدناه.";
+  if(s)s.style.display="none";
+  m.textContent=msg||"تعذّر الاتصال. أعد المحاولة.";
+  document.getElementById("bootBtns").style.display="flex";
 }
 function bootDone(){const e=document.getElementById("boot");if(e)e.remove()}
-
-setTimeout(()=>{ if(document.getElementById("boot")) bootDone(); }, 2500);
 
 const $=s=>document.querySelector(s);
 let user="Guest", balance=0, spent=0, uid="", numId=null, ORDERS=[], tab=0;
