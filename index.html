@@ -231,7 +231,7 @@ ${v.map((n,i)=>`<circle cx="${x(i)}" cy="${y(n)}" r="4.5" fill="#6366f1"/><text 
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, FacebookAuthProvider,
+import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, FacebookAuthProvider,
   signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, signOut, sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
@@ -265,8 +265,7 @@ const ERRORS = {
   "auth/too-many-requests": "محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً.",
   "auth/network-request-failed": "تعذّر الاتصال. تحقق من الإنترنت.",
   "auth/popup-blocked": "المتصفح حظر النافذة المنبثقة. اسمح بها ثم أعد المحاولة.",
-  "auth/popup-closed-by-user": "تعذّر إكمال تسجيل الدخول بالنافذة المنبثقة. أعد المحاولة أو اسمح بإعادة التوجيه.",
-  "auth/redirect-cancelled-by-user": "أُلغيت عملية تسجيل الدخول قبل إكمالها.",
+  "auth/popup-closed-by-user": "أُغلقت نافذة تسجيل الدخول قبل إكمالها. أعد المحاولة.",
   "auth/cancelled-popup-request": "تم إلغاء الطلب السابق. حاول مرة أخرى.",
   "auth/account-exists-with-different-credential": "يوجد حساب بنفس البريد بطريقة دخول أخرى (مثل Google أو البريد). سجّل بها أولاً.",
   "auth/operation-not-allowed": "طريقة الدخول هذه غير مفعّلة في Firebase Console.",
@@ -296,10 +295,7 @@ const cardLoader=on=>{
   busy = true;
   try {
     const user = await doAuth();
-    if (user === null) return;
-    if (!user || auth.currentUser?.uid !== user.uid) {
-      throw new Error("تعذر استعادة جلسة Firebase بعد تسجيل الدخول. أعد المحاولة.");
-    }
+    if (!user) throw new Error("لم تُرجع عملية تسجيل الدخول مستخدماً صالحاً.");
     cardLoader(true);
     goToDashboard();
   } finally { busy = false; cardLoader(false); }
@@ -325,11 +321,14 @@ function saveGoogleProfile(credential) {          // credential = response.crede
   } catch (e) { console.warn("JWT decode failed", e); return null; }
 }
 
-/* 3) Google: تجنب حظر/إغلاق النافذة المنبثقة باستخدام تدفق إعادة التوجيه */
-$("#gBtn").onclick = () => run(allBtns(), async () => {
+/* 3) Google: انتقل إلى اللوحة فور نجاح تسجيل الدخول */
+$("#gBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول...", async () => {
   const p = new GoogleAuthProvider(); p.setCustomParameters({ prompt: "select_account" });
-  await signInWithRedirect(auth, p);
-});
+  const result = await signInWithPopup(auth, p);
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  if (credential?.idToken) saveGoogleProfile(credential.idToken);
+  return result.user;
+}));
 
 /* 4) Facebook */
 $("#fbBtn").onclick = () => run(allBtns(), () => flow("جاري الدخول...", async () => {
@@ -379,29 +378,13 @@ function showUser(user, forcedName) {
   $("#app").classList.remove("hidden");
 }
 
-/* استعد نتيجة إعادة التوجيه قبل اتخاذ قرار عرض صفحة الدخول */
-(async () => {
-  try {
-    const result = await getRedirectResult(auth);
-    const user = result?.user || auth.currentUser;
-    if (user) {
-      const gc = result && GoogleAuthProvider.credentialFromResult(result);
-      if (gc?.idToken) saveGoogleProfile(gc.idToken);
-      goToDashboard();
-      return;
-    }
-  } catch (error) {
-    console.error("Firebase Google redirect:", error);
-    showErr(msg(error));
-  }
-
-  onAuthStateChanged(auth, user => {
-    if (busy) return;
-    if (user) goToDashboard();
-    else { $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); }
-  });
-})().catch(error => {
-  console.error("Firebase auth initialization:", error);
+/* المستخدم الحالي فقط هو ما يحدد التوجيه عند تحميل الصفحة */
+onAuthStateChanged(auth, user => {
+  if (busy) return;
+  if (user) goToDashboard();
+  else { $("#app").classList.add("hidden"); $("#auth").classList.remove("hidden"); }
+}, error => {
+  console.error("Firebase auth state:", error);
   showErr(msg(error));
 });
 
