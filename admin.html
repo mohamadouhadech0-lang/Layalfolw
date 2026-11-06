@@ -335,7 +335,10 @@ $("#loginForm").onsubmit = e => {
   }, $("#lErr"));
 };
 $("#lGoogle").onclick = () => run($("#lGoogle"), () => signInWithPopup(auth, new GoogleAuthProvider()), $("#lErr"));
-const logout = () => signOut(auth).catch(() => {});
+const logout = () => {
+  if (!confirm("هل أنت موافق للخروج؟")) return;
+  return signOut(auth).catch(() => {});
+};
 $("#outBtn").onclick = $("#deniedOut").onclick = logout;
 $("#themeBtn").onclick = () => { const d = !document.documentElement.classList.contains("dark"); document.documentElement.classList.toggle("dark", d); try { localStorage.setItem("lf_theme", d ? "dark" : "light"); } catch (_) {} };
 addEventListener("unhandledrejection", e => { console.error(e.reason); toast(errMsg(e.reason), "bad"); });

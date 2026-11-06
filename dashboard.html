@@ -1148,6 +1148,7 @@ window.__getToken = async () => {
     }
 };
 const out = () => {
+  if (!confirm("هل أنت موافق للخروج؟")) return;
   stopBal();
   try {
     localStorage.removeItem("lf_user_id");
@@ -1174,4 +1175,3 @@ if (!firebase.apps.length) {
 }
 </script>
 </html>
-

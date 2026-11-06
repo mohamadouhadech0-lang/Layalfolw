@@ -683,7 +683,7 @@ ab.onclick=e=>{e.stopPropagation();pmOpen(pm.classList.contains("hidden"))};
 document.addEventListener("click",e=>{if(!pm.contains(e.target))pmOpen(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")pmOpen(false)});
 $("#pmProfile").onclick=()=>{pmOpen(false);showSec(7)};
-$("#logout").addEventListener("click",()=>pmOpen(false));
+$("#logout").addEventListener("click",()=>out());
 $("#balChip").onclick=()=>showSec(3);
 const openSb=o=>{$("#sb").classList.toggle("-translate-x-full",!o);$("#scrim").classList.toggle("on",o);document.body.style.overflow=o?"hidden":""};
 document.addEventListener("click",e=>{
@@ -1232,4 +1232,11 @@ onAuthStateChanged(auth, user => {
 addEventListener("pagehide", stopBal);                     // إغلاق الصفحة
 
 window.__getToken = () => auth.currentUser.getIdToken();
-const out = () => { stopBal(); try { localStorage.removeItem("lf_user_id"); } catch (_) {} return signOut(auth).catch(() => {}).finally(() => loca
+const out = () => {
+  if (!confirm("هل أنت موافق للخروج؟")) return;
+  stopBal();
+  try { localStorage.removeItem("lf_user_id"); } catch (_) {}
+  return signOut(auth).catch(err => console.error("sign out:", err));
+};
+document.getElementById("logout2").onclick = out;
+document.getElementById("logout3").onclick = out;
