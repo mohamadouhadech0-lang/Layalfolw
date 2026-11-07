@@ -194,8 +194,9 @@ html.dark body{background:#0b1220;color:#e5ebf5}
     <div id="sbRole" class="text-xs text-slate-500 mt-0.5 font-mono" dir="ltr">ID: —</div>
     <div id="sbMail" class="text-xs text-slate-400 mt-0.5 truncate" dir="ltr"></div>
 
-    <div class="mt-4 grid grid-cols-4 gap-1 max-w-[280px] mx-auto">
+    <div class="mt-4 grid grid-cols-5 gap-1 max-w-[280px] mx-auto">
       <button id="qBal" type="button" class="qa" aria-label="Balance"><span class="qi" id="qiBal"></span><span id="qBalTxt">$0.00</span></button>
+      <button id="qSupport" type="button" class="qa" aria-label="Support"><span class="qi" id="qiSupport"></span><span>Support</span></button>
       <button id="qSet" type="button" class="qa" aria-label="Settings"><span class="qi" id="qiSet"></span><span>Settings</span></button>
       <button id="qTheme" type="button" class="qa" aria-label="Toggle theme"><span class="qi" id="qiTheme"></span><span id="qThemeTxt">Dark</span></button>
       <button id="logout3" type="button" class="qa danger" aria-label="Logout"><span class="qi" id="qiOut"></span><span>Logout</span></button>
@@ -338,9 +339,9 @@ html.dark body{background:#0b1220;color:#e5ebf5}
     </section>
 
     <section id="sec4" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
-      <h2 class="text-lg font-extrabold mb-4 text-emerald-800">Tickets</h2>
-      <form id="tf" class="space-y-3"><input id="tsub" class="fld" placeholder="Subject"><textarea id="tmsg" rows="4" class="fld" placeholder="Message"></textarea>
-      <button class="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">Send ticket</button></form>
+      <h2 class="text-lg font-extrabold mb-3 text-emerald-800">Tickets</h2>
+      <p class="text-sm text-slate-500 mb-4">Contact support about an issue with your account or order.</p>
+      <button id="openSupportFromTickets" type="button" class="h-11 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">Support</button>
     </section>
 
     <section id="sec5" class="hidden bg-white rounded-2xl border border-emerald-100 shadow-sm p-4 md:p-6">
@@ -420,6 +421,22 @@ html.dark body{background:#0b1220;color:#e5ebf5}
       </ul>
     </section>
   </main>
+</div>
+
+<div id="supportModal" class="hidden fixed inset-0 z-[70] bg-slate-900/50 backdrop-blur-[2px] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="supportTitle">
+  <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-5 shadow-2xl border border-emerald-100 dark:border-slate-800">
+    <div class="flex items-center justify-between gap-3 mb-4">
+      <h2 id="supportTitle" class="text-lg font-extrabold text-emerald-800 dark:text-emerald-400">Support ticket</h2>
+      <button id="closeSupport" type="button" class="w-9 h-9 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 grid place-items-center text-slate-600" aria-label="Close">✕</button>
+    </div>
+    <form id="supportForm" class="space-y-3" novalidate>
+      <div><label class="block text-sm font-semibold mb-1.5" for="supportSubject">Subject</label><input id="supportSubject" class="fld" maxlength="120" required></div>
+      <div><label class="block text-sm font-semibold mb-1.5" for="supportMessage">Message</label><textarea id="supportMessage" class="fld" rows="5" maxlength="3000" required></textarea></div>
+      <div><label class="block text-sm font-semibold mb-1.5" for="supportFiles">Add attachments</label><input id="supportFiles" class="fld" type="file" accept="image/*,video/*" multiple><p class="mt-1 text-xs text-slate-500">Up to 3 images or videos, 20MB each</p></div>
+      <p id="supportError" class="min-h-5 text-sm text-red-600" role="alert"></p>
+      <button id="supportSubmit" type="submit" class="w-full h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">Send ticket</button>
+    </form>
+  </div>
 </div>
 
 <!-- نافذة الإشعارات المنبثقة -->
@@ -567,6 +584,13 @@ $("#hIc").innerHTML=ic("card",18);$("#burger").innerHTML=ic("menu",22);$("#close
 const notifBtn = $("#notifBtn");
 const notifModal = $("#notifModal");
 const closeNotif = $("#closeNotif");
+const supportModal = $("#supportModal");
+function openSupport(){
+  $("#supportError").textContent = "";
+  supportModal.classList.remove("hidden");
+  $("#supportSubject").focus();
+}
+function closeSupport(){supportModal.classList.add("hidden")}
 if(notifBtn && notifModal){
   notifBtn.onclick = () => {
     notifModal.classList.remove("hidden");
@@ -580,6 +604,11 @@ if(closeNotif && notifModal){
 if(notifModal){
   notifModal.onclick = e => { if(e.target === notifModal) notifModal.classList.add("hidden"); };
 }
+$("#qSupport").onclick=()=>{openSb(false);openSupport()};
+$("#openSupportFromTickets").onclick=openSupport;
+$("#closeSupport").onclick=closeSupport;
+supportModal.onclick=e=>{if(e.target===supportModal)closeSupport()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!supportModal.classList.contains("hidden"))closeSupport()});
 
 const setNav=i=>{
   document.querySelectorAll("[data-n]").forEach(el=>{
@@ -977,7 +1006,36 @@ const getStoredUserId=()=>{try{return localStorage.getItem(USER_ID_KEY)||""}catc
 {const p=new URLSearchParams(location.search).get("paid");     
  if(p==="success")setTimeout(()=>toast("✓ تم الدفع. سيُضاف الرصيد خلال لحظات"),600);
  if(p==="cancel")setTimeout(()=>toast("تم إلغاء الدفع"),600);}
-$("#tf").onsubmit=e=>{e.preventDefault();if(!$("#tsub").value.trim()||!$("#tmsg").value.trim())return toast("أكمل الموضوع والرسالة");e.target.reset();tickets++;tkBadge();toast("✓ Ticket sent (demo)")};
+$("#supportForm").onsubmit=async e=>{
+  e.preventDefault();
+  const form=e.currentTarget, button=$("#supportSubmit"), error=$("#supportError"), original=button.textContent;
+  const subject=$("#supportSubject").value.trim(), message=$("#supportMessage").value.trim();
+  const files=[...$("#supportFiles").files];
+  error.textContent="";
+  if(!subject||!message){error.textContent="Please enter a subject and message";return}
+  if(files.length>3){error.textContent="Attach up to 3 files";return}
+  if(files.some(file=>!/^(image|video)\//i.test(file.type))){error.textContent="Only images and videos are allowed";return}
+  if(files.some(file=>file.size>20*1024*1024)){error.textContent="Each attachment must be 20MB or less";return}
+  const user=auth.currentUser;
+  if(!user){error.textContent="Please sign in again";return}
+  button.disabled=true;button.textContent="Sending…";
+  try{
+    const attachments=await Promise.all(files.map(async(file,index)=>{
+      const safeName=file.name.replace(/[^\w.-]/g,"_").slice(-100)||`attachment-${index+1}`;
+      const object=storageRef(storage,`support_messages/${user.uid}/${Date.now()}-${index}-${Math.random().toString(36).slice(2,10)}-${safeName}`);
+      const uploaded=await uploadBytes(object,file,{contentType:file.type});
+      return {url:await getDownloadURL(uploaded.ref),path:uploaded.ref.fullPath,name:file.name,type:file.type,size:file.size};
+    }));
+    await addDoc(collection(db,"support_messages"),{
+      uid:user.uid,email:user.email||"",userId:numId??null,subject,message,attachments,
+      status:"open",createdAt:serverTimestamp()
+    });
+    form.reset();closeSupport();tickets++;tkBadge();toast("✓ Ticket sent");
+  }catch(err){
+    console.error("support ticket:",err);
+    error.textContent="Could not send support ticket";
+  }finally{button.disabled=false;button.textContent=original}
+};
 $("#copyRef").onclick=()=>{navigator.clipboard?.writeText($("#ref").value).then(()=>toast("تم النسخ"),()=>toast("انسخ الرابط يدوياً"))};
 
 const PAIRS=[
@@ -988,7 +1046,8 @@ const PAIRS=[
 ["Top up your balance and place your first order in seconds.","اشحن رصيدك وابدأ طلبك الأول في ثوانٍ."],
 ["Account balance","رصيد الحساب"],["Spent balance","الرصيد المنفق"],["All","الكل"],
 ["Search services…","ابحث في الخدمات…"],["Category","الفئة"],["Service","الخدمة"],["Description","الوصف"],["Link","الرابط"],["Quantity","الكمية"],["Charge","التكلفة"],["Submit order","إرسال الطلب"],
-["Subject","الموضوع"],["Message","الرسالة"],["Send ticket","إرسال التذكرة"],
+["Support","الدعم الفني"],["Support ticket","تذكرة دعم"],["Contact support about an issue with your account or order.","تواصل مع الدعم بخصوص مشكلة في حسابك أو طلبك."],
+["Subject","الموضوع"],["Message","الرسالة"],["Send ticket","إرسال التذكرة"],["Add attachments","إضافة مرفقات"],["Up to 3 images or videos, 20MB each","حتى 3 ملفات صور أو فيديو، بحد أقصى 20 ميغابايت لكل ملف"],["Close","إغلاق"],["Sending…","جارٍ الإرسال…"],
 ["API URL","رابط الـAPI"],["Profile photo","الصورة الشخصية"],["Upload photo","رفع صورة"],["Save","حفظ"],["Cancel","إلغاء"],["Name","الاسم"],["Email","البريد الإلكتروني"],["User ID","معرّف المستخدم"],
 ["Resell our services under your own domain with your own prices.","أعد بيع خدماتنا تحت نطاقك الخاص وبأسعارك."],["Request child panel","طلب لوحة فرعية"],
 ["One order per line:","طلب واحد في كل سطر:"],["Submit orders","إرسال الطلبات"],
@@ -997,7 +1056,7 @@ const PAIRS=[
 ["Please select a service first.","اختر خدمة أولاً."],["Enter a valid link starting with https://","أدخل رابطاً صحيحاً يبدأ بـ https://"],
 ["Insufficient balance. Please add funds first.","رصيدك غير كافٍ. اشحن رصيدك أولاً."],["✓ Order created successfully","✓ تم إنشاء الطلب بنجاح"],
 ["Please choose an image file","اختر ملف صورة فقط"],["Image is larger than 5MB","الصورة أكبر من 5MB"],["Could not read the image","تعذّر قراءة الصورة"],["✓ Photo saved","✓ تم حفظ الصورة"],["Could not save the photo","تعذّر حفظ الصورة"],
-["Please fill in the subject and message","أكمل الموضوع والرسالة"],["✓ Ticket sent (demo)","✓ تم إرسال التذكرة (تجريبي)"],["✓ Request sent (demo)","✓ تم إرسال الطلب (تجريبي)"],["Enter a valid domain","أدخل نطاقاً صحيحاً"],
+["Please enter a subject and message","أدخل الموضوع والرسالة"],["Attach up to 3 files","يمكن إرفاق 3 ملفات كحد أقصى"],["Only images and videos are allowed","يُسمح بالصور ومقاطع الفيديو فقط"],["Each attachment must be 20MB or less","يجب ألا يتجاوز حجم كل مرفق 20 ميغابايت"],["Please sign in again","يرجى تسجيل الدخول مجدداً"],["Could not send support ticket","تعذّر إرسال تذكرة الدعم"],["✓ Ticket sent","تم إرسال التذكرة"],["✓ Request sent (demo)","✓ تم إرسال الطلب (تجريبي)"],["Enter a valid domain","أدخل نطاقاً صحيحاً"],
 ["Could not load balance","تعذّر تحميل الرصيد"],["Could not set up your account ID","تعذّر إعداد معرّف حسابك"],["Copied","تم النسخ"],["Copy the link manually","انسخ الرابط يدوياً"],
 ["Add at least one line: service_id | link | quantity","أضف سطراً واحداً على الأقل: service_id | link | quantity"],["unknown service ID","رقم الخدمة غير معروف"],["invalid link","رابط غير صالح"]
 ];
@@ -1045,8 +1104,9 @@ drawCats();refresh();
 </script>
 <script type="module" onerror="bootFail()">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot, collection, query, where } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, onSnapshot, collection, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyD38HBchSLBCdSqjnZPL_8MnsOMSuYVQ4Y",
@@ -1060,6 +1120,7 @@ const app = initializeApp({
 
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 async function ensureUserDoc(user) {
   const ref = doc(db, "users", user.uid);

@@ -133,6 +133,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0
     <button data-tab="users">المستخدمون والرصيد</button>
     <button data-tab="deposits">طلبات الشحن <span id="depBadge" class="pill p-pending hidden"></span></button>
     <button data-tab="orders">الطلبات</button>
+    <button data-tab="support">الدعم الفني</button>
     <button data-tab="messages">الرسائل</button>
     <button data-tab="logs">سجل العمليات</button>
   </nav>
@@ -192,6 +193,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--pri);box-shadow:0 0 0
         </div>
       </div>
       <div id="ordList"></div>
+    </section>
+
+    <section class="sec" id="s-support">
+      <div class="card"><h2>تذاكر الدعم <button class="btn ghost sm sp" data-act="refresh-support">تحديث</button></h2><div id="supportList"></div></div>
     </section>
 
     <!-- 3) الرسائل -->
@@ -345,7 +350,7 @@ addEventListener("unhandledrejection", e => { console.error(e.reason); toast(err
 
 /* ================= التبويبات ================= */
 const loaded = {};
-const loaders = { overview: () => loadOverview(), users: () => loadRecentUsers(), deposits: () => loadDeposits(), orders: () => loadOrders(), messages: () => loadMessages(), logs: () => loadLogs() };
+const loaders = { overview: () => loadOverview(), users: () => loadRecentUsers(), deposits: () => loadDeposits(), orders: () => loadOrders(), support: () => loadSupportMessages(), messages: () => loadMessages(), logs: () => loadLogs() };
 function showTab(t) {
   $$("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === t));
   $$(".sec").forEach(s => s.classList.toggle("on", s.id === "s-" + t));
@@ -615,6 +620,37 @@ async function loadMessages() {
   } catch (e) { box.innerHTML = `<div class="empty">${esc(errMsg(e))}</div>`; }
 }
 
+const supportCache = new Map();
+async function loadSupportMessages() {
+  loaded.support = true;
+  const box = $("#supportList");
+  box.innerHTML = '<div class="empty">جارٍ تحميل التذاكر…</div>';
+  try {
+    const r = await getDocs(query(collection(db, "support_messages"), orderBy("createdAt", "desc"), limit(100)));
+    supportCache.clear();
+    box.innerHTML = r.docs.length ? r.docs.map(d => {
+      const ticket = d.data();
+      const attachments = Array.isArray(ticket.attachments) ? ticket.attachments : [];
+      supportCache.set(d.id, attachments);
+      const files = attachments.map((file, index) => `<button class="btn ghost sm" data-act="support-preview" data-id="${esc(d.id)}" data-index="${index}">${esc(file.name || `مرفق ${index + 1}`)}</button>`).join("");
+      const status = ticket.status === "closed" ? "مغلقة" : "مفتوحة";
+      return `<div class="item"><div class="top"><b>${esc(ticket.subject || "بدون موضوع")}</b><span class="pill p-pending">${status}</span></div><div class="meta">${esc(ticket.email || "")} • #${esc(ticket.userId ?? "—")} • <span class="mono">${esc(d.id)}</span></div><div class="meta" style="white-space:pre-line">${esc(ticket.message || "")}</div><div class="meta">${when(ticket.createdAt)}</div><div class="acts">${files || '<span class="meta">لا توجد مرفقات</span>'}</div></div>`;
+    }).join("") : '<div class="empty">لا توجد تذاكر دعم</div>';
+  } catch (e) { box.innerHTML = `<div class="empty">${esc(errMsg(e))}</div>`; }
+}
+
+async function previewSupportFile(ticketId, fileIndex) {
+  const file = supportCache.get(ticketId)?.[fileIndex];
+  if (!file || !/^(image|video)\//i.test(file.type || "")) throw new Error("المرفق غير صالح.");
+  let url;
+  try { url = new URL(file.url); } catch (_) { throw new Error("رابط المرفق غير صالح."); }
+  if (url.protocol !== "https:") throw new Error("رابط المرفق غير آمن.");
+  const preview = file.type.startsWith("video/")
+    ? `<video src="${esc(url.href)}" controls playsinline style="display:block;width:100%;max-height:65vh;background:#000"></video>`
+    : `<img src="${esc(url.href)}" alt="${esc(file.name || "مرفق التذكرة")}" style="display:block;max-width:100%;max-height:65vh;margin:auto">`;
+  await modal({ title: file.name || "معاينة المرفق", body: preview, actions: [{ label: "إغلاق", cls: "ghost", act: null }] });
+}
+
 /* ================= السجل ================= */
 async function loadLogs() {
   loaded.logs = true;
@@ -632,10 +668,12 @@ document.addEventListener("click", e => {
   else if (act === "refresh-recent-users") run(b, loadRecentUsers);
   else if (act === "refresh-deposits") run(b, loadDeposits);
   else if (act === "refresh-orders") run(b, loadOrders);
+  else if (act === "refresh-support") run(b, loadSupportMessages);
   else if (act === "refresh-messages") run(b, loadMessages);
   else if (act === "refresh-logs") run(b, loadLogs);
   else if (act === "open-user") run(b, () => openUser(b.dataset.uid), $("#uErr"));
   else if (act === "review-dep") run(b, () => reviewDeposit(b.dataset.id));
+  else if (act === "support-preview") run(b, () => previewSupportFile(b.dataset.id, Number(b.dataset.index)));
   else if (act === "set-status") { const sel = b.closest(".item").querySelector("select"); run(b, () => setOrderStatus(b.dataset.id, sel.value)); }
   else if (act === "cancel-order") run(b, () => cancelOrder(b.dataset.id));
   else if (act === "del-msg") run(b, async () => { if (!(await modal({ title: "حذف الرسالة", body: "سيتم حذفها من إشعارات المستخدمين.", actions: [{ label: "حذف", cls: "bad", act: "y" }, { label: "رجوع", cls: "ghost", act: null }] })).act) return; await deleteDoc(doc(db, "notifications", b.dataset.id)); toast("تم الحذف", "ok"); loadMessages(); });
